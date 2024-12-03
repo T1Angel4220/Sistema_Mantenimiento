@@ -1,0 +1,111 @@
+/* Estilo base */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298); /* Gradiente azul formal */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+  }
+  
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .login-box {
+    background: rgba(255, 255, 255, 0.9); /* Blanco con transparencia */
+    padding: 30px;
+    width: 400px;
+    border-radius: 15px; /* Bordes redondeados */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Sombra más marcada */
+    text-align: center;
+    backdrop-filter: blur(10px); /* Efecto de desenfoque elegante */
+  }
+  
+  .login-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+    color: #007bff; /* Azul corporativo */
+  }
+  
+  .login-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .input-group label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f7f9fc; /* Fondo claro para contraste */
+    color: #333;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .input-group input:focus {
+    border-color: #007bff; /* Azul corporativo al enfocar */
+  }
+  
+  .form-button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background: #007bff; /* Azul corporativo */
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .form-button:hover {
+    background: #0056b3; /* Azul más oscuro */
+  }
+  
+  .secondary-button {
+    background: #6c757d; /* Gris corporativo */
+    color: #fff;
+    margin-top: 10px;
+  }
+  
+  .secondary-button:hover {
+    background: #5a6268;
+  }
+  
+  .login-links {
+    margin-top: 15px;
+  }
+  
+  .login-links a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .login-links a:hover {
+    text-decoration: underline;
+  }

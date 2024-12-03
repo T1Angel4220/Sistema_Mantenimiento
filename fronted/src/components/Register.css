@@ -1,0 +1,103 @@
+/* Fondo del contenedor principal */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298); /* Gradiente elegante */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+  }
+  
+  /* Contenedor general */
+  .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Caja del formulario */
+  .register-box {
+    background: rgba(255, 255, 255, 0.95); /* Blanco con un toque de transparencia */
+    padding: 40px;
+    width: 450px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
+  
+  /* Encabezado del formulario */
+  .register-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .register-header p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  /* Grupo de inputs */
+  .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .input-group label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f7f9fc;
+    color: #333;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .input-group input:focus {
+    border-color: #007bff; /* Azul corporativo */
+  }
+  
+  /* Botones del formulario */
+  .form-button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .primary-button {
+    background: #007bff; /* Azul corporativo */
+    color: #fff;
+  }
+  
+  .primary-button:hover {
+    background: #0056b3;
+  }
+  
+  .secondary-button {
+    background: #6c757d; /* Gris oscuro */
+    color: #fff;
+  }
+  
+  .secondary-button:hover {
+    background: #5a6268;
+  }
