@@ -1,20 +1,56 @@
 import React, { useState } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Notification from './Notification'; // Asegúrate de que Notification esté importado correctamente
 
 const Login = () => {
     const [correo, setCorreo] = useState('');
     const [contraseña, setContraseña] = useState('');
+    const [error, setError] = useState('');  // Manejo de errores
+    const [successMessage, setSuccessMessage] = useState(''); // Para mensajes de éxito
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Procesar login aquí
-        console.log({ correo, contraseña });
+
+        // Crear el objeto con los datos del formulario
+        const loginData = {
+            email: correo,
+            password: contraseña,
+        };
+
+        try {
+            // Enviar los datos de login al backend
+            const response = await axios.post('http://localhost:8000/api/login', loginData);
+
+            // Almacenar el token JWT (si la autenticación es exitosa)
+            localStorage.setItem('token', response.data.token);  // Guarda el token en el almacenamiento local
+
+            // Mostrar el mensaje de éxito
+            setSuccessMessage('Inicio de sesión exitoso');
+            setTimeout(() => {
+                navigate('/Inicio'); // Redirigir a la página principal
+            }, 2000); // Espera 2 segundos antes de redirigir
+
+        } catch (error) {
+            // Manejar errores
+            if (error.response) {
+                // Si el error es del backend, muestra un mensaje más amigable
+                setError(error.response.data.error || 'Error en el servidor');
+            } else {
+                setError('Error en la conexión al servidor');
+            }
+        }
     };
 
     return (
         <div className="login-container">
+            {/* Mostrar notificación de error si existe */}
+            {error && <Notification message={error} type="error" onClose={() => setError('')} />}
+            {/* Mostrar mensaje de éxito */}
+            {successMessage && <Notification message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
+
             <div className="login-box">
                 <div className="login-icon">👤</div>
                 <h2 className="login-title">Iniciar Sesión</h2>

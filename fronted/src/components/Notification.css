@@ -1,0 +1,78 @@
+/* Notification.css */
+.notification {
+    position: fixed;
+    top: 20px; /* Espacio desde la parte superior */
+    left: 50%;
+    transform: translateX(-50%); /* Centrado horizontal */
+    padding: 15px 30px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none; /* Evitar que interfiera con los clics */
+    transition: opacity 0.4s ease-in-out, transform 0.3s ease-out;
+}
+
+.notification.success {
+    background-color: #4CAF50; /* Verde para éxito */
+}
+
+.notification.error {
+    background-color: #f44336; /* Rojo para error */
+}
+
+.notification.warning {
+    background-color: #FF9800; /* Naranja para advertencias */
+}
+
+.notification.info {
+    background-color: #2196F3; /* Azul para información */
+}
+
+.notification p {
+    margin: 0;
+    font-weight: 500;
+    flex: 1;
+}
+
+.notification .icon {
+    font-size: 20px;
+    margin-right: 15px;
+}
+
+.notification.show {
+    opacity: 1;
+    pointer-events: auto; /* Permite la interacción cuando está visible */
+    transform: translateX(-50%) translateY(0); /* Animación de deslizamiento */
+}
+
+.notification.hide {
+    transform: translateX(-50%) translateY(-100%); /* Deslizar fuera de la pantalla */
+}
+
+/* Animación de desvanecimiento */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100%);
+    }
+}

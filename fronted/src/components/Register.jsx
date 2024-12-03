@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import './Register.css';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Importar axios
+import axios from 'axios';  // Importar axios
+import Notification from './Notification'; // Asegúrate de que Notification esté importado correctamente
 
 const Register = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');  // Manejo de errores
+    const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -26,19 +29,19 @@ const Register = () => {
             // Enviar la solicitud POST al backend
             const response = await axios.post('http://localhost:8000/api/register', userData);
 
-            // Si la respuesta es exitosa, muestra un mensaje y redirige al login
-            console.log(response.data);
-            alert('Usuario registrado exitosamente');
-            navigate('/'); // Redirige al login después del registro
+            // Si la respuesta es exitosa, muestra un mensaje de éxito
+            setSuccessMessage('¡Usuario registrado exitosamente!');
+            setTimeout(() => {
+                navigate('/'); // Redirige al login después de 2 segundos
+            }, 2000);
+
         } catch (error) {
             // Manejar cualquier error, como errores de validación o de servidor
             if (error.response) {
                 // Si el error viene del backend
-                console.error(error.response.data);
-                alert('Error: ' + error.response.data.message);
+                setError(error.response.data.message || 'Error al registrar el usuario');
             } else {
-                console.error(error);
-                alert('Error en la conexión al servidor');
+                setError('Error en la conexión al servidor');
             }
         }
     };
@@ -51,6 +54,11 @@ const Register = () => {
                     <p>Complete la información para registrarse.</p>
                 </div>
                 <form onSubmit={handleSubmit}>
+                    {/* Mostrar notificación de error si existe */}
+                    {error && <Notification message={error} type="error" onClose={() => setError('')} />}
+                    {/* Mostrar mensaje de éxito si existe */}
+                    {successMessage && <Notification message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
+
                     <div className="input-group">
                         <label>Nombre</label>
                         <input
