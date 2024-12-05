@@ -45,55 +45,55 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            {/* Mostrar notificación de error si existe */}
-            {error && <Notification message={error} type="error" onClose={() => setError('')} />}
-            {/* Mostrar mensaje de éxito */}
-            {successMessage && <Notification message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
-
-            <div className="login-box">
-                <div className="login-icon">👤</div>
-                <h2 className="login-title">Iniciar Sesión</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="input-group">
-                        <label htmlFor="correo">Correo Electrónico</label>
-                        <input
-                            type="email"
-                            id="correo"
-                            placeholder="Ingrese su correo"
-                            value={correo}
-                            onChange={(e) => setCorreo(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="input-group">
-                        <label htmlFor="contraseña">Contraseña</label>
-                        <input
-                            type="password"
-                            id="contraseña"
-                            placeholder="Ingrese su contraseña"
-                            value={contraseña}
-                            onChange={(e) => setContraseña(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button type="submit" className="form-button">
-                        Iniciar Sesión
-                    </button>
-                    <button
-                        type="button"
-                        className="form-button secondary-button"
-                        onClick={() => navigate('/register')}
-                    >
-                        Registrarse
-                    </button>
-                </form>
-                <div className="login-links">
-                    <a href="#">¿Olvidó su contraseña?</a>
+        <div className="bodylogin">
+            <div className="login-container">
+                {/* Mostrar notificación de error si existe */}
+                {error && <Notification message={error} type="error" onClose={() => setError('')} />}
+                {/* Mostrar mensaje de éxito */}
+                {successMessage && <Notification message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
+    
+                <div className="login-box">
+                    <div className="login-icon">👤</div>
+                    <h2 className="login-title">Iniciar Sesión</h2>
+                    <form onSubmit={handleSubmit}>
+                        <div className="input-group">
+                            <label htmlFor="correo">Correo Electrónico</label>
+                            <input
+                                type="email"
+                                id="correo"
+                                placeholder="Ingrese su correo"
+                                value={correo}
+                                onChange={(e) => setCorreo(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label htmlFor="contraseña">Contraseña</label>
+                            <input
+                                type="password"
+                                id="contraseña"
+                                placeholder="Ingrese su contraseña"
+                                value={contraseña}
+                                onChange={(e) => setContraseña(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <button type="submit" className="form-button">
+                            Iniciar Sesión
+                        </button>
+                        <button
+                            type="button"
+                            className="form-button secondary-button"
+                            onClick={() => navigate('/register')}
+                        >
+                            Registrarse
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     );
+    
 };
 
 export default Login;
