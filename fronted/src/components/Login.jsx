@@ -30,7 +30,7 @@ const Login = () => {
             // Mostrar el mensaje de éxito
             setSuccessMessage('Inicio de sesión exitoso');
             setTimeout(() => {
-                navigate('/Inicio'); // Redirigir a la página principal
+                navigate('/main'); // Redirigir a la página principal
             }, 2000); // Espera 2 segundos antes de redirigir
 
         } catch (error) {
@@ -93,7 +93,6 @@ const Login = () => {
             </div>
         </div>
     );
-    
 };
 
 export default Login;
