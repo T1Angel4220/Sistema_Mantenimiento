@@ -86,7 +86,7 @@ const Login = () => {
                             className="form-button secondary-button"
                             onClick={() => navigate('/register')}
                         >
-                            Registrarse
+                        Registrarse
                         </button>
                     </form>
                 </div>
