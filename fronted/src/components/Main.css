@@ -1,0 +1,151 @@
+/* Reset y estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Contenedor principal */
+.main-container {
+    display: flex;
+    height: 100vh;
+    background: #f4f6f9;
+}
+
+/* Barra lateral */
+.main-sidebar {
+    width: 250px;
+    background-color: #2f3b52; /* Azul oscuro */
+    color: white;
+    padding-top: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.main-sidebar-header {
+    padding-left: 20px;
+}
+
+.main-sidebar-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: white;
+}
+
+.main-sidebar-btn {
+    background-color: #3c4b63;
+    color: white;
+    font-size: 18px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    text-align: left;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.main-sidebar-btn:hover {
+    background-color: #43567f;
+}
+
+.main-logout-btn {
+    background-color: #d32f2f;
+    color: white;
+    font-size: 18px;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: auto;
+}
+
+.main-logout-btn:hover {
+    background-color: #c62828;
+}
+
+/* Contenido principal */
+.main-content {
+    flex: 1;
+    padding: 30px;
+    background-color: white;
+}
+
+/* Cabecera del contenido */
+.main-header {
+    background-color: #4CAF50;
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+}
+
+.main-header-title {
+    font-size: 28px;
+    text-align: center;
+}
+
+/* Tarjetas */
+.main-cards {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.main-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 48%;
+}
+
+.main-card-title {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.main-card-text {
+    color: #555;
+    font-size: 16px;
+}
+
+/* Tabla */
+.main-table-container {
+    margin-top: 30px;
+    overflow-x: auto;
+}
+
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.main-th, .main-td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.main-th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.main-td {
+    background-color: #f9f9f9;
+}
+
+.main-table tr:hover .main-td {
+    background-color: #f1f1f1;
+}

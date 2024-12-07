@@ -30,7 +30,7 @@ const Login = () => {
             // Mostrar el mensaje de éxito
             setSuccessMessage('Inicio de sesión exitoso');
             setTimeout(() => {
-                navigate('/Inicio'); // Redirigir a la página principal
+                navigate('/main'); // Redirigir a la página principal
             }, 2000); // Espera 2 segundos antes de redirigir
 
         } catch (error) {
@@ -86,14 +86,13 @@ const Login = () => {
                             className="form-button secondary-button"
                             onClick={() => navigate('/register')}
                         >
-                            Registrarse
+                        Registrarse
                         </button>
                     </form>
                 </div>
             </div>
         </div>
     );
-    
 };
 
 export default Login;
