@@ -53,7 +53,7 @@ class EquipoController extends Controller
         // Validar los datos enviados en el request
         $request->validate([
             'Nombre_Producto' => 'required|string|max:255',
-            'Tipo_Equipo' => 'required|string|in:Informatico,Electronicos y Electricos,Industriales,Audiovisuales',
+            'Tipo_Equipo' => 'required|string|in:Informático,Electrónicos y Eléctricos,Industriales,Audiovisuales',
             'Fecha_Adquisicion' => 'required|date',
             'Ubicacion_Equipo' => 'required|string|in:Departamento de TI,Laboratorio de Redes,Sala de reuniones,Laboratorio CTT',
             'Descripcion_Equipo' => 'nullable|string|max:500',
