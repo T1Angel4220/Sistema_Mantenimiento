@@ -1,0 +1,157 @@
+/* EditarEquipo.css */
+
+/* Estilo general del contenedor principal */
+.main-editar-equipo-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.main-editar-equipo-container:hover {
+    transform: scale(1.02); /* Efecto sutil al pasar el mouse */
+}
+
+.main-editar-equipo-container h2 {
+    text-align: center;
+    font-size: 2.2rem;
+    color: #333;
+    margin-bottom: 25px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+/* Formulario */
+.main-editar-equipo-form .form-group {
+    margin-bottom: 20px;
+}
+
+.main-editar-equipo-form label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #444;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.main-editar-equipo-form input,
+.main-editar-equipo-form select,
+.main-editar-equipo-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #555;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.main-editar-equipo-form input:focus,
+.main-editar-equipo-form select:focus,
+.main-editar-equipo-form textarea:focus {
+    border-color: #0056b3;
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 86, 179, 0.5);
+}
+
+.main-editar-equipo-form select {
+    cursor: pointer;
+}
+
+.main-editar-equipo-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Contenedor flexible para los botones */
+.main-editar-equipo-buttons {
+    display: flex;
+    justify-content: space-between; /* Distribuye los botones de manera simétrica */
+    gap: 20px; /* Espacio entre los botones */
+    margin-top: 20px;
+}
+
+/* Botón de guardar cambios */
+.main-editar-equipo-btn {
+    flex: 1; /* Ocupa el mismo espacio que el otro botón */
+    padding: 15px;
+    background-color: #28a745;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.main-editar-equipo-btn:hover {
+    background-color: #218838;
+    transform: translateY(-3px); /* Efecto de desplazamiento al hacer hover */
+}
+
+.main-editar-equipo-btn:active {
+    background-color: #1e7e34;
+    transform: translateY(1px); /* Efecto de desplazamiento hacia abajo cuando se presiona */
+}
+
+/* Botón de regresar */
+.main-editar-equipo-btn-regresar {
+    flex: 1; /* Ocupa el mismo espacio que el otro botón */
+    padding: 15px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.main-editar-equipo-btn-regresar:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px); /* Efecto de desplazamiento al hacer hover */
+}
+
+.main-editar-equipo-btn-regresar:active {
+    background-color: #004085;
+    transform: translateY(1px); /* Efecto de desplazamiento hacia abajo cuando se presiona */
+}
+
+/* Sombra y transición de los botones */
+.main-editar-equipo-btn,
+.main-editar-equipo-btn-regresar {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.main-editar-equipo-btn:focus,
+.main-editar-equipo-btn-regresar:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
+}
+
+/* Estilo para los campos de error */
+.main-editar-equipo-form .error {
+    color: #ff0000;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Estilo de un contenedor con respuesta o alerta */
+.main-editar-equipo-alert {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    text-align: center;
+}

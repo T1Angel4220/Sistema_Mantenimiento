@@ -1,0 +1,125 @@
+/* Estilos generales */
+.container {
+    width: 80%;
+    margin: 20px auto;
+  }
+  
+  .table-container {
+    overflow-x: auto; /* Asegura que la tabla sea desplazable si es muy ancha */
+    margin-bottom: 20px; /* Separación con el botón de crear */
+  }
+  
+  /* Estilos de la tabla */
+  .tableEquipos {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  }
+  
+  .tableEquipos th, .tableEquipos td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px; /* Tamaño de fuente más pequeño para mayor legibilidad */
+  }
+  
+  .tableEquipos th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .tableEquipos tr:nth-child(even) {
+    background-color: #f9f9f9; /* Fondo alternado para filas */
+  }
+  
+  .tableEquipos tr:hover {
+    background-color: #f1f1f1; /* Color al pasar el ratón */
+  }
+  
+  .tableEquipos .actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center; /* Alinea los botones en el centro */
+  }
+  
+  .tableEquipos .btn {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .tableEquipos .btn-warning {
+    background-color: #f0ad4e;
+    color: white;
+  }
+  
+  .tableEquipos .btn-danger {
+    background-color: #d9534f;
+    color: white;
+  }
+  
+  /* Estilos del botón de "Crear Nuevo Equipo" */
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .button-group .btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    width: 48%; /* Para que ambos botones tengan el mismo tamaño */
+  }
+  
+  .button-group .btn-create {
+    background: linear-gradient(135deg, #007bff, #00aaff); /* Gradiente atractivo */
+    color: white;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .button-group .btn-create:hover {
+    background: linear-gradient(135deg, #0066cc, #0099cc); /* Gradiente más oscuro al pasar el ratón */
+    transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
+  }
+  
+  .button-group .btn-return {
+    background-color: #f0ad4e; /* Color de fondo para el botón de regresar */
+    color: white;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .button-group .btn-return:hover {
+    background-color: #e6953e; /* Color de fondo más oscuro al pasar el ratón */
+    transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
+  }
+  
+  /* Sombra y transición para botones */
+  .button-group .btn:hover {
+    opacity: 0.9;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar efecto de profundidad */
+  }
+  
+  /* Estilo del botón de "Crear Nuevo Equipo" */
+  .d-grid.create-button {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .d-grid.create-button .btn-success {
+    background-color: #007bff;
+    padding: 12px 20px;
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .d-grid.create-button .btn-success:hover {
+    background-color: #0056b3; /* Azul más oscuro */
+  }
+  

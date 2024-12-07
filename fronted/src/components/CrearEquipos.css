@@ -1,0 +1,121 @@
+/* CrearEquipos.css */
+
+/* Estilo para el contenedor principal */
+.crear-equipos-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+/* Estilo para los formularios */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #555;
+}
+
+input, select, textarea {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #007bff;
+}
+
+/* Estilo para el botón de envío */
+.submit-btn {
+    padding: 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para el botón de cancelar o volver */
+.cancel-btn {
+    padding: 12px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Estilo de campos select (tipo de equipo y ubicación) */
+select {
+    -webkit-appearance: none;  /* Remover el estilo predeterminado de los select en algunos navegadores */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Cpath fill="none" stroke="%23333" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4l-4 4-4-4"%3E%3C/path%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
+/* Estilo para los campos textarea */
+textarea {
+    resize: vertical;
+    height: 100px;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .crear-equipos-container {
+        padding: 20px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    .submit-btn, .cancel-btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+
