@@ -53,7 +53,13 @@ const Login = () => {
                 {successMessage && <Notification message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
     
                 <div className="login-box">
-                    <div className="login-icon">👤</div>
+                <div className="login-icon">
+        <img 
+            src="https://w7.pngwing.com/pngs/653/121/png-transparent-preventive-maintenance-company-service-reliability-centered-maintenance-others-thumbnail.png" 
+            alt="Icono de usuario" 
+            className="icon-image" 
+        />
+    </div>
                     <h2 className="login-title">Iniciar Sesión</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="input-group">

@@ -29,10 +29,21 @@
 }
 
 .bodylogin .login-icon {
-  font-size: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 15px;
-  color: #007bff; /* Azul corporativo */
 }
+
+.bodylogin .icon-image {
+  width: 80px; /* Ajusta el tamaño de la imagen según tus necesidades */
+  height: 80px;
+  object-fit: cover; /* Asegura que la imagen mantenga su proporción */
+  border-radius: 50%; /* Hace que la imagen sea circular */
+  border: 2px solid #007bff; /* Borde azul para darle un estilo */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para profundidad */
+}
+
 
 .bodylogin .login-title {
   font-size: 28px; /* Título más grande */
