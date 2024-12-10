@@ -59,7 +59,13 @@ const Main = () => {
     }
     setFilteredEquipos(filtered);
   };
-  
+  const handleLogout = () => {
+    const confirmLogout = window.confirm("¿Está seguro de que desea cerrar sesión?");
+    if (confirmLogout) {
+      localStorage.removeItem('token');
+      navigate('/');
+    }
+  };
   
   
 
@@ -92,9 +98,9 @@ const Main = () => {
           <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>Equipos</button>
           <button className="main-sidebar-btn" onClick={() => navigate('/mantenimientos')}>Mantenimientos</button>
           <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>Reportes</button>
-          <button className="main-logout-btn" onClick={() => localStorage.removeItem('token') && navigate('/')}>
-            Salir
-          </button>
+            <button className="main-logout-btn" onClick={handleLogout}>Salir</button>
+            
+          
         </div>
 
         <div className="main-content">
