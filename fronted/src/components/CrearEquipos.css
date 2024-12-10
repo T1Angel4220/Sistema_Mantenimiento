@@ -10,7 +10,8 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
+/* Estilo para el título */
+.crear-equipos-title {
     text-align: center;
     font-size: 28px;
     font-weight: 600;
@@ -19,25 +20,27 @@ h2 {
 }
 
 /* Estilo para los formularios */
-form {
+.crear-equipos-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.form-group {
+.crear-equipos-form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-label {
+.crear-equipos-label {
     font-size: 16px;
     font-weight: 500;
     color: #555;
 }
 
-input, select, textarea {
+.crear-equipos-input,
+.crear-equipos-select,
+.crear-equipos-textarea {
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
@@ -46,12 +49,14 @@ input, select, textarea {
     transition: border-color 0.3s;
 }
 
-input:focus, select:focus, textarea:focus {
+.crear-equipos-input:focus,
+.crear-equipos-select:focus,
+.crear-equipos-textarea:focus {
     border-color: #007bff;
 }
 
 /* Estilo para el botón de envío */
-.submit-btn {
+.crear-equipos-submit-btn {
     padding: 12px;
     background-color: #007bff;
     color: #fff;
@@ -64,12 +69,12 @@ input:focus, select:focus, textarea:focus {
     text-align: center;
 }
 
-.submit-btn:hover {
+.crear-equipos-submit-btn:hover {
     background-color: #0056b3;
 }
 
 /* Estilo para el botón de cancelar o volver */
-.cancel-btn {
+.crear-equipos-cancel-btn {
     padding: 12px;
     background-color: #6c757d;
     color: #fff;
@@ -82,13 +87,13 @@ input:focus, select:focus, textarea:focus {
     transition: background-color 0.3s;
 }
 
-.cancel-btn:hover {
+.crear-equipos-cancel-btn:hover {
     background-color: #5a6268;
 }
 
-/* Estilo de campos select (tipo de equipo y ubicación) */
-select {
-    -webkit-appearance: none;  /* Remover el estilo predeterminado de los select en algunos navegadores */
+/* Estilo de campos select */
+.crear-equipos-select {
+    -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Cpath fill="none" stroke="%23333" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4l-4 4-4-4"%3E%3C/path%3E%3C/svg%3E');
@@ -98,7 +103,7 @@ select {
 }
 
 /* Estilo para los campos textarea */
-textarea {
+.crear-equipos-textarea {
     resize: vertical;
     height: 100px;
 }
@@ -109,13 +114,13 @@ textarea {
         padding: 20px;
     }
 
-    h2 {
+    .crear-equipos-title {
         font-size: 24px;
     }
 
-    .submit-btn, .cancel-btn {
+    .crear-equipos-submit-btn,
+    .crear-equipos-cancel-btn {
         font-size: 14px;
         padding: 10px;
     }
 }
-

@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Importamos axios para las solicitudes HTTP
+import axios from 'axios';
 import './main.css';
 
 const Main = () => {
   const navigate = useNavigate();
   const [equipos, setEquipos] = useState([]); // Estado para almacenar todos los equipos
-  const [ultimoEquipo, setUltimoEquipo] = useState(null); // Estado para el último equipo
+  const [filteredEquipos, setFilteredEquipos] = useState([]); // Estado para los equipos filtrados
+  const [filters, setFilters] = useState({}); // Estado para los filtros activos
+  const [currentPage, setCurrentPage] = useState(1); // Página actual
+  const itemsPerPage = 9 // Número de elementos por página
 
   useEffect(() => {
-    // Verificar si el usuario está autenticado
     const token = localStorage.getItem('token');
     if (!token) {
-      // Si no hay token, redirige al login
-      navigate('/'); // Redirige al login
+      navigate('/');
     } else {
-      // Obtener todos los equipos y el último equipo
       getEquipos();
     }
   }, [navigate]);
@@ -25,85 +25,192 @@ const Main = () => {
       const response = await axios.get('http://localhost:8000/api/equipos'); // Endpoint para obtener todos los equipos
       const equipos = response.data;
 
-      setEquipos(equipos); // Guardamos todos los equipos en el estado
-
-      // Ordenamos los equipos por fecha de adquisición y tomamos el último
-      const ultimo = equipos.sort((a, b) => new Date(b.Fecha_Adquisicion) - new Date(a.Fecha_Adquisicion))[0];
-      setUltimoEquipo(ultimo); // Guardamos el último equipo en el estado
+      setEquipos(equipos);
+      setFilteredEquipos(equipos); // Inicialmente, todos los equipos están visibles
     } catch (error) {
       console.error('Error al obtener los equipos:', error);
     }
   };
 
-  const handleLogout = () => {
-    // Muestra el mensaje de confirmación
-    const confirmLogout = window.confirm("¿Está seguro de que desea cerrar sesión?");
-    if (confirmLogout) {
-      // Si confirma, elimina el token y redirige al login
-      localStorage.removeItem('token');
-      navigate('/'); // Redirige al login
+  const handleFilterChange = (type, value) => {
+    const newFilters = { ...filters, [type]: value };
+    setFilters(newFilters);
+  
+    let filtered = [...equipos]; // Crear una copia para evitar mutaciones
+  
+    if (newFilters.Tipo_Equipo) {
+      filtered = filtered.filter((equipo) => equipo.Tipo_Equipo === newFilters.Tipo_Equipo);
+    }
+    if (newFilters.Ubicacion_Equipo) {
+      filtered = filtered.filter((equipo) => equipo.Ubicacion_Equipo === newFilters.Ubicacion_Equipo);
+    }
+    if (newFilters.Estado_Equipo) {
+      filtered = filtered.filter((equipo) => equipo.Estado_Equipo === newFilters.Estado_Equipo);
+    }
+    if (newFilters.Orden_Fecha) {
+      filtered = filtered.sort((a, b) => {
+        const fechaA = new Date(a.Fecha_Adquisicion);
+        const fechaB = new Date(b.Fecha_Adquisicion);
+  
+        return newFilters.Orden_Fecha === "Reciente"
+          ? fechaB - fechaA // Más reciente primero
+          : fechaA - fechaB; // Más antigua primero
+      });
+    }
+    setFilteredEquipos(filtered);
+  };
+  
+  
+  
+
+  const totalPages = Math.ceil(filteredEquipos.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
     }
   };
 
+  const displayedEquipos = filteredEquipos.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
-    <div className="main-container">
-      <div className="main-sidebar">
-        <div className="main-sidebar-header">
-          <h2 className="main-sidebar-title">T1</h2>
-        </div>
-        <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>Equipos</button>
-        <button className="main-sidebar-btn" onClick={() => navigate('/mantenimientos')}>Mantenimientos</button>
-        <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>Reportes</button>
-        <button className="main-logout-btn" onClick={handleLogout}>Salir</button>
-      </div>
-
-      <div className="main-content">
-        <div className="main-header">
-          <h1 className="main-header-title">Bienvenido al Sistema</h1>
-        </div>
-
-        {/* Sección de "Últimos Registros" */}
-        <div className="main-cards">
-          <div className="main-card">
-            <h2 className="main-card-title">Últimos Registros</h2>
-            <p className="main-card-text">
-              <strong>{ultimoEquipo ? ultimoEquipo.Nombre_Producto : "Cargando..."}</strong>
-              <br />
-              <span>{ultimoEquipo ? ultimoEquipo.Fecha_Adquisicion : "Cargando..."}</span>
-            </p>
+    <div className="body-main">
+      <div className="main-container">
+        <div className="main-sidebar">
+          <div className="main-sidebar-header">
+            <h2 className="main-sidebar-title">SK TELECOM</h2>
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
+              alt="Logo SK Telecom"
+              className="main-sidebar-logo"
+            />
           </div>
+
+          <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>Equipos</button>
+          <button className="main-sidebar-btn" onClick={() => navigate('/mantenimientos')}>Mantenimientos</button>
+          <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>Reportes</button>
+          <button className="main-logout-btn" onClick={() => localStorage.removeItem('token') && navigate('/')}>
+            Salir
+          </button>
         </div>
 
-        {/* Sección de la tabla con todos los equipos */}
-        <div className="main-table-container">
-          <table className="main-table">
-            <thead>
-              <tr>
-                <th className="main-th">Nombre del Equipo</th>
-                <th className="main-th">Tipo</th>
-                <th className="main-th">Ubicación</th>
-                <th className="main-th">Estado</th>
-                <th className="main-th">Fecha de Registro</th>
-              </tr>
-            </thead>
-            <tbody>
-              {equipos.length > 0 ? (
-                equipos.map((equipo) => (
-                  <tr key={equipo.id}>
-                    <td className="main-td">{equipo.Nombre_Producto}</td>
-                    <td className="main-td">{equipo.Tipo_Equipo}</td>
-                    <td className="main-td">{equipo.Ubicacion_Equipo}</td>
-                    <td className="main-td">{equipo.Estado_Equipo}</td>
-                    <td className="main-td">{equipo.Fecha_Adquisicion}</td>
-                  </tr>
-                ))
-              ) : (
+        <div className="main-content">
+          <div className="main-header">
+            <h1 className="main-header-title">Bienvenido al Sistema</h1>
+          </div>
+          {/* Sección de "Últimos Registros" */}
+<div className="main-cards-horizontal">
+  <h2 className="main-card-title">Últimos Registros</h2>
+  <div className="main-horizontal-container">
+    {equipos.length > 0 ? (
+      equipos
+        .sort((a, b) => new Date(b.Fecha_Adquisicion) - new Date(a.Fecha_Adquisicion)) // Ordenar por fecha descendente
+        .slice(0, 8) // Tomar los 5 últimos equipos
+        .map((equipo, index) => (
+          <div className="main-horizontal-card" key={index}>
+            <strong>{equipo.Nombre_Producto}</strong>
+            <br />
+            <span>{equipo.Fecha_Adquisicion}</span>
+          </div>
+        ))
+    ) : (
+      <p className="main-card-text">No hay equipos registrados.</p>
+    )}
+  </div>
+</div>
+
+<div className="filter-container">
+<h3 className="main-card-title">Filtrado : </h3>
+
+  {/* Filtro por Tipo */}
+  <select onChange={(e) => handleFilterChange('Tipo_Equipo', e.target.value)} className="filter-select">
+    <option value="">Filtrar por Tipo</option>
+    <option value="Informático">Informático</option>
+    <option value="Electrónicos y Eléctricos">Electrónicos y Eléctricos</option>
+    <option value="Industriales">Industriales</option>
+    <option value="Audiovisuales">Audiovisuales</option>
+  </select>
+
+  {/* Filtro por Ubicación */}
+  <select onChange={(e) => handleFilterChange('Ubicacion_Equipo', e.target.value)} className="filter-select">
+    <option value="">Filtrar por Ubicación</option>
+    <option value="Departamento de TI">Departamento de TI</option>
+    <option value="Laboratorio de Redes">Laboratorio de Redes</option>
+    <option value="Sala de reuniones">Sala de reuniones</option>
+    <option value="Laboratorio CTT">Laboratorio CTT</option>
+  </select>
+
+  {/* Filtro por Estado */}
+  <select onChange={(e) => handleFilterChange('Estado_Equipo', e.target.value)} className="filter-select">
+    <option value="">Filtrar por Estado</option>
+    <option value="Activo">Activo</option>
+    <option value="Inactivo">Inactivo</option>
+    <option value="En reparación">En reparación</option>
+  </select>
+
+  {/* Filtro por Orden de Fecha */}
+  <select onChange={(e) => handleFilterChange('Orden_Fecha', e.target.value)} className="filter-select">
+  <option value="">Ordenar por Fecha</option>
+  <option value="Reciente">Más reciente</option>
+  <option value="Antigua">Más antigua</option>
+</select>
+
+</div>
+
+
+          {/* Tabla */}
+          <div className="main-table-container">
+            <table className="main-table">
+              <thead>
                 <tr>
-                  <td colSpan="5" className="main-td">Cargando equipos...</td>
+                  <th className="main-th">Nombre del Equipo</th>
+                  <th className="main-th">Tipo</th>
+                  <th className="main-th">Ubicación</th>
+                  <th className="main-th">Estado</th>
+                  <th className="main-th">Fecha de Registro</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {displayedEquipos.length > 0 ? (
+                  displayedEquipos.map((equipo) => (
+                    <tr key={equipo.id}>
+                      <td className="main-td">{equipo.Nombre_Producto}</td>
+                      <td className="main-td">{equipo.Tipo_Equipo}</td>
+                      <td className="main-td">{equipo.Ubicacion_Equipo}</td>
+                      <td className="main-td">{equipo.Estado_Equipo}</td>
+                      <td className="main-td">{equipo.Fecha_Adquisicion}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="main-td">No hay equipos registrados.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginación */}
+          <div className="pagination">
+            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+              &lt; Anterior
+            </button>
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => handlePageChange(index + 1)}
+                className={currentPage === index + 1 ? "active" : ""}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+              Siguiente &gt;
+            </button>
+          </div>
         </div>
       </div>
     </div>

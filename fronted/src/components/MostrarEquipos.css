@@ -53,7 +53,7 @@
   }
   
   .tableEquipos .btn-warning {
-    background-color: #f0ad4e;
+    background-color: #52b922;
     color: white;
   }
   
@@ -89,14 +89,14 @@
   }
   
   .button-group .btn-return {
-    background-color: #f0ad4e; /* Color de fondo para el botón de regresar */
+    background-color: #ff0000; /* Color de fondo para el botón de regresar */
     color: white;
     font-weight: bold;
     text-align: center;
   }
   
   .button-group .btn-return:hover {
-    background-color: #e6953e; /* Color de fondo más oscuro al pasar el ratón */
+    background-color: #ff0000; /* Color de fondo más oscuro al pasar el ratón */
     transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
   }
   

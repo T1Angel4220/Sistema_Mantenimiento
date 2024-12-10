@@ -9,12 +9,21 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+
+.body-main {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #101820; /* Fondo negro */
+    color: #17134d; /* Texto blanco */
+}
+
 /* Contenedor principal */
 .main-container {
     display: flex;
     height: 100vh;
     background: #f4f6f9;
 }
+
+
 
 /* Barra lateral */
 .main-sidebar {
@@ -27,17 +36,26 @@ body {
     justify-content: space-between;
     height: 100%;
 }
-
 .main-sidebar-header {
+    display: flex;
+    align-items: center; /* Centra el texto verticalmente con la imagen */
+    gap: 15px; /* Aumenta el espacio entre la imagen y el texto */
     padding-left: 20px;
 }
 
-.main-sidebar-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 40px;
-    color: white;
+.main-sidebar-logo {
+    width: 50px; /* Tamaño más grande */
+    height: 50px;
+    object-fit: contain; /* Mantén las proporciones de la imagen */
 }
+
+.main-sidebar-title {
+    font-size: 24px; /* Tamaño del texto */
+    font-weight: bold;
+    color: white;
+    line-height: 1; /* Asegura que el texto esté centrado verticalmente */
+}
+
 
 .main-sidebar-btn {
     background-color: #3c4b63;
@@ -114,7 +132,7 @@ body {
 }
 
 .main-card-text {
-    color: #555;
+    color: #43567f;;
     font-size: 16px;
 }
 
@@ -149,3 +167,99 @@ body {
 .main-table tr:hover .main-td {
     background-color: #f1f1f1;
 }
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 8px; /* Espaciado entre los botones */
+}
+
+.pagination button {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pagination button:hover {
+    background-color: #45a049; /* Verde más oscuro */
+    transform: scale(1.05); /* Efecto de zoom al pasar el mouse */
+}
+
+.pagination button:disabled {
+    background-color: #ccc; /* Gris claro */
+    color: #666; /* Gris oscuro */
+    cursor: not-allowed;
+}
+
+.pagination button.active {
+    background-color: #2f3b52; /* Azul oscuro */
+    color: white;
+    font-weight: bold;
+    transform: scale(1.1); /* Efecto de tamaño para resaltar */
+}
+
+.pagination button:focus {
+    outline: none;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Sombra al hacer clic */
+}
+/* Contenedor principal de los registros horizontales */
+.main-cards-horizontal {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #ffffff; /* Fondo blanco */
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Contenedor de los registros en fila */
+  .main-horizontal-container {
+    display: flex;
+    gap: 15px; /* Espaciado entre las tarjetas */
+    overflow-x: auto; /* Permite desplazamiento horizontal si hay muchos elementos */
+    padding: 10px 0;
+  }
+  
+  /* Tarjetas individuales */
+  .main-horizontal-card {
+    background-color: #f4f4f4; /* Gris claro */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-width: 150px; /* Tamaño mínimo de las tarjetas */
+    flex-shrink: 0; /* Evita que las tarjetas se reduzcan demasiado */
+    color: #17134d; /* Color del texto */
+  }
+  
+  .main-horizontal-card strong {
+    font-size: 16px;
+    color: #43567f; /* Azul oscuro */
+  }
+  
+  .main-horizontal-card span {
+    font-size: 14px;
+    color: #666666; /* Gris oscuro */
+  }
+  
+  .filter-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .filter-select {
+    padding: 15px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-top: 30px;
+  }
+  
