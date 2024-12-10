@@ -60,6 +60,7 @@ const EditarEquipo = () => {
     };
 
     return (
+        <div className="main-editar-equipos-body">
         <div className="main-editar-equipo-container">
         <h2>Editar Equipo</h2>
         <form className="main-editar-equipo-form" onSubmit={handleSubmit}>
@@ -139,6 +140,7 @@ const EditarEquipo = () => {
                 <a href="/equipos" className="main-editar-equipo-btn-regresar">Regresar a la Lista de Equipos</a>
             </div>
         </form>
+    </div>
     </div>
 );
 };

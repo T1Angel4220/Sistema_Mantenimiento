@@ -1,11 +1,17 @@
 /* CrearEquipos.css */
 
 /* Estilo para el contenedor principal */
+/* Fondo general */
+.crear-equipos-body {
+    background-color: #cfe8f5; /* Azul pastel más oscuro */
+}
+
 .crear-equipos-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 30px;
-    background-color: #f8f9fa;
+    background-color: #edf6f9; /* Azul pastel muy claro */
+
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -76,7 +82,7 @@
 /* Estilo para el botón de cancelar o volver */
 .crear-equipos-cancel-btn {
     padding: 12px;
-    background-color: #6c757d;
+    background-color: #e22626;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -88,7 +94,7 @@
 }
 
 .crear-equipos-cancel-btn:hover {
-    background-color: #5a6268;
+    background-color: #c0263f;
 }
 
 /* Estilo de campos select */
