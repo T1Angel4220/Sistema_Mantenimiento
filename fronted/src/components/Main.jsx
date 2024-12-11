@@ -86,7 +86,9 @@ const Main = () => {
     <div className="body-main">
       <div className="main-container">
         <div className="main-sidebar">
+          
           <div className="main-sidebar-header">
+            
             <h2 className="main-sidebar-title">SK TELECOM</h2>
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
@@ -127,9 +129,10 @@ const Main = () => {
     )}
   </div>
 </div>
-
+<br/>
+<h3 className="main-card-title">Listado de equipos </h3>
 <div className="filter-container">
-<h3 className="main-card-title">Filtrado : </h3>
+
 
   {/* Filtro por Tipo */}
   <select onChange={(e) => handleFilterChange('Tipo_Equipo', e.target.value)} className="filter-select">

@@ -5,7 +5,7 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 30px;
-    background-color: #f8f9fa;
+    background-color: #c1d6eb;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -76,7 +76,7 @@
 /* Estilo para el botón de cancelar o volver */
 .crear-equipos-cancel-btn {
     padding: 12px;
-    background-color: #6c757d;
+    background-color: #ff0000;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -88,7 +88,7 @@
 }
 
 .crear-equipos-cancel-btn:hover {
-    background-color: #5a6268;
+    background-color: #d42525;
 }
 
 /* Estilo de campos select */

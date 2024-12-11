@@ -34,7 +34,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 100%;
+    height: 100vh
 }
 .main-sidebar-header {
     display: flex;
