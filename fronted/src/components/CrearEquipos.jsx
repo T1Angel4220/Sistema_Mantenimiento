@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Notification from './Notification'; // Importar el componente Notification
@@ -23,6 +23,20 @@ const CrearEquipos = () => {
     const ubicacionesDeEquipo = ['Departamento de TI', 'Laboratorio de Redes', 'Sala de reuniones', 'Laboratorio CTT'];
 
     const today = new Date().toISOString().split('T')[0];
+
+    useEffect(() => {
+        const handlePopState = () => {
+            navigate('/equipos', { replace: true });
+        };
+
+        // Reemplazar la entrada actual en el historial
+        window.history.replaceState(null, '', window.location.href);
+        window.addEventListener('popstate', handlePopState);
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [navigate]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -52,7 +66,7 @@ const CrearEquipos = () => {
             const response = await axios.post(endpoint, formData);
             if (response.status === 201) {
                 setNotification({ message: 'Equipo creado correctamente.', type: 'success' }); // Mostrar notificación
-                setTimeout(() => navigate('/equipos'), 2000); // Redirigir después de 3 segundos
+                setTimeout(() => navigate('/equipos', { replace: true }), 2000); // Redirigir después de 2 segundos
             } else {
                 setNotification({ message: 'Error al crear el equipo.', type: 'error' }); // Mostrar error
             }

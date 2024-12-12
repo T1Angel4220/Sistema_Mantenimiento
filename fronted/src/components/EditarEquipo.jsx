@@ -66,7 +66,7 @@ const EditarEquipo = () => {
         try {
             await axios.put(`${endpoint}/${id}`, formData);
             setNotification({ message: "Equipo actualizado correctamente.", type: "success" });
-            setTimeout(() => navigate('/equipos'), 2000); // Redirigir después de 3 segundos
+            setTimeout(() => navigate('/equipos', { replace: true }), 2000); // Redirigir con replace para evitar volver con las flechas
         } catch (error) {
             console.error('Error al actualizar el equipo:', error);
             setNotification({ message: "Hubo un error al actualizar el equipo. Intenta nuevamente.", type: "error" });
