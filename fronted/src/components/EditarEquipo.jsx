@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import Notification from "./Notification"; // Importar el componente Notification
 import './EditarEquipo.css';
 
 const endpoint = 'http://localhost:8000/api/equipo';
@@ -15,13 +16,13 @@ const EditarEquipo = () => {
     });
 
     const [error, setError] = useState(''); // Estado para manejar mensajes de error
+    const [notification, setNotification] = useState({ message: '', type: '' }); // Estado para manejar notificaciones
     const tiposDeEquipos = ['Informático', 'Electrónicos y Eléctricos', 'Industriales', 'Audiovisuales'];
     const ubicacionesDeEquipo = ['Departamento de TI', 'Laboratorio de Redes', 'Sala de reuniones', 'Laboratorio CTT'];
 
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // Obtener la fecha actual en formato YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
 
     useEffect(() => {
@@ -31,6 +32,7 @@ const EditarEquipo = () => {
                 setFormData(response.data);
             } catch (error) {
                 console.error("Error al cargar el equipo:", error);
+                setNotification({ message: "Error al cargar el equipo.", type: "error" });
             }
         };
 
@@ -40,7 +42,6 @@ const EditarEquipo = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Validar fecha
         if (name === 'Fecha_Adquisicion' && value > today) {
             setError('La fecha de adquisición no puede ser mayor al día actual.');
             return;
@@ -64,16 +65,25 @@ const EditarEquipo = () => {
 
         try {
             await axios.put(`${endpoint}/${id}`, formData);
-            alert('Equipo actualizado correctamente');
-            navigate('/equipos');
+            setNotification({ message: "Equipo actualizado correctamente.", type: "success" });
+            setTimeout(() => navigate('/equipos'), 2000); // Redirigir después de 3 segundos
         } catch (error) {
             console.error('Error al actualizar el equipo:', error);
-            alert('Hubo un error al actualizar el equipo. Intenta nuevamente.');
+            setNotification({ message: "Hubo un error al actualizar el equipo. Intenta nuevamente.", type: "error" });
         }
     };
 
     return (
         <div className="main-editar-equipos-body">
+            {/* Notificación fuera del contenedor */}
+            {notification.message && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification({ message: '', type: '' })}
+                />
+            )}
+
             <div className="main-editar-equipo-container">
                 <h2>Editar Equipo</h2>
                 <form className="main-editar-equipo-form" onSubmit={handleSubmit}>
@@ -115,7 +125,7 @@ const EditarEquipo = () => {
                             name="Fecha_Adquisicion"
                             value={formData.Fecha_Adquisicion}
                             onChange={handleChange}
-                            max={today} // Restringe fechas mayores al día actual
+                            max={today}
                             required
                         />
                     </div>

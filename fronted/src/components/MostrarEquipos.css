@@ -25,7 +25,7 @@
   }
   
   .tableEquipos th {
-    background-color: #007bff;
+    background-color: #2f3b52;
     color: white;
     font-weight: bold;
   }
@@ -53,7 +53,7 @@
   }
   
   .tableEquipos .btn-warning {
-    background-color: #52b922;
+    background-color:   #c7333a;
     color: white;
   }
   
@@ -233,3 +233,4 @@
   font-size: 0.9em;
   margin-top: 5px;
 }
+

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Notification from './Notification'; // Importar el componente Notification
 import './CrearEquipos.css';
 
 const endpoint = 'http://localhost:8000/api/equipo';
@@ -15,19 +16,17 @@ const CrearEquipos = () => {
     });
 
     const [error, setError] = useState(''); // Estado para manejar mensajes de error
+    const [notification, setNotification] = useState({ message: '', type: '' }); // Estado para manejar notificaciones
     const navigate = useNavigate();
 
     const tiposDeEquipos = ['Informático', 'Electrónicos y Eléctricos', 'Industriales', 'Audiovisuales'];
     const ubicacionesDeEquipo = ['Departamento de TI', 'Laboratorio de Redes', 'Sala de reuniones', 'Laboratorio CTT'];
 
-    // Obtener la fecha actual en formato YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
 
-    // Manejo de cambios en los campos del formulario
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Validar fecha
         if (name === 'Fecha_Adquisicion' && value > today) {
             setError('La fecha de adquisición no puede ser mayor al día actual.');
             return;
@@ -41,7 +40,6 @@ const CrearEquipos = () => {
         }));
     };
 
-    // Función para enviar el formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -53,20 +51,29 @@ const CrearEquipos = () => {
         try {
             const response = await axios.post(endpoint, formData);
             if (response.status === 201) {
-                alert('Equipo creado correctamente');
-                navigate('/equipos'); // Redirigir después de la creación si la respuesta es exitosa
+                setNotification({ message: 'Equipo creado correctamente.', type: 'success' }); // Mostrar notificación
+                setTimeout(() => navigate('/equipos'), 2000); // Redirigir después de 3 segundos
             } else {
-                alert('Error al crear el equipo');
+                setNotification({ message: 'Error al crear el equipo.', type: 'error' }); // Mostrar error
             }
         } catch (error) {
             console.error('Error al crear el equipo:', error);
-            alert('Hubo un error al crear el equipo. Intenta nuevamente.');
+            setNotification({ message: 'Hubo un error al crear el equipo. Intenta nuevamente.', type: 'error' });
         }
     };
 
     return (
         <div className="crear-equipos-body">
             <div className="crear-equipos-container">
+                {/* Notificación */}
+                {notification.message && (
+                    <Notification
+                        message={notification.message}
+                        type={notification.type}
+                        onClose={() => setNotification({ message: '', type: '' })}
+                    />
+                )}
+
                 <h2 className="crear-equipos-title">Crear Nuevo Equipo</h2>
                 <form className="crear-equipos-form" onSubmit={handleSubmit}>
                     <div className="crear-equipos-form-group">
@@ -110,7 +117,7 @@ const CrearEquipos = () => {
                             className="crear-equipos-input"
                             value={formData.Fecha_Adquisicion}
                             onChange={handleChange}
-                            max={today} // Restringe fechas mayores al día actual visualmente
+                            max={today}
                             required
                         />
                     </div>

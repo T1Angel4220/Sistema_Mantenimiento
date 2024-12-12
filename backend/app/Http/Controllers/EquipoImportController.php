@@ -60,7 +60,8 @@ class EquipoImportController extends Controller
 
             return response()->json(['message' => 'Los datos se insertaron correctamente.'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al procesar el archivo: ' . $e->getMessage()], 500);
+            // Cambiar el mensaje de error a uno genérico
+            return response()->json(['message' => 'Error: el archivo no cumple con la estructura de la base de datos.'], 500);
         }
     }
 }

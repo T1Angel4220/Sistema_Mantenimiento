@@ -13,7 +13,7 @@ body {
 .body-main {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #101820; /* Fondo negro */
-    color: #17134d; /* Texto blanco */
+    color: #000000; /* Texto blanco */
 }
 
 /* Contenedor principal */
@@ -71,6 +71,20 @@ body {
     width: 100%;
 }
 
+.main-sidebar-btn-crear{
+    background-color: #000000;
+    color: white;
+    font-size: 18px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    text-align: left;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
 .main-sidebar-btn:hover {
     background-color: #43567f;
 }
@@ -100,7 +114,7 @@ body {
 
 /* Cabecera del contenido */
 .main-header {
-    background-color: #4CAF50;
+    background-color: #2f3b52;
     padding: 20px;
     border-radius: 10px;
     color: white;
@@ -156,7 +170,7 @@ body {
 }
 
 .main-th {
-    background-color: #4CAF50;
+    background-color: #2f3b52;
     color: white;
 }
 
@@ -177,8 +191,8 @@ body {
 }
 
 .pagination button {
-    background-color: #4CAF50; /* Verde */
-    color: white;
+    background-color: #ffffff; /* Verde */
+    color: rgb(0, 0, 0);
     border: none;
     border-radius: 8px;
     padding: 10px 15px;
@@ -189,7 +203,7 @@ body {
 }
 
 .pagination button:hover {
-    background-color: #45a049; /* Verde más oscuro */
+    background-color: #2f3b52; /* Verde más oscuro */
     transform: scale(1.05); /* Efecto de zoom al pasar el mouse */
 }
 
@@ -241,7 +255,7 @@ body {
   
   .main-horizontal-card strong {
     font-size: 16px;
-    color: #43567f; /* Azul oscuro */
+    color: #000000; /* Azul oscuro */
   }
   
   .main-horizontal-card span {
@@ -262,4 +276,101 @@ body {
     font-size: 16px;
     margin-top: 30px;
   }
-  
+  /* Botón para "Crear Nuevo Equipo" con color celeste */
+.main-sidebar-btn-create {
+    background-color: #FF8C00; /* Celeste */
+    color: white;
+    font-size: 16px;
+    padding: 15px;
+    border: 2px solid #FF8C00; /* Borde celeste más oscuro */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.main-sidebar-btn-create:hover {
+    background-color: #ff8c00d7; /* Celeste más oscuro */
+    border-color: #FF8C00; /* Borde más oscuro */
+}
+
+/* Botón para "Cargar Equipos" con color negro */
+.main-sidebar-btn-upload {
+    background-color: #004de7; /* Negro */
+    color: white;
+    font-size: 16px;
+    padding: 15px;
+    border: 2px solid #004de7; /* Borde negro claro */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin-bottom: 10px;
+    width: 100%;
+
+}
+
+.main-sidebar-btn-upload:hover {
+    background-color: #004de7a8; /* Negro más claro */
+    border-color: #004de7; /* Borde más claro */
+}
+/* Fondo de overlay del modal */
+.main-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Contenedor del modal */
+.main-modal-content {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Botones del modal */
+.main-modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.main-confirm-button {
+    background-color: #d32f2f;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.main-confirm-button:hover {
+    background-color: #c62828;
+}
+
+.main-cancel-button {
+    background-color: #3c4b63;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.main-cancel-button:hover {
+    background-color: #2f3b52;
+}

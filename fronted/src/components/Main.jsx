@@ -9,7 +9,8 @@ const Main = () => {
   const [filteredEquipos, setFilteredEquipos] = useState([]); // Estado para los equipos filtrados
   const [filters, setFilters] = useState({}); // Estado para los filtros activos
   const [currentPage, setCurrentPage] = useState(1); // Página actual
-  const itemsPerPage = 9 // Número de elementos por página
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // Estado del modal para cerrar sesión
+  const itemsPerPage = 9; // Número de elementos por página
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -35,9 +36,9 @@ const Main = () => {
   const handleFilterChange = (type, value) => {
     const newFilters = { ...filters, [type]: value };
     setFilters(newFilters);
-  
+
     let filtered = [...equipos]; // Crear una copia para evitar mutaciones
-  
+
     if (newFilters.Tipo_Equipo) {
       filtered = filtered.filter((equipo) => equipo.Tipo_Equipo === newFilters.Tipo_Equipo);
     }
@@ -51,7 +52,7 @@ const Main = () => {
       filtered = filtered.sort((a, b) => {
         const fechaA = new Date(a.Fecha_Adquisicion);
         const fechaB = new Date(b.Fecha_Adquisicion);
-  
+
         return newFilters.Orden_Fecha === "Reciente"
           ? fechaB - fechaA // Más reciente primero
           : fechaA - fechaB; // Más antigua primero
@@ -59,15 +60,19 @@ const Main = () => {
     }
     setFilteredEquipos(filtered);
   };
+
   const handleLogout = () => {
-    const confirmLogout = window.confirm("¿Está seguro de que desea cerrar sesión?");
-    if (confirmLogout) {
-      localStorage.removeItem('token');
-      navigate('/');
-    }
+    setShowLogoutModal(true); // Mostrar modal de confirmación
   };
-  
-  
+
+  const confirmLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false); // Cerrar modal
+  };
 
   const totalPages = Math.ceil(filteredEquipos.length / itemsPerPage);
 
@@ -94,78 +99,94 @@ const Main = () => {
               className="main-sidebar-logo"
             />
           </div>
-
-          <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>Equipos</button>
-          <button className="main-sidebar-btn" onClick={() => navigate('/mantenimientos')}>Mantenimientos</button>
-          <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>Reportes</button>
-            <button className="main-logout-btn" onClick={handleLogout}>Salir</button>
-            
-          
+          <button className="main-sidebar-btn" onClick={() => navigate('/Main')}>
+            Inicio
+          </button>
+          <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>
+            Equipos
+          </button>
+          <button className="main-sidebar-btn" onClick={() => navigate('/mantenimientos')}>
+            Mantenimientos
+          </button>
+          <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>
+            Reportes
+          </button>
+          <button className="main-logout-btn" onClick={handleLogout}>
+            Salir
+          </button>
         </div>
 
         <div className="main-content">
           <div className="main-header">
             <h1 className="main-header-title">Bienvenido al Sistema</h1>
           </div>
+
           {/* Sección de "Últimos Registros" */}
-<div className="main-cards-horizontal">
-  <h2 className="main-card-title">Últimos Registros</h2>
-  <div className="main-horizontal-container">
-    {equipos.length > 0 ? (
-      equipos
-        .sort((a, b) => new Date(b.Fecha_Adquisicion) - new Date(a.Fecha_Adquisicion)) // Ordenar por fecha descendente
-        .slice(0, 5) // Tomar los 5 últimos equipos
-        .map((equipo, index) => (
-          <div className="main-horizontal-card" key={index}>
-            <strong>{equipo.Nombre_Producto}</strong>
-            <br />
-            <span>{equipo.Fecha_Adquisicion}</span>
+          <div className="main-cards-horizontal">
+            <h2 className="main-card-title">Últimos Registros</h2>
+            <div className="main-horizontal-container">
+              {equipos.length > 0 ? (
+                equipos
+                  .sort((a, b) => b.id - a.id)
+                  .slice(0, 5)
+                  .map((equipo, index) => (
+                    <div className="main-horizontal-card" key={index}>
+                      <strong>{equipo.Nombre_Producto}</strong>
+                      <br />
+                      <span>Registrado el: {new Date(equipo.created_at).toLocaleDateString()}</span>
+                    </div>
+                  ))
+              ) : (
+                <p className="main-card-text">No hay equipos registrados.</p>
+              )}
+            </div>
           </div>
-        ))
-    ) : (
-      <p className="main-card-text">No hay equipos registrados.</p>
-    )}
-  </div>
-</div>
 
-<div className="filter-container">
-<h3 className="main-card-title">Filtrado : </h3>
+          {/* Filtros */}
+          <div className="filter-container">
+            <h3 className="main-card-title">Filtrado : </h3>
 
-  {/* Filtro por Tipo */}
-  <select onChange={(e) => handleFilterChange('Tipo_Equipo', e.target.value)} className="filter-select">
-    <option value="">Filtrar por Tipo</option>
-    <option value="Informático">Informático</option>
-    <option value="Electrónicos y Eléctricos">Electrónicos y Eléctricos</option>
-    <option value="Industriales">Industriales</option>
-    <option value="Audiovisuales">Audiovisuales</option>
-  </select>
+            <select
+              onChange={(e) => handleFilterChange('Tipo_Equipo', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Filtrar por Tipo</option>
+              <option value="Informático">Informático</option>
+              <option value="Electrónicos y Eléctricos">Electrónicos y Eléctricos</option>
+              <option value="Industriales">Industriales</option>
+              <option value="Audiovisuales">Audiovisuales</option>
+            </select>
 
-  {/* Filtro por Ubicación */}
-  <select onChange={(e) => handleFilterChange('Ubicacion_Equipo', e.target.value)} className="filter-select">
-    <option value="">Filtrar por Ubicación</option>
-    <option value="Departamento de TI">Departamento de TI</option>
-    <option value="Laboratorio de Redes">Laboratorio de Redes</option>
-    <option value="Sala de reuniones">Sala de reuniones</option>
-    <option value="Laboratorio CTT">Laboratorio CTT</option>
-  </select>
+            <select
+              onChange={(e) => handleFilterChange('Ubicacion_Equipo', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Filtrar por Ubicación</option>
+              <option value="Departamento de TI">Departamento de TI</option>
+              <option value="Laboratorio de Redes">Laboratorio de Redes</option>
+              <option value="Sala de reuniones">Sala de reuniones</option>
+              <option value="Laboratorio CTT">Laboratorio CTT</option>
+            </select>
 
-  {/* Filtro por Estado */}
-  <select onChange={(e) => handleFilterChange('Estado_Equipo', e.target.value)} className="filter-select">
-    <option value="">Filtrar por Estado</option>
-    <option value="Activo">Activo</option>
-    <option value="Inactivo">Inactivo</option>
-    <option value="En reparación">En reparación</option>
-  </select>
+            <select
+              onChange={(e) => handleFilterChange('Estado_Equipo', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Filtrar por Estado</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+              <option value="En reparación">En reparación</option>
+            </select>
 
-  {/* Filtro por Orden de Fecha */}
-  <select onChange={(e) => handleFilterChange('Orden_Fecha', e.target.value)} className="filter-select">
-  <option value="">Ordenar por Fecha</option>
-  <option value="Reciente">Más reciente</option>
-  <option value="Antigua">Más antigua</option>
-</select>
-
-</div>
-
+            <select
+              onChange={(e) => handleFilterChange('Orden_Fecha', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Ordenar por Fecha</option>
+              <option value="Reciente">Más reciente</option>
+              <option value="Antigua">Más antigua</option>
+            </select>
+          </div>
 
           {/* Tabla */}
           <div className="main-table-container">
@@ -201,24 +222,47 @@ const Main = () => {
 
           {/* Paginación */}
           <div className="pagination">
-            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
               &lt; Anterior
             </button>
             {[...Array(totalPages)].map((_, index) => (
               <button
                 key={index + 1}
                 onClick={() => handlePageChange(index + 1)}
-                className={currentPage === index + 1 ? "active" : ""}
+                className={currentPage === index + 1 ? 'active' : ''}
               >
                 {index + 1}
               </button>
             ))}
-            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
               Siguiente &gt;
             </button>
           </div>
         </div>
       </div>
+
+      {/* Modal de confirmación */}
+      {showLogoutModal && (
+        <div className="main-modal-overlay">
+          <div className="main-modal-content">
+            <h3>¿Está seguro de que desea cerrar sesión?</h3>
+            <div className="main-modal-buttons">
+              <button className="main-confirm-button" onClick={confirmLogout}>
+                Sí
+              </button>
+              <button className="main-cancel-button" onClick={cancelLogout}>
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
