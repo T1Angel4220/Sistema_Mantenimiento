@@ -1,4 +1,11 @@
 /* EditarEquipo.css */
+.main-editar-equipos-body {
+    background-color: #cfe8f5; /* Azul pastel */
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+
+}
 
 /* Estilo general del contenedor principal */
 .main-editar-equipo-container {
