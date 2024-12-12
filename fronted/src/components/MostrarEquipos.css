@@ -73,7 +73,8 @@
     padding: 12px 20px;
     font-size: 16px;
     border-radius: 5px;
-    width: 48%; /* Para que ambos botones tengan el mismo tamaño */
+    width: 30%; /* Para que ambos botones tengan el mismo tamaño */
+    
   }
   
   .button-group .btn-create {
@@ -122,4 +123,113 @@
   .d-grid.create-button .btn-success:hover {
     background-color: #0056b3; /* Azul más oscuro */
   }
-  
+/* Estilos del Modal */
+
+/* Modal fondo */
+.modal-mostrar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Contenido del modal */
+.modal-mostrar .modal-content {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 15px;
+  width: 600px;
+  max-width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón cerrar modal */
+.modal-mostrar .modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.modal-mostrar .modal-close:hover {
+  color: red;
+}
+
+/* Estilos del formulario dentro del modal */
+.modal-mostrar .upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-mostrar .upload-field {
+  text-align: left;
+}
+
+.modal-mostrar .upload-label {
+  font-size: 1rem;
+  color: #555555;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.modal-mostrar .upload-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.modal-mostrar .upload-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+.modal-mostrar .upload-button {
+  background-color: #007bff;
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-mostrar .upload-button:hover {
+  background-color: #0056b3;
+}
+
+.modal-mostrar .upload-message {
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.modal-mostrar .upload-message.success {
+  color: #28a745;
+}
+
+.modal-mostrar .upload-message.error {
+  color: #dc3545;
+}
+.error-message {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 5px;
+}

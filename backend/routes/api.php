@@ -6,6 +6,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\EquipoController;
+use App\Http\Controllers\EquipoImportController;
+
+Route::post('/equipos/import', [EquipoImportController::class, 'import']);
 
 
 Route::post('/register', [RegisterController::class, 'register']);
@@ -22,4 +25,3 @@ Route::controller(EquipoController::class)->group(function(){
     Route::put('/equipo/{id}','update');
     Route::delete('/equipo/{id}','destroy');
 });
-

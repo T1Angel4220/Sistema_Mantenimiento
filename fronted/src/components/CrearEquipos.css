@@ -4,6 +4,7 @@
 /* Fondo general */
 .crear-equipos-body {
     background-color: #cfe8f5; /* Azul pastel más oscuro */
+    padding: 104px;
 }
 
 .crear-equipos-container {

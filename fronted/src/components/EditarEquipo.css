@@ -3,7 +3,7 @@
     background-color: #cfe8f5; /* Azul pastel */
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 53px;
 
 }
 
@@ -111,7 +111,7 @@
 .main-editar-equipo-btn-regresar {
     flex: 1; /* Ocupa el mismo espacio que el otro botón */
     padding: 15px;
-    background-color: #007bff;
+    background-color: red;
     color: white;
     font-size: 1.2rem;
     font-weight: bold;
@@ -124,7 +124,7 @@
 }
 
 .main-editar-equipo-btn-regresar:hover {
-    background-color: #0056b3;
+    background-color: #a73030;
     transform: translateY(-3px); /* Efecto de desplazamiento al hacer hover */
 }
 

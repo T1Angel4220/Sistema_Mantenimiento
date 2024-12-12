@@ -8,6 +8,7 @@ import MostrarEquipos from './components/MostrarEquipos';
 import CrearEquipos from './components/CrearEquipos';
 import EditarEquipo from './components/EditarEquipo';
 
+
 function App() {
     return (
         <Router>
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/equipos" element={<MostrarEquipos/>}/>
                 <Route path="/create" element={<CrearEquipos />} /> 
                 <Route path="/edit/:id" element={<EditarEquipo />} />
+
 
 
 

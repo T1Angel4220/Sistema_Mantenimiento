@@ -114,7 +114,7 @@ const Main = () => {
     {equipos.length > 0 ? (
       equipos
         .sort((a, b) => new Date(b.Fecha_Adquisicion) - new Date(a.Fecha_Adquisicion)) // Ordenar por fecha descendente
-        .slice(0, 8) // Tomar los 5 últimos equipos
+        .slice(0, 5) // Tomar los 5 últimos equipos
         .map((equipo, index) => (
           <div className="main-horizontal-card" key={index}>
             <strong>{equipo.Nombre_Producto}</strong>
