@@ -220,30 +220,79 @@ const Main = () => {
             </table>
           </div>
 
-          {/* Paginación */}
-          <div className="pagination">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              &lt; Anterior
-            </button>
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={currentPage === index + 1 ? 'active' : ''}
-              >
-                {index + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Siguiente &gt;
-            </button>
-          </div>
+{/* Paginación */}
+<div className="pagination">
+  <button
+    onClick={() => handlePageChange(currentPage - 1)}
+    disabled={currentPage === 1}
+  >
+    &lt; Anterior
+  </button>
+  {totalPages <= 26 ? (
+    // Mostrar todas las páginas si hay 26 o menos
+    [...Array(totalPages)].map((_, index) => (
+      <button
+        key={index + 1}
+        onClick={() => handlePageChange(index + 1)}
+        className={currentPage === index + 1 ? 'active' : ''}
+      >
+        {index + 1}
+      </button>
+    ))
+  ) : (
+    <>
+      {/* Mostrar las primeras 26 páginas */}
+      {[...Array(23)].map((_, index) => (
+        <button
+          key={index + 1}
+          onClick={() => handlePageChange(index + 1)}
+          className={currentPage === index + 1 ? 'active' : ''}
+        >
+          {index + 1}
+        </button>
+      ))}
+{/* Botón de puntos suspensivos */}
+<div style={{ position: 'relative' }}>
+  <button
+    onClick={() => {
+      const extraPages = document.getElementById('extra-pages');
+      extraPages.classList.toggle('hidden'); // Alternar la visibilidad del menú
+    }}
+  >
+    ...
+  </button>
+  {/* Contenedor para las páginas adicionales */}
+  <div id="extra-pages" className="extra-pages-menu hidden">
+    {[...Array(totalPages - 23)].map((_, index) => {
+      const pageNumber = index + 24; // Calcula el número de página
+      return (
+        <button
+          key={pageNumber}
+          onClick={() => {
+            handlePageChange(pageNumber);
+            document.getElementById('extra-pages').classList.add('hidden'); // Cerrar el menú
+          }}
+          className={currentPage === pageNumber ? 'active' : ''} // Clase 'active' para la página actual
+        >
+          {pageNumber}
+        </button>
+      );
+    })}
+  </div>
+</div>
+
+    </>
+  )}
+  <button
+    onClick={() => handlePageChange(currentPage + 1)}
+    disabled={currentPage === totalPages}
+  >
+    Siguiente &gt;
+  </button>
+</div>
+
+
+
         </div>
       </div>
 

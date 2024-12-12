@@ -56,27 +56,37 @@ const MostrarEquipos = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await axios.post('http://localhost:8000/api/equipos/import', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            setMessage(response.data.message);
-            setNotification({ message: 'Información insertada correctamente.', type: 'success' });
-            setShowModal(false); // Cierra el modal
-            getAllEquipos(); // Actualiza la tabla después de cargar el archivo
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Error desconocido al cargar el archivo.';
-            setMessage(errorMessage);
-            setNotification({ message: errorMessage, type: 'error' });
-        }
-    };
-
+      e.preventDefault();
+  
+      if (!file) {
+          setNotification({ message: 'Por favor, selecciona un archivo.', type: 'error' });
+          return;
+      }
+  
+      const formData = new FormData();
+      formData.append('file', file);
+  
+      try {
+          const response = await axios.post('http://localhost:8000/api/equipos/import', formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+              },
+          });
+  
+          setMessage(response.data.message);
+          setNotification({ message: 'Información insertada correctamente.', type: 'success' });
+          setShowModal(false); // Cierra el modal
+          getAllEquipos(); // Actualiza la tabla después de cargar el archivo
+          setFile(null); // Reinicia el archivo seleccionado
+      } catch (error) {
+          const errorMessage = error.response?.data?.message || 'Error desconocido al cargar el archivo.';
+          setMessage(errorMessage);
+          setNotification({ message: 'Sube otro archivo válido. El archivo no cumple con el formato requerido.', type: 'error' });
+          getAllEquipos(); // Actualiza la tabla después de cargar el archivo
+          setFile(null); // Reinicia el archivo seleccionado
+      }
+  };
+  
     const confirmDelete = (id) => {
         setDeleteId(id);
         setShowDeleteModal(true); // Muestra el modal de confirmación
@@ -229,32 +239,76 @@ const MostrarEquipos = () => {
                         </table>
                     </div>
 
-                    {/* Paginación */}
-                    <div className="pagination">
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                        >
-                            &lt; Anterior
-                        </button>
-                        {[...Array(totalPages)].map((_, index) => (
-                            <button
-                                key={index + 1}
-                                onClick={() => handlePageChange(index + 1)}
-                                className={
-                                    currentPage === index + 1 ? 'active' : ''
-                                }
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                        >
-                            Siguiente &gt;
-                        </button>
-                    </div>
+                   {/* Paginación */}
+<div className="pagination">
+  <button
+    onClick={() => handlePageChange(currentPage - 1)}
+    disabled={currentPage === 1}
+  >
+    &lt; Anterior
+  </button>
+  {totalPages <= 26 ? (
+    // Mostrar todas las páginas si hay 26 o menos
+    [...Array(totalPages)].map((_, index) => (
+      <button
+        key={index + 1}
+        onClick={() => handlePageChange(index + 1)}
+        className={currentPage === index + 1 ? 'active' : ''}
+      >
+        {index + 1}
+      </button>
+    ))
+  ) : (
+    <>
+      {/* Mostrar las primeras 26 páginas */}
+      {[...Array(23)].map((_, index) => (
+        <button
+          key={index + 1}
+          onClick={() => handlePageChange(index + 1)}
+          className={currentPage === index + 1 ? 'active' : ''}
+        >
+          {index + 1}
+        </button>
+      ))}
+{/* Botón de puntos suspensivos */}
+<div style={{ position: 'relative' }}>
+  <button
+    onClick={() => {
+      const extraPages = document.getElementById('extra-pages');
+      extraPages.classList.toggle('hidden'); // Alternar la visibilidad del menú
+    }}
+  >
+    ...
+  </button>
+  {/* Contenedor para las páginas adicionales */}
+  <div id="extra-pages" className="extra-pages-menu hidden">
+    {[...Array(totalPages - 23)].map((_, index) => {
+      const pageNumber = index + 24; // Calcula el número de página
+      return (
+        <button
+          key={pageNumber}
+          onClick={() => {
+            handlePageChange(pageNumber);
+            document.getElementById('extra-pages').classList.add('hidden'); // Cerrar el menú
+          }}
+          className={currentPage === pageNumber ? 'active' : ''} // Clase 'active' para la página actual
+        >
+          {pageNumber}
+        </button>
+      );
+    })}
+  </div>
+</div>
+
+    </>
+  )}
+  <button
+    onClick={() => handlePageChange(currentPage + 1)}
+    disabled={currentPage === totalPages}
+  >
+    Siguiente &gt;
+  </button>
+</div>
 
                     {/* Modal de carga */}
                     {showModal && (
@@ -262,16 +316,28 @@ const MostrarEquipos = () => {
                             <div className="modal-content">
                                 <h2>Subir Equipos por Lotes</h2>
                                 <form onSubmit={handleSubmit} className="upload-form">
-                                    <div className="upload-field">
-                                        <label htmlFor="file-upload" className="upload-label">Selecciona un archivo:</label>
-                                        <input
-                                            id="file-upload"
-                                            type="file"
-                                            accept=".csv, .xlsx"
-                                            onChange={handleFileChange}
-                                            className="upload-input"
-                                        />
-                                    </div>
+                                <div className="upload-field">
+    <label htmlFor="file-upload" className="upload-label">Selecciona un archivo:</label>
+    <div className="texto-custom-file-upload">
+    <button
+        type="button"
+        className="texto-upload-button"
+        onClick={() => document.getElementById('file-upload').click()}
+    >
+        Seleccionar archivo
+    </button>
+    <span className="texto-file-name">{file ? file.name : 'Ningún archivo cargado'}</span>
+    <input
+        id="file-upload"
+        type="file"
+        accept=".csv, .xlsx"
+        onChange={handleFileChange}
+        className="texto-hidden-file-input"
+    />
+</div>
+</div>
+
+
                                     <button type="submit" className="upload-button">Cargar Archivo</button>
                                 </form>
                                 <button className="modal-close" onClick={() => setShowModal(false)}>X</button>

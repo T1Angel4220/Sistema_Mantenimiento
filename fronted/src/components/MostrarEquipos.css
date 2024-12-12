@@ -234,3 +234,32 @@
   margin-top: 5px;
 }
 
+.texto-hidden-file-input {
+  display: none;
+}
+
+.texto-custom-file-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.texto-upload-button {
+  background-color: #000000; /* Color azul */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.texto-upload-button:hover {
+  background-color: #000000b4; /* Azul más oscuro */
+}
+
+.texto-file-name {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+}
