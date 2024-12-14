@@ -7,6 +7,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Csv as CsvReader;
 use App\Models\Equipo;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class EquipoImportController extends Controller
 {
@@ -34,16 +35,27 @@ class EquipoImportController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $data = $sheet->toArray();
 
-            unset($data[0]);
+            if (empty(array_filter(array_map('array_filter', $data)))) {
+                return response()->json(['message' => 'El archivo está vacío.'], 400);
+            }
+
+            unset($data[0]); // Remover la cabecera si la hay
 
             foreach ($data as $row) {
-                $row = array_slice($row, 0, 5);
+                $row = array_filter($row, function($value) {
+                    return !is_null($value) && $value !== '';
+                });
+
+                if (empty($row)) {
+                    continue; // Si la fila está completamente vacía, la omite
+                }
+
+                $row = array_values($row); // Re-indexar el array después de filtrar
 
                 $fechaAdquisicion = null;
-
                 if (!empty($row[2])) {
                     try {
-                        $fechaAdquisicion = \Carbon\Carbon::createFromFormat('d/m/Y', $row[2])->format('Y-m-d');
+                        $fechaAdquisicion = Carbon::createFromFormat('d/m/Y', $row[2])->format('Y-m-d');
                     } catch (\Exception $e) {
                         $fechaAdquisicion = null;
                     }

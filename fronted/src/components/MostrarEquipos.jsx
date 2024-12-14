@@ -81,7 +81,7 @@ const MostrarEquipos = () => {
       } catch (error) {
           const errorMessage = error.response?.data?.message || 'Error desconocido al cargar el archivo.';
           setMessage(errorMessage);
-          setNotification({ message: 'Sube otro archivo válido. El archivo no cumple con el formato requerido.', type: 'error' });
+          setNotification({ message: 'Sube otro archivo válido. El archivo no cumple con el formato requerido o esta vacío.', type: 'error' });
           getAllEquipos(); // Actualiza la tabla después de cargar el archivo
           setFile(null); // Reinicia el archivo seleccionado
       }

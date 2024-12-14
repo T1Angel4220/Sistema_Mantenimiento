@@ -60,7 +60,7 @@ const Login = () => {
             className="icon-image" 
         />
     </div>
-                    <h2 className="login-title">Iniciar Sesión</h2>
+                    <h2 className="login-title">Sistema de Mantenimientos</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="input-group">
                             <label htmlFor="correo">Correo Electrónico</label>

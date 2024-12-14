@@ -118,7 +118,7 @@ const Main = () => {
 
         <div className="main-content">
           <div className="main-header">
-            <h1 className="main-header-title">Bienvenido al Sistema</h1>
+            <h1 className="main-header-title">Bienvenido al Sistema de Gestión de Mantemientos</h1>
           </div>
 
           {/* Sección de "Últimos Registros" */}
