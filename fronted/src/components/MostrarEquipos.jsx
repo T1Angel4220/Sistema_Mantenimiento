@@ -153,6 +153,9 @@ const MostrarEquipos = () => {
                     >
                         Inicio
                     </button>
+                    <button className="main-sidebar-btn" onClick={() => navigate('/ProcesoCompra')}>
+            Proceso de Compra
+          </button>
                     <button
                         className="main-sidebar-btn"
                         onClick={() => {
@@ -160,7 +163,7 @@ const MostrarEquipos = () => {
                             setShowEquipoButtons(!showEquipoButtons); // Alternar mostrar/ocultar botones
                         }}
                     >
-                        Equipos
+                        Activos
                     </button>
 
                     {showEquipoButtons && (
@@ -169,13 +172,13 @@ const MostrarEquipos = () => {
                                 className="main-sidebar-btn-create"
                                 onClick={() => navigate('/create')}
                             >
-                                Crear Nuevo Equipo
+                                Crear Nuevo Activo
                             </button>
                             <button
                                 className="main-sidebar-btn-upload"
                                 onClick={() => setShowModal(true)}
                             >
-                                Cargar Equipos
+                                Cargar Activos
                             </button>
                         </div>
                     )}
@@ -314,7 +317,7 @@ const MostrarEquipos = () => {
                     {showModal && (
                         <div className="modal-mostrar">
                             <div className="modal-content">
-                                <h2>Subir Equipos por Lotes</h2>
+                                <h2>Subir Activos por Lotes</h2>
                                 <form onSubmit={handleSubmit} className="upload-form">
                                 <div className="upload-field">
     <label htmlFor="file-upload" className="upload-label">Selecciona un archivo:</label>
@@ -336,8 +339,6 @@ const MostrarEquipos = () => {
     />
 </div>
 </div>
-
-
                                     <button type="submit" className="upload-button">Cargar Archivo</button>
                                 </form>
                                 <button className="modal-close" onClick={() => setShowModal(false)}>X</button>

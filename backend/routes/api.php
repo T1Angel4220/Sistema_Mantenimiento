@@ -7,6 +7,16 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\EquipoController;
 use App\Http\Controllers\EquipoImportController;
+use App\Http\Controllers\ProcesoCompraController;
+
+Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
+
+
+Route::get('/proceso-compra', [ProcesoCompraController::class, 'index']);
+Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
+
+
+
 
 Route::post('/equipos/import', [EquipoImportController::class, 'import']);
 

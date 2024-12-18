@@ -99,6 +99,7 @@ body {
     transition: background-color 0.3s ease;
     width: 100%;
     margin-top: auto;
+    text-align: center;
 }
 
 .main-logout-btn:hover {
@@ -277,46 +278,46 @@ body {
     font-size: 16px;
     margin-top: 30px;
   }
-  /* Botón para "Crear Nuevo Equipo" con color celeste */
+  /* Botón para "Crear Nuevo Equipo" con color más sutil */
 .main-sidebar-btn-create {
-    background-color: #FF8C00; /* Celeste */
-    color: white;
-    font-size: 16px;
-    padding: 15px;
-    border: 2px solid #FF8C00; /* Borde celeste más oscuro */
-    border-radius: 8px;
+    background-color: #F5A623; /* Amarillo Naranja Suave */
+    color: #ffffff;
+    font-size: 14px;
+    padding: 10px;
+    border: 2px solid #E5941E; /* Borde más oscuro */
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
     margin-bottom: 10px;
-    width: 100%;
+    width: 99%;
 }
 
 .main-sidebar-btn-create:hover {
-    background-color: #ff8c00d7; /* Celeste más oscuro */
-    border-color: #FF8C00; /* Borde más oscuro */
+    background-color: #E5941E; /* Naranja más fuerte */
+    border-color: #D1831B; /* Borde más oscuro */
 }
 
-/* Botón para "Cargar Equipos" con color negro */
+/* Botón para "Cargar Equipos" con color azul mejorado */
 .main-sidebar-btn-upload {
-    background-color: #004de7; /* Negro */
-    color: white;
-    font-size: 16px;
-    padding: 15px;
-    border: 2px solid #004de7; /* Borde negro claro */
-    border-radius: 8px;
+    background-color: #2C6BED; /* Azul Suave */
+    color: #ffffff;
+    font-size: 14px;
+    padding: 10px;
+    border: 2px solid #245AB3; /* Borde Azul Oscuro */
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
     margin-bottom: 10px;
-    width: 100%;
-
+    width: 99%;
 }
 
 .main-sidebar-btn-upload:hover {
-    background-color: #004de7a8; /* Negro más claro */
-    border-color: #004de7; /* Borde más claro */
+    background-color: #245AB3; /* Azul más oscuro */
+    border-color: #1E4A8F; /* Borde aún más oscuro */
 }
+
 /* Fondo de overlay del modal */
 .main-modal-overlay {
     position: fixed;

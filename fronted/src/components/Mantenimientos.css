@@ -1,0 +1,79 @@
+.mantenimiento-container {
+    width: 100%;
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  
+  .mantenimiento-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .mantenimiento-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .mantenimiento-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .mantenimiento-radio-group {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .mantenimiento-input, .mantenimiento-select, .mantenimiento-textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+  }
+  
+  .mantenimiento-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .mantenimiento-button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .mantenimiento-button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+  }
+  
+  .mantenimiento-button-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .mantenimiento-button-primary:hover {
+    background-color: #2563eb;
+  }
+  
+  .mantenimiento-button-secondary {
+    background-color: #e5e7eb;
+    color: #1f2937;
+  }
+  
+  .mantenimiento-button-secondary:hover {
+    background-color: #d1d5db;
+  }
+  
+  .mantenimiento-textarea {
+    min-height: 100px;
+  }
+  
