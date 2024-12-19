@@ -9,9 +9,49 @@ export default function MaintenanceForm() {
     const [endDate, setEndDate] = useState("");
     const [componentsChanged, setComponentsChanged] = useState("no");
     const [showProveedorButtons, setShowProveedorButtons] = useState(true); // Estado para el botón desplegable
+    const [selectedComponents, setSelectedComponents] = useState([]); // Estado para componentes seleccionados
 
+    // Agregar componente seleccionado a la lista
+    const handleComponentAdd = (e) => {
+        const selectedOption = e.target.value;
+        if (selectedOption && !selectedComponents.includes(selectedOption)) {
+            setSelectedComponents([...selectedComponents, selectedOption]);
+        }
+        e.target.value = ""; // Reinicia el dropdown
+    };
+    
+    // Eliminar un componente de la lista
+    const handleComponentRemove = (component, event) => {
+      event.preventDefault(); // Prevenir recarga de página
+      setSelectedComponents(selectedComponents.filter(item => item !== component));
+  };
+  
+    
+  
     const assets = ['ACT0001', 'ACT0002', 'ACT0003', 'ACT0004'];
-    const activities = ['Formateo', 'Limpieza', 'Actualización de Software'];
+    const activities = [
+      'Formateo',
+      'Limpieza',
+      'Actualización de Software',
+      'Instalación de Controladores',
+      'Actualización de Firmware',
+      'Verificación de Conexiones',
+      'Pruebas de Diagnóstico',
+      'Optimización del Sistema Operativo',
+      'Desfragmentación del Disco Duro',
+      'Revisión de Seguridad Antivirus',
+      'Restauración de Sistemas',
+      'Calibración de Componentes',
+      'Verificación de Licencias de Software',
+      'Mantenimiento Preventivo de Impresoras',
+      'Monitoreo de Temperatura',
+      'Gestión de Inventario de Activos',
+      'Auditoría de Uso de Software',
+      'Actualización de Documentación Técnica',
+      'Revisión de Conexiones de Red',
+      'Optimización de Consumo Energético',
+    ];
+    
     const components = ['Disco', 'Ventilador', 'Tarjeta RAM'];
 
     return (
@@ -42,9 +82,9 @@ export default function MaintenanceForm() {
                     <div className="proveedor-buttons">
                         <button
                             className="main-sidebar-btn-create"
-                            onClick={() => navigate('/crear-proveedor')}
+                            onClick={() => navigate('/AniadirMantenimiento')}
                         >
-                            Crear Proveedores
+                            Añadir Mantenimiento
                         </button>
                     </div>
                 )}
@@ -178,13 +218,45 @@ export default function MaintenanceForm() {
               </label>
             </div>
             {componentsChanged === "si" && (
-              <select className="mantenimiento-select">
-                <option value="">Seleccione los componentes</option>
-                {components.map((component) => (
-                  <option key={component} value={component}>{component}</option>
-                ))}
-              </select>
-            )}
+    <div className="mantenimiento-form-group">
+        <label>Seleccione los componentes:</label>
+        <select onChange={handleComponentAdd} className="mantenimiento-select">
+            <option value="">Seleccione un componente</option>
+            {components.map((component) => (
+                <option key={component} value={component}>{component}</option>
+            ))}
+        </select>
+
+        {/* Lista de componentes seleccionados */}
+        <div>
+            <h3>Componentes seleccionados:</h3>
+            <ul>
+    {selectedComponents.map((component, index) => (
+        <li key={index} style={{ display: 'flex', alignItems: 'center' }}>
+            <button
+                type="button" // Asegurarse de que no sea un botón de envío
+                onClick={(e) => handleComponentRemove(component, e)}
+                style={{
+                    marginRight: '10px',
+                    color: 'white',
+                    backgroundColor: 'red',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    padding: '2px 5px'
+                }}
+            >
+                X
+            </button>
+            {component}
+        </li>
+    ))}
+</ul>
+
+        </div>
+    </div>
+)}
+
           </div>
 
           <div className="mantenimiento-form-group">

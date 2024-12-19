@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('nombre', 150); // Nombre del proceso de compra
             $table->text('descripcion')->nullable(); // Descripción opcional
             $table->date('fecha'); // Fecha
-            $table->string('proveedor', 150); // Nombre del proveedor
-            $table->timestamps(); // created_at y updated_at
+            // Campo proveedor como enum con 5 opciones
+            $table->enum('proveedor', ['Amazon', 'eBay', 'Alibaba', 'MercadoLibre', 'Shopify']);
+            $table->timestamps(); // Campos created_at y updated_at
         });
     }
 

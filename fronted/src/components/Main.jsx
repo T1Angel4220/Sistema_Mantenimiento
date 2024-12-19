@@ -108,7 +108,7 @@ const Main = () => {
           <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>
             Activos
           </button>
-          <button className="main-sidebar-btn" onClick={() => navigate('/mantenimientos')}>
+          <button className="main-sidebar-btn" onClick={() => navigate('/InicioMantenimientos')}>
             Mantenimientos
           </button>
           <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>
