@@ -7,9 +7,7 @@ import Main from './components/Main';  // Asegúrate de importar el componente I
 import MostrarEquipos from './components/MostrarEquipos';
 import CrearEquipos from './components/CrearEquipos';
 import EditarEquipo from './components/EditarEquipo';
-import Mantenimientos from './components/Mantenimientos';
-
-
+import MostrarMantenimientos from './components/Mantenimientos';
 function App() {
     return (
         <Router>
@@ -20,8 +18,7 @@ function App() {
                 <Route path="/equipos" element={<MostrarEquipos/>}/>
                 <Route path="/create" element={<CrearEquipos />} /> 
                 <Route path="/edit/:id" element={<EditarEquipo />} />
-                <Route path="/mantenimientos" element={<Mantenimientos/>}/>
-
+                <Route path="/mantenimientos" element={<MostrarMantenimientos />} />
 
 
 
