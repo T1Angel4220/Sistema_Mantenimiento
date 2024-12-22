@@ -1,42 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Notification from './Notification'; // Asegúrate de que Notification esté importado correctamente
+import Notification from './Notification';
 
 const Login = () => {
     const [correo, setCorreo] = useState('');
     const [contraseña, setContraseña] = useState('');
-    const [error, setError] = useState('');  // Manejo de errores
-    const [successMessage, setSuccessMessage] = useState(''); // Para mensajes de éxito
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Verificar si el usuario ya está autenticado
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/main'); // Redirigir a la página principal si hay un token
+        }
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Crear el objeto con los datos del formulario
         const loginData = {
             email: correo,
             password: contraseña,
         };
 
         try {
-            // Enviar los datos de login al backend
             const response = await axios.post('http://localhost:8000/api/login', loginData);
 
-            // Almacenar el token JWT (si la autenticación es exitosa)
-            localStorage.setItem('token', response.data.token);  // Guarda el token en el almacenamiento local
+            localStorage.setItem('token', response.data.token);
 
-            // Mostrar el mensaje de éxito
             setSuccessMessage('Inicio de sesión exitoso');
             setTimeout(() => {
-                navigate('/main'); // Redirigir a la página principal
-            }, 2000); // Espera 2 segundos antes de redirigir
+                navigate('/main');
+            }, 2000);
 
         } catch (error) {
-            // Manejar errores
             if (error.response) {
-                // Si el error es del backend, muestra un mensaje más amigable
                 setError(error.response.data.error || 'Error en el servidor');
             } else {
                 setError('Error en la conexión al servidor');
@@ -47,19 +49,17 @@ const Login = () => {
     return (
         <div className="bodylogin">
             <div className="login-container">
-                {/* Mostrar notificación de error si existe */}
                 {error && <Notification message={error} type="error" onClose={() => setError('')} />}
-                {/* Mostrar mensaje de éxito */}
                 {successMessage && <Notification message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
-    
+
                 <div className="login-box">
-                <div className="login-icon">
-        <img 
-            src="https://w7.pngwing.com/pngs/653/121/png-transparent-preventive-maintenance-company-service-reliability-centered-maintenance-others-thumbnail.png" 
-            alt="Icono de usuario" 
-            className="icon-image" 
-        />
-    </div>
+                    <div className="login-icon">
+                        <img 
+                            src="https://w7.pngwing.com/pngs/653/121/png-transparent-preventive-maintenance-company-service-reliability-centered-maintenance-others-thumbnail.png" 
+                            alt="Icono de usuario" 
+                            className="icon-image" 
+                        />
+                    </div>
                     <h2 className="login-title">Iniciar Sesión</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="input-group">
@@ -86,13 +86,6 @@ const Login = () => {
                         </div>
                         <button type="submit" className="form-button">
                             Iniciar Sesión
-                        </button>
-                        <button
-                            type="button"
-                            className="form-button secondary-button"
-                            onClick={() => navigate('/register')}
-                        >
-                        Registrarse
                         </button>
                     </form>
                 </div>

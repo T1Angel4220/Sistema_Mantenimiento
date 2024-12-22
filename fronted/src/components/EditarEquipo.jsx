@@ -61,7 +61,7 @@ const EditarEquipo = () => {
 
     return (
         <div className="main-editar-equipo-container">
-        <h2>Editar Equipo</h2>
+        <h2 >Editar Equipo</h2>
         <form className="main-editar-equipo-form" onSubmit={handleSubmit}>
             <div className="form-group">
                 <label htmlFor="Nombre_Producto">Nombre del Producto</label>
