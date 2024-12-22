@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -18,7 +18,8 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Build as BuildIcon, ArrowBack as ArrowBackIcon, Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate
-
+import axios from 'axios'; // Importa axios para hacer la solicitud HTTP
+const endpoint = 'http://localhost:8000/api/mantenimientos';
 // Crear un tema personalizado con más colores
 const theme = createTheme({
   palette: {
@@ -49,32 +50,6 @@ const theme = createTheme({
   },
 });
 
-// Datos de ejemplo
-const mockData = [
-  {
-    id: 1,
-    codigo_mantenimiento: 'MNT001',
-    tipo: 'Preventivo',
-    fecha_inicio: '2023-01-01',
-    fecha_fin: '2023-01-05',
-    proveedor: 'TechFix Inc.',
-    contacto_proveedor: 'John Doe',
-    costo: 500,
-    observaciones: 'Mantenimiento rutinario',
-  },
-  {
-    id: 2,
-    codigo_mantenimiento: 'MNT002',
-    tipo: 'Correctivo',
-    fecha_inicio: '2023-02-15',
-    fecha_fin: '2023-02-20',
-    proveedor: 'RepairPro',
-    contacto_proveedor: 'Jane Smith',
-    costo: 750,
-    observaciones: 'Reparación de emergencia',
-  },
-];
-
 const MaintenanceTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -89,11 +64,13 @@ const MaintenanceTable = () => {
     observaciones: '',
   });
 
+  const [data, setData] = useState([]); // Estado para almacenar los datos del mantenimiento
+
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
-  const filteredData = mockData.filter((item) => {
+  const filteredData = data.filter((item) => {
     return (
       Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
@@ -110,10 +87,21 @@ const MaintenanceTable = () => {
   };
   
   const handleNewMaintenance = () => {
-    navigate('/AniadirMantenimiento'); // Redirige a la página "Inicio"
+    navigate('/AniadirMantenimiento'); // Redirige a la página "Nuevo Mantenimiento"
   };
+
   const navigate = useNavigate(); // Hook para redirigir
 
+  useEffect(() => {
+    // Llamada al endpoint para obtener los datos de mantenimiento
+    axios.get(`${endpoint}`) // Reemplaza con tu URL del endpoint
+      .then((response) => {
+        setData(response.data); // Guarda los datos obtenidos en el estado 'data'
+      })
+      .catch((error) => {
+        console.error('Error al obtener los datos:', error);
+      });
+  }, []); // Se ejecuta una sola vez cuando el componente se monta
 
   return (
     <ThemeProvider theme={theme}>
@@ -126,24 +114,23 @@ const MaintenanceTable = () => {
         </Paper>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <Button
-  variant="contained"
-  color="primary"
-  startIcon={<ArrowBackIcon />}
-  onClick={handleReturn} // Llama a la función para redirigir
->
-  Regresar
-</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleReturn} // Llama a la función para redirigir
+          >
+            Regresar
+          </Button>
 
-<Button
-  variant="contained"
-  color="secondary"
-  startIcon={<AddIcon />}
-  onClick={handleNewMaintenance} // Llama a la función para redirigir
->
-  Ingresar nuevo mantenimiento
-</Button>
-
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<AddIcon />}
+            onClick={handleNewMaintenance} // Llama a la función para redirigir
+          >
+            Ingresar nuevo mantenimiento
+          </Button>
         </Box>
 
         <TextField
@@ -191,10 +178,10 @@ const MaintenanceTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredData.map((item, index) => (
-                <TableRow 
+              {filteredData.map((item) => (
+                <TableRow
                   key={item.id}
-                  sx={{ 
+                  sx={{
                     '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
                     '&:hover': { backgroundColor: 'action.selected' }
                   }}
@@ -202,9 +189,9 @@ const MaintenanceTable = () => {
                   <TableCell>{item.id}</TableCell>
                   <TableCell>{item.codigo_mantenimiento}</TableCell>
                   <TableCell>
-                    <Chip 
-                      label={item.tipo} 
-                      color={item.tipo === 'Preventivo' ? 'success' : 'warning'} 
+                    <Chip
+                      label={item.tipo}
+                      color={item.tipo === 'Preventivo' ? 'success' : 'warning'}
                       size="small"
                     />
                   </TableCell>
@@ -229,4 +216,3 @@ const MaintenanceTable = () => {
 };
 
 export default MaintenanceTable;
-

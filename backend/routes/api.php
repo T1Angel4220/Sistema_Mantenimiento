@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\EquipoController;
 use App\Http\Controllers\EquipoImportController;
 use App\Http\Controllers\ProcesoCompraController;
+use App\Http\Controllers\MantenimientoController;
 
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 
@@ -17,6 +18,13 @@ Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 
 
 
+Route::controller(MantenimientoController::class)->group(function () {
+    Route::get('/mantenimientos', 'index');
+    Route::post('/mantenimientos', 'store');
+    Route::get('/mantenimientos/{id}', 'show');
+    Route::put('/mantenimientos/{id}', 'update');
+    Route::delete('/mantenimientos/{id}', 'destroy');
+});
 
 Route::post('/equipos/import', [EquipoImportController::class, 'import']);
 
