@@ -10,6 +10,7 @@ export default function MaintenanceForm() {
     const [componentsChanged, setComponentsChanged] = useState("no");
     const [showProveedorButtons, setShowProveedorButtons] = useState(true); // Estado para el botón desplegable
     const [selectedComponents, setSelectedComponents] = useState([]); // Estado para componentes seleccionados
+    const [assets, setAssets] = useState([]); // Estado para los activos cargados desde la API
 
     // Agregar componente seleccionado a la lista
     const handleComponentAdd = (e) => {
@@ -28,7 +29,20 @@ export default function MaintenanceForm() {
   
     
   
-    const assets = ['ACT0001', 'ACT0002', 'ACT0003', 'ACT0004'];
+
+    // Realizar la solicitud HTTP para cargar los activos desde la API
+    useEffect(() => {
+        const fetchAssets = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/activos');
+                setAssets(response.data); // Suponiendo que los activos vienen en response.data
+            } catch (error) {
+                console.error("Error al cargar los activos:", error);
+            }
+        };
+
+        fetchAssets();
+    }, []); // El efect
     const activities = [
       'Formateo',
       'Limpieza',

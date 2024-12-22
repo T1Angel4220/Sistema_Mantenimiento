@@ -9,6 +9,33 @@ use App\Http\Controllers\Api\EquipoController;
 use App\Http\Controllers\EquipoImportController;
 use App\Http\Controllers\ProcesoCompraController;
 use App\Http\Controllers\MantenimientoController;
+use App\Http\Controllers\ActivoController;
+use App\Http\Controllers\ComponenteController;
+use App\Http\Controllers\ActividadController;
+
+Route::controller(ActividadController::class)->group(function () {
+    Route::get('/actividades', 'index');
+    Route::post('/actividades', 'store');
+    Route::get('/actividades/{id}', 'show');
+    Route::put('/actividades/{id}', 'update');
+    Route::delete('/actividades/{id}', 'destroy');
+});
+
+Route::controller(ComponenteController::class)->group(function () {
+    Route::get('/componentes', 'index');
+    Route::post('/componentes', 'store');
+    Route::get('/componentes/{id}', 'show');
+    Route::put('/componentes/{id}', 'update');
+    Route::delete('/componentes/{id}', 'destroy');
+});
+
+Route::controller(ActivoController::class)->group(function () {
+    Route::get('/activos', 'index'); // Mostrar todos los activos
+    Route::post('/activos', 'store'); // Crear un nuevo activo
+    Route::get('/activos/{id}', 'show'); // Mostrar un activo específico
+    Route::put('/activos/{id}', 'update'); // Actualizar un activo
+    Route::delete('/activos/{id}', 'destroy'); // Eliminar un activo
+});
 
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 

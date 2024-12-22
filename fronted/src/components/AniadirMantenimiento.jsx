@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Importa axios para hacer la solicitud HTTP
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -22,11 +23,45 @@ export default function AssetMaintenanceForm() {
   const [observations, setObservations] = useState(''); // Observaciones
   const [showProveedorButtons, setShowProveedorButtons] = useState(false); // Estado para mostrar botones de proveedores
   const navigate = useNavigate();
+  const [assets, setAssets] = useState([]); // Estado para los activos cargados desde la API
+  const [components, setComponents] = useState([]); // Estado para los activos cargados desde la API
+  const [activities, setActivities] = useState([]);
+  useEffect(() => {
+    const fetchAssets = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/actividades');
+            setActivities(response.data); // Suponiendo que los activos vienen en response.data
+        } catch (error) {
+            console.error("Error al cargar las actividades", error);
+        }
+    };
+  
+    fetchAssets();
+  }, []); 
+   useEffect(() => {
+    const fetchAssets = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/activos');
+            setAssets(response.data); // Suponiendo que los activos vienen en response.data
+        } catch (error) {
+            console.error("Error al cargar los activos:", error);
+        }
+    };
 
-  const activities = ['Formateo', 'Limpieza', 'Actualización de Software', 'Revisión de Hardware', 'Optimización de Sistema'];
-  const components = ['Disco', 'Ventilador', 'Tarjeta RAM']; // Lista de componentes
-  const assets = ['ACT0001', 'ACT0002', 'ACT0003', 'ACT0004']; // Lista de activos
+    fetchAssets();
+}, []); // El efect
+useEffect(() => {
+  const fetchAssets = async () => {
+      try {
+          const response = await axios.get('http://localhost:8000/api/componentes');
+          setComponents(response.data); // Suponiendo que los activos vienen en response.data
+      } catch (error) {
+          console.error("Error al cargar los componentes:", error);
+      }
+  };
 
+  fetchAssets();
+}, []); // El efect
   const handleAddActivity = (e) => {
     const selected = e.target.value;
     if (selected && !selectedActivities.includes(selected)) {
@@ -193,8 +228,8 @@ Externo
                 Seleccione un activo
               </option>
               {assets.map((asset) => (
-                <option key={asset} value={asset}>
-                  {asset}
+                <option key={asset.codigo_barras} value={asset.id}>
+                  {asset.codigo_barras}
                 </option>
               ))}
             </select>
@@ -238,8 +273,8 @@ Externo
                     Seleccione un componente
                   </option>
                   {components.map((component) => (
-                    <option key={component} value={component}>
-                      {component}
+                    <option key={component.id} value={component.nombre}>
+                      {component.nombre}
                     </option>
                   ))}
                 </select>
@@ -278,8 +313,8 @@ Externo
                 Seleccione una actividad
               </option>
               {activities.map((activity) => (
-                <option key={activity} value={activity}>
-                  {activity}
+                <option key={activity.id} value={activity.nombre}>
+                  {activity.nombre}
                 </option>
               ))}
             </select>
