@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import RegistrarMantenimiento from './RegistrarMantenimiento'; // Importar el componente
 import './MostrarMantenimientos.css';
 
 const endpoint = 'http://localhost:8000/api/mantenimientos';
 
 const MostrarMantenimientos = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [idToDelete, setIdToDelete] = useState(null);
   const [mantenimientos, setMantenimientos] = useState([]);
   const [filters, setFilters] = useState({
     fechaInicio: '',
@@ -15,8 +18,10 @@ const MostrarMantenimientos = () => {
     tipo: '',
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Número de elementos por página
-  const [showFilters, setShowFilters] = useState(false); // Estado para mostrar/ocultar filtros
+  const itemsPerPage = 5;
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false); // Estado para el modal de registro
 
   useEffect(() => {
     getAllMantenimientos();
@@ -31,29 +36,51 @@ const MostrarMantenimientos = () => {
     }
   };
 
+  const handleRegisterClick = () => {
+    setShowRegisterModal(true); // Mostrar el modal
+  };
+
+  const handleCloseRegisterModal = () => {
+    setShowRegisterModal(false); // Ocultar el modal
+  };
+
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
       [e.target.name]: e.target.value,
     });
-    setCurrentPage(1); // Resetear a la primera página al cambiar filtros
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id) => {
+    setIdToDelete(id);
+    setShowModal(true);
+  };
+
+  const confirmDelete = async () => {
     try {
-      await axios.delete(`${endpoint}/${id}`);
-      // Eliminar el mantenimiento de la lista local sin necesidad de recargar
+      await axios.delete(`${endpoint}/${idToDelete}`);
       setMantenimientos((prevMantenimientos) =>
-        prevMantenimientos.filter((mantenimiento) => mantenimiento.id !== id)
+        prevMantenimientos.filter((mantenimiento) => mantenimiento.id !== idToDelete)
       );
-      getAllMantenimientos(); // Recargar la lista de mantenimientos
+      setShowModal(false);
+
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 1500);
     } catch (error) {
       console.error('Error al eliminar mantenimiento:', error);
+      setShowModal(false);
     }
   };
 
+  const cancelDelete = () => {
+    setShowModal(false);
+  };
+
   const handleCheckboxChange = () => {
-    setShowFilters(!showFilters); // Alternar el estado de mostrar/ocultar filtros
+    setShowFilters(!showFilters);
   };
 
   const filteredMantenimientos = mantenimientos.filter((mantenimiento) => {
@@ -64,11 +91,10 @@ const MostrarMantenimientos = () => {
         (filters.descripcion === '' || (mantenimiento.descripcion && mantenimiento.descripcion.toLowerCase().includes(filters.descripcion.toLowerCase()))) &&
         (filters.responsable === '' || mantenimiento.responsable.toLowerCase().includes(filters.responsable.toLowerCase())) &&
         (filters.tipo === '' || mantenimiento.tipo.toLowerCase().includes(filters.tipo.toLowerCase()))
-      ) || !showFilters // Si no se muestran los filtros, no se aplican
+      ) || !showFilters
     );
   });
 
-  // Lógica para paginación
   const indexOfLastMantenimiento = currentPage * itemsPerPage;
   const indexOfFirstMantenimiento = indexOfLastMantenimiento - itemsPerPage;
   const currentMantenimientos = filteredMantenimientos.slice(indexOfFirstMantenimiento, indexOfLastMantenimiento);
@@ -88,9 +114,7 @@ const MostrarMantenimientos = () => {
       <h1 className="main-header-title">Listado de Mantenimientos</h1>
       <div className="filters-container">
         <div className="filters-label">
-          <label>
-            Aplicar filtros de busqueda
-          </label>
+          <label>Aplicar filtros de busqueda</label>
         </div>
         <div className="checkbox-container">
           <input
@@ -165,8 +189,8 @@ const MostrarMantenimientos = () => {
                   <td>{mantenimiento.responsable || 'Sin responsable'}</td>
                   <td>{mantenimiento.tipo.toUpperCase() || 'No especificado'}</td>
                   <td className="actions">
-                    <button className='btn btn-elminar' onClick={() => handleDelete(mantenimiento.id)}>Eliminar</button>
-                    <button className='btn btn-editarr'>Editar</button>
+                    <button className='btn btn-eliminar' onClick={() => handleDelete(mantenimiento.id)}>Eliminar</button>
+                    <button className='btn btn-editar'>Editar</button>
                   </td>
                 </tr>
               ))
@@ -196,10 +220,39 @@ const MostrarMantenimientos = () => {
           Siguiente
         </button>
       </div>
+
       <div className="button-group">
         <Link to="/Main" className="btn btn-return">Regresar</Link>
-        <Link to="/RegistroMentenimiento" className="btn btn-create">Registrar mantenimiento</Link>
+        <button className="btn btn-create" onClick={handleRegisterClick}>
+          Registrar mantenimiento
+        </button>
       </div>
+
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>¿Estás seguro de que deseas eliminar este mantenimiento?</h3>
+            <div className="modal-buttons">
+              <button className="btn btn-eliminar" onClick={confirmDelete}>Confirmar</button>
+              <button className="btn btn-editar" onClick={cancelDelete}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRegisterModal && (
+        <div className="modal ">
+          <div className="modal-content registro">
+            <RegistrarMantenimiento onClose={handleCloseRegisterModal} />
+          </div>
+        </div>
+      )}
+
+      {showSuccessMessage && (
+        <div className="success-message">
+          <p>El mantenimiento fue eliminado con éxito.</p>
+        </div>
+      )}
     </div>
   );
 };
