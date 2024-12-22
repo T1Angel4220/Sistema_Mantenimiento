@@ -14,6 +14,7 @@ class Mantenimiento extends Model
 
     // Especifica los campos que pueden ser asignados en masa (mass assignment)
     protected $fillable = [
+        
         'fecha_inicio',
         'fecha_fin',
         'responsable',

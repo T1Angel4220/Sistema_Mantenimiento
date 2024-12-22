@@ -27,7 +27,6 @@ Route::controller(EquipoController::class)->group(function(){
 
 // Rutas para manejar los mantenimientos
 Route::controller(MantenimientoController::class)->group(function(){
-    Route::get('/mantenimientos', 'index'); // Obtener todos los mantenimientos
-    Route::get('/mantenimientos/{id}', 'show'); // Obtener mantenimiento específico por ID
+    Route::get('/mantenimientos', 'index'); 
     Route::delete('/mantenimientos/{id}', 'destroy');
 });
