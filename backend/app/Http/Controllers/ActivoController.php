@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Activo;
+use Carbon\Carbon;
 
 class ActivoController extends Controller
 {
@@ -14,6 +15,36 @@ class ActivoController extends Controller
         return $activos;
     }
 
+    public function obtenerActivosDisponibles(Request $request)
+    {
+        
+        $validated = $request->validate([
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+        ]);
+    
+        $fechaInicio = $validated['fecha_inicio'];
+        $fechaFin = $validated['fecha_fin'];
+    
+        // Activos sin ningún mantenimiento
+        $activosSinMantenimiento = Activo::whereDoesntHave('mantenimientos')->pluck('id');
+    
+        // Activos con mantenimientos fuera del rango
+        $activosFueraRango = Activo::whereHas('mantenimientos', function ($query) use ($fechaInicio, $fechaFin) {
+            $query->where(function ($subQuery) use ($fechaInicio, $fechaFin) {
+                $subQuery->where('fecha_inicio', '>', $fechaFin)
+                         ->orWhere('fecha_fin', '<', $fechaInicio);
+            });
+        })->pluck('id');
+    
+        // Combinar los IDs de ambos conjuntos
+        $activosDisponiblesIds = $activosSinMantenimiento->merge($activosFueraRango)->unique();
+    
+        // Recuperar los registros completos de los activos disponibles
+        $activosDisponibles = Activo::whereIn('id', $activosDisponiblesIds)->get();
+    
+        return response()->json($activosDisponibles);
+    }
     /**
      * Show the form for creating a new resource.
      */

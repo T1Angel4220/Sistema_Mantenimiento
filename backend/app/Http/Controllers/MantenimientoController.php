@@ -23,22 +23,32 @@ class MantenimientoController extends Controller
    
     public function store(Request $request)
     {
-        $request->validate([
-            'codigo_mantenimiento' => 'required|unique:mantenimiento|max:20',
-            'tipo' => 'required|in:Interno,Externo',
-            'fecha_inicio' => 'nullable|date',
-            'fecha_fin' => 'required|date',
-            'proveedor' => 'nullable|in:ACME Maintenance,TechSupport S.A.,ServiMaq Ltda.,Otro',
-            'contacto_proveedor' => 'nullable|string|max:255',
-            'costo' => 'nullable|numeric',
-            'observaciones' => 'nullable|string',
+    
+        $validated = $request;
+
+        $mantenimiento = Mantenimiento::create([
+            'codigo_mantenimiento' => $validated['codigo_mantenimiento'],
+            'tipo' => $validated['tipo'],
+            'fecha_inicio' => $validated['fecha_inicio'],
+            'fecha_fin' => $validated['fecha_fin'],
+            'proveedor' => $validated['proveedor'],
+            'contacto_proveedor' => $validated['contacto_proveedor'],
+            'costo' => $validated['costo'],
+            'observaciones' => $validated['observaciones'],
         ]);
 
-        $mantenimiento = Mantenimiento::create($request->all());
-
-        return response()->json($mantenimiento, 201); // Devuelve el mantenimiento recién creado
+        // Asociar los activos al mantenimiento
+        $mantenimiento->activos()->sync($validated['activos']);
+        $mantenimiento->actividades()->sync($validated['actividades']);
+        // Retornar el mantenimiento con los activos asociados
+        return $mantenimiento;
+    
     }
-
+    public function obtenerIdMaximo()
+    {
+        $idMaximo = Mantenimiento::max('id');
+        return $idMaximo;
+    }
    
     public function show($id)
     {

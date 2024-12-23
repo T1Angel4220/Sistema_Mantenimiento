@@ -35,6 +35,8 @@ Route::controller(ActivoController::class)->group(function () {
     Route::get('/activos/{id}', 'show'); // Mostrar un activo específico
     Route::put('/activos/{id}', 'update'); // Actualizar un activo
     Route::delete('/activos/{id}', 'destroy'); // Eliminar un activo
+    Route::get('/activos-disponibles', 'obtenerActivosDisponibles');
+
 });
 
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
@@ -51,6 +53,8 @@ Route::controller(MantenimientoController::class)->group(function () {
     Route::get('/mantenimientos/{id}', 'show');
     Route::put('/mantenimientos/{id}', 'update');
     Route::delete('/mantenimientos/{id}', 'destroy');
+    Route::get('/mantenimientos_idMax', 'obtenerIdMaximo');
+    
 });
 
 Route::post('/equipos/import', [EquipoImportController::class, 'import']);
