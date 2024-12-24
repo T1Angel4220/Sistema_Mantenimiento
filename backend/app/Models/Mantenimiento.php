@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Activo;
+use App\Models\Equipo;
 use App\Models\Actividad;
 
 class Mantenimiento extends Model
@@ -24,9 +24,9 @@ class Mantenimiento extends Model
         'observaciones',
     ];
 
-    public function activos()
+    public function equipos()
     {
-        return $this->belongsToMany(Activo::class, 'activo_mantenimiento', 'mantenimiento_id', 'activo_id')
+        return $this->belongsToMany(Equipo::class, 'equipo_mantenimiento', 'mantenimiento_id', 'equipo_id')
             ->withTimestamps();
     }
     public function actividades()

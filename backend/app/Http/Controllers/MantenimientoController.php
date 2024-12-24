@@ -35,10 +35,12 @@ class MantenimientoController extends Controller
             'contacto_proveedor' => $validated['contacto_proveedor'],
             'costo' => $validated['costo'],
             'observaciones' => $validated['observaciones'],
+            'equipos'=> $validated['equipos'],
+            'activdades'=> $validated['actividades']
         ]);
 
         // Asociar los activos al mantenimiento
-        $mantenimiento->activos()->sync($validated['activos']);
+        $mantenimiento->equipos()->sync($validated['equipos']);
         $mantenimiento->actividades()->sync($validated['actividades']);
         // Retornar el mantenimiento con los activos asociados
         return $mantenimiento;

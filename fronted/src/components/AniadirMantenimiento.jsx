@@ -34,12 +34,13 @@ export default function AssetMaintenanceForm() {
         setIdMaximo(response.data+1);
       })
       .catch(() => {
-        setIdMaximo('Error al obtener el ID máximo');
+        setIdMaximo(1);
       });
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault() 
+    
     const actividades=selectedActivities.map( item=>item.id);
     const tipo=maintenanceType.charAt(0).toUpperCase() + maintenanceType.slice(1).toLowerCase();
     const mantenimientoData = {
@@ -60,7 +61,7 @@ export default function AssetMaintenanceForm() {
           'Content-Type': 'application/json',
         },
       });
-
+      navigate('/InicioMantenimientos')
       console.log('Mantenimiento creado:', response.data);
       // Redirigir o realizar cualquier acción adicional después de la respuesta
     } catch (error) {
@@ -83,7 +84,7 @@ export default function AssetMaintenanceForm() {
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/activos');
+        const response = await axios.get('http://localhost:8000/api/equipos');
         setAssets(response.data); // Suponiendo que los activos vienen en response.data
       } catch (error) {
         console.error("Error al cargar los activos:", error);
@@ -142,7 +143,7 @@ export default function AssetMaintenanceForm() {
   return (
     <div className="main-container flex flex-col items-center bg-gray-100 min-h-screen">
       <div className="max-w-4xl w-full p-6 space-y-8 bg-white shadow-md rounded-lg">
-        <h1 className="text-2xl font-bold mb-6">Mantenimiento de Activos</h1>
+        <h1 className="text-2xl font-bold mb-6">Mantenimiento de Equipos</h1>
 
         <div className="space-y-6">
           <div>
@@ -228,6 +229,7 @@ export default function AssetMaintenanceForm() {
                 }
                
               />
+              
             </div>
 
             <div className="space-y-2">
@@ -303,18 +305,18 @@ export default function AssetMaintenanceForm() {
           {/* Modificación de la sección de activos */}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <p className="font-medium">Seleccione los activos que tendrá el mantenimiento:</p>
+              <p className="font-medium">Seleccione los equipos que tendrá el mantenimiento:</p>
               <select
                 onChange={handleSelectAsset}
                 className="border-2 border-black p-2 w-full"
                 defaultValue=""
               >
                 <option value="" disabled>
-                  Seleccione un activo
+                  Seleccione un equipo por su codigo de barras
                 </option>
                 {assets.map((asset) => (
-                  <option key={asset.codigo_barras} value={asset.id}>
-                    {asset.codigo_barras}
+                  <option key={asset.Codigo_Barras} value={asset.id}>
+                    {asset.Codigo_Barras}
                   </option>
                 ))}
               </select>
@@ -430,6 +432,7 @@ export default function AssetMaintenanceForm() {
             <div className="space-y-2">
               <label htmlFor="observations">Observaciones:</label>
               <textarea
+                onChange={(e) => setObservations(e.target.value)}
                 id="observations"
                 className="w-full min-h-[150px] border-2 border-black p-2"
                 maxlength="150"
@@ -443,6 +446,7 @@ export default function AssetMaintenanceForm() {
             <button
               type="submit"
               className="px-8 py-2 bg-black text-white hover:bg-gray-700"
+              
             >
               Guardar
             </button>

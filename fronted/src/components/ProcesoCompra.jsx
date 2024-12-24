@@ -60,7 +60,7 @@ const ProcesoCompra = () => {
                 <button className="main-sidebar-btn" onClick={() => navigate('/Main')}>Inicio</button>
                 <button className="main-sidebar-btn" onClick={() => navigate('/ProcesoCompra')}>Proceso de Compra</button>
                 <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>Activos</button>
-                <button className="main-sidebar-btn" onClick={() => navigate('/mantenimientos')}>Mantenimientos</button>
+                <button className="main-sidebar-btn" onClick={() => navigate('/InicioMantenimientos')}>Mantenimientos</button>
                 <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>Reportes</button>
                 <button className="main-logout-btn" onClick={() => navigate('/Main')}>Regresar</button>
             </div>

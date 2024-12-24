@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activo_mantenimiento', function (Blueprint $table) {
+        Schema::create('equipo_mantenimiento', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('mantenimiento_id');
-            $table->unsignedBigInteger('activo_id');
+            $table->unsignedBigInteger('equipo_id');
             $table->timestamps();
 
             $table->foreign('mantenimiento_id')->references('id')->on('mantenimiento')->onDelete('cascade');
-            $table->foreign('activo_id')->references('id')->on('activos')->onDelete('cascade');
+            $table->foreign('equipo_id')->references('id')->on('equipos')->onDelete('cascade');
         });
     }
 

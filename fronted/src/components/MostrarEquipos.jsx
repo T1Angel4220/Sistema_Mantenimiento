@@ -185,7 +185,7 @@ const MostrarEquipos = () => {
 
                     <button
                         className="main-sidebar-btn"
-                        onClick={() => navigate('/mantenimientos')}
+                        onClick={() => navigate('/InicioMantenimientos')}
                     >
                         Mantenimientos
                     </button>

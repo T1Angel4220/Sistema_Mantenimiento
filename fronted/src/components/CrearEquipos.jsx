@@ -9,6 +9,7 @@ const endpoint = 'http://localhost:8000/api/equipo';
 const CrearEquipos = () => {
     const [formData, setFormData] = useState({
         Nombre_Producto: '',
+        Codigo_Barras: '', // Nuevo campo para el código de barras
         Tipo_Equipo: '',
         Fecha_Adquisicion: '',
         Ubicacion_Equipo: '',
@@ -98,6 +99,20 @@ const CrearEquipos = () => {
                             name="Nombre_Producto"
                             className="crear-equipos-input"
                             value={formData.Nombre_Producto}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    {/* Nuevo campo para el código de barras debajo del nombre del producto */}
+                    <div className="crear-equipos-form-group">
+                        <label htmlFor="Codigo_Barras" className="crear-equipos-label">Código de Barras</label>
+                        <input
+                            type="text"
+                            id="Codigo_Barras"
+                            name="Codigo_Barras"
+                            className="crear-equipos-input"
+                            value={formData.Codigo_Barras}
                             onChange={handleChange}
                             required
                         />

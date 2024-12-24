@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\ActivoMantenimiento;
+use App\Models\EquipoMantenimiento;
 
 
-class ActivoMantenimientoController extends Controller
+class EquipoMantenimientoController extends Controller
 {
     public function index()
     {

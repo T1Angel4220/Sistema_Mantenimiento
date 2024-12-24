@@ -29,16 +29,6 @@ Route::controller(ComponenteController::class)->group(function () {
     Route::delete('/componentes/{id}', 'destroy');
 });
 
-Route::controller(ActivoController::class)->group(function () {
-    Route::get('/activos', 'index'); // Mostrar todos los activos
-    Route::post('/activos', 'store'); // Crear un nuevo activo
-    Route::get('/activos/{id}', 'show'); // Mostrar un activo específico
-    Route::put('/activos/{id}', 'update'); // Actualizar un activo
-    Route::delete('/activos/{id}', 'destroy'); // Eliminar un activo
-    Route::get('/activos-disponibles', 'obtenerActivosDisponibles');
-
-});
-
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 
 
@@ -73,4 +63,5 @@ Route::controller(EquipoController::class)->group(function(){
     Route::get('/equipo/{id}','show');
     Route::put('/equipo/{id}','update');
     Route::delete('/equipo/{id}','destroy');
+    Route::get('/equipoDisponibles','obtenerEquiposDisponibles');
 });
