@@ -23,6 +23,13 @@ class Mantenimiento extends Model
         'costo',
         'observaciones',
     ];
+    
+    protected $casts = [
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
+        'costo' => 'decimal:2',
+    ];
+    
 
     public function equipos()
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Mantenimiento;
 class MantenimientoController extends Controller
@@ -23,29 +24,47 @@ class MantenimientoController extends Controller
    
     public function store(Request $request)
     {
+        try {
+            // Validar los datos del request
+            $validated = $request->validate([
+                'codigo_mantenimiento' => 'required|max:20|unique:mantenimiento,codigo_mantenimiento',
+                'tipo' => 'required|in:Interno,Externo',
+                'fecha_inicio' => 'nullable|date',
+                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+                'proveedor' => 'nullable|string|max:255|required_if:tipo,Externo',
+                'contacto_proveedor' => 'nullable|string|max:255|required_if:tipo,Externo',
+                'costo' => 'nullable|numeric|min:0|required_if:tipo,Externo',
+                'observaciones' => 'nullable|string',
+                'actividades' => 'nullable|array',
+            ]);
     
-        $validated = $request;
-
-        $mantenimiento = Mantenimiento::create([
-            'codigo_mantenimiento' => $validated['codigo_mantenimiento'],
-            'tipo' => $validated['tipo'],
-            'fecha_inicio' => $validated['fecha_inicio'],
-            'fecha_fin' => $validated['fecha_fin'],
-            'proveedor' => $validated['proveedor'],
-            'contacto_proveedor' => $validated['contacto_proveedor'],
-            'costo' => $validated['costo'],
-            'observaciones' => $validated['observaciones'],
-            'equipos'=> $validated['equipos'],
-            'activdades'=> $validated['actividades']
-        ]);
-
-        // Asociar los activos al mantenimiento
-        $mantenimiento->equipos()->sync($validated['equipos']);
-        $mantenimiento->actividades()->sync($validated['actividades']);
-        // Retornar el mantenimiento con los activos asociados
-        return $mantenimiento;
+            // Crear el mantenimiento
+            $mantenimiento = Mantenimiento::create([
+                'codigo_mantenimiento' => $validated['codigo_mantenimiento'],
+                'tipo' => $validated['tipo'],
+                'fecha_inicio' => $validated['fecha_inicio'],
+                'fecha_fin' => $validated['fecha_fin'],
+                'proveedor' => $validated['proveedor'] ?? null,
+                'contacto_proveedor' => $validated['contacto_proveedor'] ?? null,
+                'costo' => $validated['costo'] ?? null,
+                'observaciones' => $validated['observaciones'] ?? null,
+            ]);
     
+            // Sincronizar las actividades (si existen)
+            if (!empty($validated['actividades'])) {
+                $mantenimiento->actividades()->sync($validated['actividades']);
+            }
+    
+            return response()->json($mantenimiento, 201);
+        } catch (\Exception $e) {
+            \Log::error('Error al crear mantenimiento: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Error al crear mantenimiento.',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
     }
+    
     public function obtenerIdMaximo()
     {
         $idMaximo = Mantenimiento::max('id');
@@ -99,4 +118,30 @@ class MantenimientoController extends Controller
 
         return response()->json(null, 204); // Responde con estado 204 sin contenido
     }
+
+    public function getProveedores()
+    {
+        try {
+            // Ejecutar la consulta para obtener los valores del tipo ENUM "proveedor"
+            $result = DB::select("SELECT unnest(enum_range(NULL::\"proveedor\")) AS value");
+    
+            // Formatear el resultado como un arreglo simple de valores
+            $values = array_map(function ($row) {
+                return $row->value;
+            }, $result);
+    
+            return response()->json($values);
+        } catch (\Exception $e) {
+            // Registrar el error en los logs
+            \Log::error('Error al obtener proveedores: ' . $e->getMessage());
+    
+            return response()->json([
+                'error' => 'Error al obtener proveedores.',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
+    
+    
 }

@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('activo_mantenimiento');
+        Schema::dropIfExists('equipo_mantenimiento');
     }
 };

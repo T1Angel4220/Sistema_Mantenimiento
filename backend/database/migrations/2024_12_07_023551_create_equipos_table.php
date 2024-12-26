@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('equipos');
+        DB::statement('DROP TABLE IF EXISTS equipos CASCADE');
     }
 };

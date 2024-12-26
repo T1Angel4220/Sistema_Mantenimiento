@@ -12,6 +12,8 @@ use App\Http\Controllers\MantenimientoController;
 use App\Http\Controllers\ActivoController;
 use App\Http\Controllers\ComponenteController;
 use App\Http\Controllers\ActividadController;
+use App\Http\Controllers\EquipoComponenteController;
+
 
 Route::controller(ActividadController::class)->group(function () {
     Route::get('/actividades', 'index');
@@ -20,6 +22,8 @@ Route::controller(ActividadController::class)->group(function () {
     Route::put('/actividades/{id}', 'update');
     Route::delete('/actividades/{id}', 'destroy');
 });
+
+Route::get('/proveedores', [MantenimientoController::class, 'getProveedores']);
 
 Route::controller(ComponenteController::class)->group(function () {
     Route::get('/componentes', 'index');
@@ -64,4 +68,11 @@ Route::controller(EquipoController::class)->group(function(){
     Route::put('/equipo/{id}','update');
     Route::delete('/equipo/{id}','destroy');
     Route::get('/equipoDisponibles','obtenerEquiposDisponibles');
+});
+
+Route::prefix('equipo-componentes')->group(function () {
+    Route::get('/{equipoMantenimientoId}', [EquipoComponenteController::class, 'index']);
+    Route::post('/', [EquipoComponenteController::class, 'store']);
+    Route::put('/{id}', [EquipoComponenteController::class, 'update']);
+    Route::delete('/{id}', [EquipoComponenteController::class, 'destroy']);
 });
