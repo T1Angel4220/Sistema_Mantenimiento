@@ -13,7 +13,6 @@ class ComponenteController extends Controller
         return $componentes; // Return the data as JSON
     }
 
-    // Show the form for creating a new resource
     public function create()
     {
         // Typically, you would return a view to show a form, but for now, we don't need it in the API context

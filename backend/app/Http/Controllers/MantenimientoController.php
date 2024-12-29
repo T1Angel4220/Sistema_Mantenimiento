@@ -36,6 +36,7 @@ class MantenimientoController extends Controller
                 'costo' => 'nullable|numeric|min:0|required_if:tipo,Externo',
                 'observaciones' => 'nullable|string',
                 'actividades' => 'nullable|array',
+                'equipos' => 'nullable|array',
             ]);
     
             // Crear el mantenimiento
@@ -49,7 +50,10 @@ class MantenimientoController extends Controller
                 'costo' => $validated['costo'] ?? null,
                 'observaciones' => $validated['observaciones'] ?? null,
             ]);
-    
+
+            if (!empty($validated['equipos'])) {
+                $mantenimiento->equipos()->sync($validated['equipos']);
+            }
             // Sincronizar las actividades (si existen)
             if (!empty($validated['actividades'])) {
                 $mantenimiento->actividades()->sync($validated['actividades']);
@@ -58,6 +62,7 @@ class MantenimientoController extends Controller
             return response()->json($mantenimiento, 201);
         } catch (\Exception $e) {
             \Log::error('Error al crear mantenimiento: ' . $e->getMessage());
+            
             return response()->json([
                 'error' => 'Error al crear mantenimiento.',
                 'details' => $e->getMessage(),

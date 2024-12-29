@@ -13,7 +13,9 @@ const ProcesoCompra = () => {
         provider: ''
     });
     const [purchases, setPurchases] = useState([]);
-
+    const handleSubmit = (e) => {
+        e.preventDefault(); // Previene que se recargue la página al enviar el formulario
+    };
     // Obtener datos de la base de datos al cargar el componente
     useEffect(() => {
         axios.get('http://localhost:8000/api/proceso-compra') // Ruta de la API Laravel
@@ -40,15 +42,14 @@ const ProcesoCompra = () => {
                     alert(`Error: ${error.response?.data?.message || 'Ocurrió un error inesperado.'}`);
                 });
         } else {
-            alert('Por favor, complete todos los campos antes de guardar.');
         }
     };
-    
+
 
     return (
-        <div className="proceso-compra-container">
+        <div className="flex h-screen">
             {/* Sidebar */}
-            <div className="main-sidebar">
+            <div className="main-sidebar w-[250px] h-screen">
                 <div className="main-sidebar-header">
                     <h2 className="main-sidebar-title">SK TELECOM</h2>
                     <img
@@ -66,58 +67,135 @@ const ProcesoCompra = () => {
             </div>
 
             {/* Contenido Principal */}
-            <div className="proceso-compra-content">
-                <div className="proceso-compra-form-container">
-                    <h2 className="proceso-compra-title">Proceso de Compra</h2>
-                    <form className="proceso-compra-form">
-                        <div className="proceso-compra-form-group">
-                            <label htmlFor="name">Nombre</label>
-                            <input type="text" id="name" name="name" value={form.name} onChange={handleChange} placeholder="Ingrese el nombre del proceso de compra" required />
+            <div className="flex-1 p-6 bg-gray-200 min-h-screen">
+                <div className="w-full max-w-[1000px] mx-auto bg-white shadow-md rounded-lg p-8">
+                    <h2 className="text-4xl font-bold text-center text-green-600">Proceso de Compra</h2>
+                    <form className="proceso-compra-form space-y-4" onSubmit={handleSubmit}>
+                        <div className="">
+                            <label htmlFor="name" className="block text-gray-800 font-medium text-xl">Nombre</label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={form.name}
+                                onChange={handleChange}
+                                placeholder="Ingrese el nombre del proceso de compra"
+                                required
+                                maxLength="50"
+                                className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:ring-green-500 focus:border-green-500 text-lg py-3"
+                            />
                         </div>
-                        <div className="proceso-compra-form-group">
-                            <label htmlFor="description">Descripción</label>
-                            <textarea id="description" name="description" value={form.description} onChange={handleChange} placeholder="Describa el proceso de compra" required />
+                        <div className="">
+                            <label htmlFor="description" className="block text-gray-800 font-medium text-xl">Descripción</label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                value={form.description}
+                                onChange={handleChange}
+                                placeholder="Describa el proceso de compra"
+                                required
+                                maxLength="200"
+                                className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:ring-green-500 focus:border-green-500 text-lg py-3"
+                            ></textarea>
                         </div>
-                        <div className="proceso-compra-form-group">
-                            <label htmlFor="date">Fecha</label>
-                            <input type="date" id="date" name="date" value={form.date} onChange={handleChange} required />
+                        <div className="">
+                            <label htmlFor="date" className="block text-gray-800 font-medium text-xl">Fecha</label>
+                            <input
+                                min={new Date().toISOString().split('T')[0]}
+                                type="date"
+                                id="date"
+                                name="date"
+                                value={form.date}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:ring-green-500 focus:border-green-500 text-lg py-3"
+                            />
                         </div>
-                        <div className="proceso-compra-form-group">
-                            <label htmlFor="provider">Proveedor</label>
-                            <input type="text" id="provider" name="provider" value={form.provider} onChange={handleChange} placeholder="Ingrese el nombre del proveedor" required />
+                        <div className="">
+                            <label htmlFor="provider" className="block text-gray-800 font-medium text-xl">Proveedor</label>
+                            <div className="flex flex-col">
+                                <select
+                                    id="provider"
+                                    name="provider"
+                                    value={form.provider}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:ring-green-500 focus:border-green-500 text-lg"
+                                >
+                                    <option value="">Seleccione un proveedor</option>
+                                    <option value="Amazon">Amazon</option>
+                                    <option value="eBay">eBay</option>
+                                    <option value="Alibaba">Alibaba</option>
+                                    <option value="MercadoLibre">MercadoLibre</option>
+                                    <option value="Shopify">Shopify</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+
+                                {/* Campo para escribir otro proveedor si se selecciona "Otro" */}
+                                {form.provider === 'Otro' && (
+                                    <input
+                                        type="text"
+                                        id="providerOther"
+                                        name="providerOther"
+                                        value={form.providerOther || ''}
+                                        onChange={handleChange}
+                                        placeholder="Escriba el nombre del proveedor"
+                                        className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:ring-green-500 focus:border-green-500 text-lg py-3"
+                                        />
+                                )}
+                            </div>
                         </div>
-                        <div className="proceso-compra-button-group">
-                            <button type="button" className="proceso-compra-save" onClick={handleSave}>Guardar</button>
-                            <button type="reset" className="proceso-compra-delete" onClick={() => setForm({ name: '', description: '', date: '', provider: '' })}>Borrar</button>
+
+                        <div className=" flex justify-center space-x-4  ml-90">
+                            <button
+                                type="submit"
+                                className="proceso-compra-save bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none"
+                                onClick={handleSave}
+                            >
+                                Guardar
+                            </button>
+                            <button
+                                type="reset"
+                                className=" bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none"
+                                onClick={() => setForm({ name: '', description: '', date: '', provider: '' })}
+                            >
+                                Limpiar Campos
+                            </button>
                         </div>
                     </form>
                 </div>
 
                 {/* Tabla de registros */}
-                <table className="proceso-compra-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Fecha</th>
-                            <th>Proveedor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {purchases.map((purchase) => (
-                            <tr key={purchase.id}>
-                                <td>{purchase.id}</td>
-                                <td>{purchase.nombre}</td>
-                                <td>{purchase.descripcion}</td>
-                                <td>{purchase.fecha}</td>
-                                <td>{purchase.proveedor}</td>
+                <div className="mt-8 overflow-x-auto">
+                    <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg overflow-hidden">
+                        <thead className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
+                            <tr>
+                                <th className="px-6 py-3 text-xl font-semibold">ID</th>
+                                <th className="px-6 py-3 text-xl font-semibold">Nombre</th>
+                                <th className="px-6 py-3 text-xl font-semibold">Descripción</th>
+                                <th className="px-6 py-3 text-xl font-semibold">Fecha</th>
+                                <th className="px-6 py-3 text-xl font-semibold">Proveedor</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {purchases.map((purchase, index) => (
+                                <tr
+                                    key={purchase.id}
+                                    className={`hover:bg-gray-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"}`}
+                                >
+                                    <td className="px-6 py-4 border-t text-lg">{purchase.id}</td>
+                                    <td className="px-6 py-4 border-t text-lg">{purchase.nombre}</td>
+                                    <td className="px-6 py-4 border-t text-lg">{purchase.descripcion}</td>
+                                    <td className="px-6 py-4 border-t text-lg">{purchase.fecha}</td>
+                                    <td className="px-6 py-4 border-t text-lg">{purchase.proveedor}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
+
     );
 };
 

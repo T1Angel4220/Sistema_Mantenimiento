@@ -32,6 +32,10 @@ Route::controller(ComponenteController::class)->group(function () {
     Route::put('/componentes/{id}', 'update');
     Route::delete('/componentes/{id}', 'destroy');
 });
+Route::controller(EquipoComponenteController::class)->group(function () {
+    Route::get('/componentesEquipos', 'index');
+    Route::post('/componentesEquipos', 'store');
+});
 
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 
@@ -67,7 +71,8 @@ Route::controller(EquipoController::class)->group(function(){
     Route::get('/equipo/{id}','show');
     Route::put('/equipo/{id}','update');
     Route::delete('/equipo/{id}','destroy');
-    Route::get('/equipoDisponibles','obtenerEquiposDisponibles');
+    Route::post('/equipoDisponibles','obtenerEquiposDisponibles');
+    Route::get('/equiposComponentes/{id}','obtenerComponentesDeEquipo');
 });
 
 Route::prefix('equipo-componentes')->group(function () {

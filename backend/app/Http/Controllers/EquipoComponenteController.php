@@ -10,12 +10,19 @@ class EquipoComponenteController extends Controller
     /**
      * Obtener los componentes asignados a un equipo en un mantenimiento.
      */
-    public function index($equipoMantenimientoId)
-    {
-        $componentes = EquipoComponente::with('componente')
-            ->where('equipo_mantenimiento_id', $equipoMantenimientoId)
-            ->get();
+    public function obtenerComponentesDeEquipo($equipoId)
+{
+    $equipo = Equipo::with('componentes')->find($equipoId);
 
+    if (!$equipo) {
+        return response()->json(['error' => 'Equipo no encontrado'], 404);
+    }
+
+}
+    public function index()
+    {
+        $componentes = EquipoComponente::all();
+            
         return response()->json($componentes);
     }
 
@@ -23,17 +30,22 @@ class EquipoComponenteController extends Controller
      * Agregar componentes a un equipo en un mantenimiento.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'equipo_mantenimiento_id' => 'required|exists:equipo_mantenimiento,id',
-            'componente_id' => 'required|exists:componentes,id',
-            'cantidad' => 'required|integer|min:1',
-        ]);
+{
+    $validated = $request->validate([
+        '*.equipo_mantenimiento_id' => 'required|exists:equipo_mantenimiento,id',
+        '*.componente_id' => 'required|exists:componentes,id',
+        '*.cantidad' => 'nullable|integer|min:1', // cantidad opcional
+    ]);
 
-        $equipoComponente = EquipoComponente::create($validated);
+    $equiposComponentes = [];
 
-        return response()->json($equipoComponente, 201);
+    foreach ($validated as $item) {
+        $equiposComponentes[] = EquipoComponente::create($item);
     }
+
+    return response()->json($equiposComponentes, 201);
+}
+
 
     /**
      * Actualizar un componente asignado a un equipo en un mantenimiento.
