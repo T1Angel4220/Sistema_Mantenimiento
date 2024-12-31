@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Mantenimiento;
+use App\Models\EquipoMantenimiento;
 class MantenimientoController extends Controller
 {
    
@@ -20,6 +21,39 @@ class MantenimientoController extends Controller
         // Si se requiere un formulario de creación, puedes devolver una vista
         // return view('mantenimiento.create');
     }
+    public function show($id)
+    {
+        $mantenimiento = Mantenimiento::with(['actividades', 'equipos'])->findOrFail($id);
+        $componentes = $this->getComponentes($id);
+        
+        return response()->json([
+            'mantenimiento' => $mantenimiento,
+            'componentes' => $componentes
+        ]);
+    }
+
+
+    public function getActividades($id)
+    {
+        $mantenimiento = Mantenimiento::findOrFail($id);
+        return response()->json($mantenimiento->actividades);
+    }
+
+    public function getComponentes($id)
+    {
+        return DB::table('equipo_componentes')
+            ->join('componentes', 'equipo_componentes.componente_id', '=', 'componentes.id')
+            ->join('equipo_mantenimiento', 'equipo_componentes.equipo_mantenimiento_id', '=', 'equipo_mantenimiento.id')
+            ->where('equipo_mantenimiento.mantenimiento_id', $id)
+            ->select('componentes.*', 'equipo_componentes.cantidad')
+            ->get();
+    }
+    public function getEquipos($id)
+    {
+        $mantenimiento = Mantenimiento::findOrFail($id);
+        return response()->json($mantenimiento->equipos);
+    }
+
 
    
     public function store(Request $request)
@@ -76,11 +110,7 @@ class MantenimientoController extends Controller
         return $idMaximo;
     }
    
-    public function show($id)
-    {
-        $mantenimiento = Mantenimiento::findOrFail($id);
-        return response()->json($mantenimiento);
-    }
+
 
     /**
      * Mostrar el formulario para editar un mantenimiento específico.
@@ -147,6 +177,25 @@ class MantenimientoController extends Controller
         }
     }
     
-    
+    public function storeComponentes(Request $request, $mantenimientoId)
+    {
+        $validated = $request->validate([
+            'componentes' => 'required|array',
+            'componentes.*.id' => 'required|exists:componentes,id',
+            'componentes.*.cantidad' => 'required|integer|min:1',
+        ]);
+
+        $equipoMantenimiento = EquipoMantenimiento::where('mantenimiento_id', $mantenimientoId)->first();
+
+        if (!$equipoMantenimiento) {
+            return response()->json(['error' => 'No se encontró el equipo de mantenimiento'], 404);
+        }
+
+        foreach ($validated['componentes'] as $componente) {
+            $equipoMantenimiento->componentes()->attach($componente['id'], ['cantidad' => $componente['cantidad']]);
+        }
+
+        return response()->json(['message' => 'Componentes agregados correctamente'], 200);
+    }
     
 }

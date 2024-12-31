@@ -10,10 +10,10 @@ class EquipoMantenimiento extends Model
     use HasFactory;
 
     protected $table = 'equipo_mantenimiento';
-
+    
     protected $fillable = [
         'mantenimiento_id',
-        'equipo_id',
+        'equipo_id'
     ];
 
     public function mantenimiento()
@@ -24,5 +24,11 @@ class EquipoMantenimiento extends Model
     public function equipo()
     {
         return $this->belongsTo(Equipo::class);
+    }
+
+    public function componentes()
+    {
+        return $this->belongsToMany(Componente::class, 'equipo_componentes')
+            ->withPivot('cantidad');
     }
 }

@@ -13,7 +13,40 @@ use App\Http\Controllers\ActivoController;
 use App\Http\Controllers\ComponenteController;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\EquipoComponenteController;
+use Illuminate\Support\Facades\DB;
 
+Route::get('/mantenimientos/{id}', [MantenimientoController::class, 'show']);
+Route::get('/mantenimiento-actividad/{id}', [MantenimientoController::class, 'getActividades']);
+Route::get('/equipo-componentes/{id}', [MantenimientoController::class, 'getComponentes']);
+Route::get('/mantenimiento-equipos/{id}', [MantenimientoController::class, 'getEquipos']);
+
+
+// Get activities for a maintenance
+Route::get('/mantenimiento-actividad/{id}', function ($id) {
+    return DB::table('mantenimiento_actividad')
+        ->join('actividades', 'mantenimiento_actividad.actividad_id', '=', 'actividades.id')
+        ->where('mantenimiento_actividad.mantenimiento_id', $id)
+        ->select('actividades.*')
+        ->get();
+});
+
+// Get components for a maintenance
+Route::get('/equipo-componentes/{id}', function ($id) {
+    return DB::table('equipo_componentes')
+        ->join('componentes', 'equipo_componentes.componente_id', '=', 'componentes.id')
+        ->join('equipo_mantenimiento', 'equipo_componentes.equipo_mantenimiento_id', '=', 'equipo_mantenimiento.id')
+        ->where('equipo_mantenimiento.mantenimiento_id', $id)
+        ->select('componentes.*', 'equipo_componentes.cantidad')
+        ->get();
+});
+
+Route::get('/mantenimiento-equipos/{id}', function ($id) {
+    return DB::table('mantenimiento_equipos')
+        ->join('equipos', 'mantenimiento_equipos.equipo_id', '=', 'equipos.id')
+        ->where('mantenimiento_equipos.mantenimiento_id', $id)
+        ->select('equipos.*')
+        ->get();
+});
 
 Route::controller(ActividadController::class)->group(function () {
     Route::get('/actividades', 'index');
@@ -34,8 +67,7 @@ Route::controller(ComponenteController::class)->group(function () {
 });
 Route::controller(EquipoComponenteController::class)->group(function () {
     Route::get('/componentesEquipos', 'index');
-    Route::post('/componentesEquipos', 'store');
-});
+    Route::post('/componentesEquipos', [EquipoComponenteController::class, 'store']);});
 
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 
@@ -81,3 +113,6 @@ Route::prefix('equipo-componentes')->group(function () {
     Route::put('/{id}', [EquipoComponenteController::class, 'update']);
     Route::delete('/{id}', [EquipoComponenteController::class, 'destroy']);
 });
+Route::post('/componentesEquipos', [EquipoComponenteController::class, 'store']);
+
+

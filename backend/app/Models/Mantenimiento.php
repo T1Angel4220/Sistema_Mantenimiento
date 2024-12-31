@@ -31,14 +31,14 @@ class Mantenimiento extends Model
     ];
     
 
-    public function equipos()
-    {
-        return $this->belongsToMany(Equipo::class, 'equipo_mantenimiento', 'mantenimiento_id', 'equipo_id')
-            ->withTimestamps();
-    }
     public function actividades()
     {
-        return $this->belongsToMany(Actividad::class, 'mantenimiento_actividad', 'mantenimiento_id', 'actividad_id')
-            ->withTimestamps();
+        return $this->belongsToMany(Actividad::class, 'mantenimiento_actividad');
     }
+
+    public function equipos()
+    {
+        return $this->belongsToMany(Equipo::class, 'equipo_mantenimiento');
+    }
+    
 }
