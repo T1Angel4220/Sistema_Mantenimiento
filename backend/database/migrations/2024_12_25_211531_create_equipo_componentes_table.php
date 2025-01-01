@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id(); // ID autoincremental
             $table->unsignedBigInteger('equipo_mantenimiento_id'); // Relación con equipo_mantenimiento
             $table->unsignedBigInteger('componente_id'); // Relación con componentes
-            $table->unsignedBigInteger('mantenimiento_id');
+            $table->unsignedBigInteger('mantenimiento_id');//es un ejemplo
             $table->integer('cantidad')->default(1); // Cantidad de componentes
             $table->timestamps(); // Fechas de creación y actualización
 
