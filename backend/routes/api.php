@@ -67,7 +67,8 @@ Route::controller(ComponenteController::class)->group(function () {
 });
 Route::controller(EquipoComponenteController::class)->group(function () {
     Route::get('/componentesEquipos', 'index');
-    Route::post('/componentesEquipos', [EquipoComponenteController::class, 'store']);});
+    Route::post('/componentesEquipos',  'store');
+});
 
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 

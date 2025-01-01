@@ -23,14 +23,23 @@ class MantenimientoController extends Controller
     }
     public function show($id)
     {
+        // Obtener el mantenimiento con sus actividades y equipos
         $mantenimiento = Mantenimiento::with(['actividades', 'equipos'])->findOrFail($id);
-        $componentes = $this->getComponentes($id);
         
+        // Obtener los componentes relacionados con la actividad específica y la cantidad
+        $componentes = \DB::table('equipo_componentes')
+            ->join('componentes', 'equipo_componentes.componente_id', '=', 'componentes.id')
+            ->where('equipo_componentes.mantenimiento_id', $id)
+            ->select('componentes.*', 'equipo_componentes.cantidad')
+            ->get();
+        
+        // Devolver la respuesta en formato JSON
         return response()->json([
             'mantenimiento' => $mantenimiento,
             'componentes' => $componentes
         ]);
     }
+    
 
 
     public function getActividades($id)

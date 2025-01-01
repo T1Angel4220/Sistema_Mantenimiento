@@ -31,20 +31,29 @@ class EquipoComponenteController extends Controller
      */
     public function store(Request $request)
 {
-    $validated = $request->validate([
-        '*.equipo_mantenimiento_id' => 'required|exists:equipo_mantenimiento,id',
-        '*.componente_id' => 'required|exists:componentes,id',
-        '*.cantidad' => 'nullable|integer|min:1', // cantidad opcional
-    ]);
+    // Obtener los datos directamente desde la solicitud
+    $data = $request->all(); // Esto te dará los datos como un array
 
-    $equiposComponentes = [];
+    $equiposComponentes = []; // Para almacenar los componentes creados
 
-    foreach ($validated as $item) {
-        $equiposComponentes[] = EquipoComponente::create($item);
+    // Guardar cada item del array en la tabla
+    foreach ($data as $item) {
+        // Crear una nueva instancia del modelo
+        $equipoComponente = new EquipoComponente();
+
+        $equipoComponente->equipo_mantenimiento_id = $item['equipo_mantenimiento_id']; // Asignar los valores a cada campo
+        $equipoComponente->componente_id = $item['componente_id'];
+        $equipoComponente->cantidad = 1; // La cantidad puede ser nula, si no existe se asigna null
+        $equipoComponente->mantenimiento_id=$item['mantenimiento_id'];
+        $equipoComponente->save(); // Guardar el registro
+
+        $equiposComponentes[] = $equipoComponente; // Agregar el componente guardado al array
     }
 
+    // Retornar la respuesta con los componentes creados
     return response()->json($equiposComponentes, 201);
 }
+
 
 
     /**

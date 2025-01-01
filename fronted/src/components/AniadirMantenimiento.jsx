@@ -173,7 +173,7 @@ export default function AssetMaintenanceForm() {
         equipment.id
       )),
     };
-
+    console.log(selectedComponents)
     try {
       const response = await axios.post(
         "http://localhost:8000/api/componentesEquipos",
@@ -329,7 +329,8 @@ export default function AssetMaintenanceForm() {
 
   const handleAddComponent = (e, idEquipo) => {
     const componente = components.find((item) => item.nombre === e.target.value);
-    const selected = { equipo_mantenimiento_id: idEquipo, componente_id: componente.id };
+    const selected = { equipo_mantenimiento_id: idEquipo, componente_id: componente.id, mantenimiento_id: parseInt(idMaximo)}
+   
     if (selected && !selectedComponents.includes(selected)) {
       setSelectedComponents([...selectedComponents, selected]);
     }

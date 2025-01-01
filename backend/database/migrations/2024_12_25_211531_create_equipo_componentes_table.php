@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id(); // ID autoincremental
             $table->unsignedBigInteger('equipo_mantenimiento_id'); // Relación con equipo_mantenimiento
             $table->unsignedBigInteger('componente_id'); // Relación con componentes
+            $table->unsignedBigInteger('mantenimiento_id');
             $table->integer('cantidad')->default(1); // Cantidad de componentes
             $table->timestamps(); // Fechas de creación y actualización
 
-            // Claves foráneas
-            $table->foreign('equipo_mantenimiento_id')->references('id')->on('equipo_mantenimiento')->onDelete('cascade');
-            $table->foreign('componente_id')->references('id')->on('componentes')->onDelete('cascade');
         });
     }
 
