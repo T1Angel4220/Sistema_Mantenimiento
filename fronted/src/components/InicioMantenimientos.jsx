@@ -41,6 +41,7 @@ import {
   Engineering as EngineeringIcon,
   ListAlt as ListAltIcon,
   Computer as ComputerIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -120,13 +121,41 @@ const MaintenanceTable = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [proveedores, setProveedores] = useState([]);
+  const [isLoadingProveedores, setIsLoadingProveedores] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [availableComponents, setAvailableComponents] = useState([]);
+  const [selectedComponent, setSelectedComponent] = useState('');
+  const [componentQuantity, setComponentQuantity] = useState(1);
+  const [componentChanges, setComponentChanges] = useState({ added: [], removed: [] }); // Added state for component changes
 
   const navigate = useNavigate();
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
+  const fetchProveedores = async () => {
+    setIsLoadingProveedores(true);
+    try {
+      const response = await api.get('/proveedores');
+      console.log('Proveedores response:', response.data);
+      if (response.status === 200) {
+        // Ensure we're setting the array of provider names directly
+        const proveedoresArray = Array.isArray(response.data) ? response.data : [];
+        setProveedores(proveedoresArray);
+      } else {
+        console.error('Error: El formato de los datos no es válido.', response.data);
+        setProveedores([]);
+      }
+    } catch (error) {
+      console.error('Error al cargar proveedores:', error.message);
+      setProveedores([]);
+    } finally {
+      setIsLoadingProveedores(false);
+    }
+  };
+  
+
 
   const filteredData = data.filter((item) => {
     return (
@@ -155,10 +184,16 @@ const MaintenanceTable = () => {
       const response = await api.get(`/mantenimientos/${maintenance.id}`);
       console.log('Maintenance data:', response.data);
 
-      setSelectedMaintenance({
+      const maintenanceData = {
         ...response.data.mantenimiento,
         componentes: response.data.componentes
-      });
+      };
+
+      setSelectedMaintenance(maintenanceData);
+
+      if (maintenanceData.tipo === 'Externo') {
+        await fetchProveedores();
+      }
 
       setOpenDialog(true);
     } catch (error) {
@@ -169,10 +204,8 @@ const MaintenanceTable = () => {
         errorMessage = `Error ${error.response.status}: ${error.response.data.message || 'Error del servidor'}`;
       }
       setSelectedMaintenance({
-        ...maintenance,
-        error: errorMessage
+        error: errorMessage,
       });
-      setOpenDialog(true);
     } finally {
       setIsLoading(false);
     }
@@ -182,6 +215,7 @@ const MaintenanceTable = () => {
     setOpenDialog(false);
     setIsEditing(false);
     setTabValue(0);
+    setComponentChanges({ added: [], removed: [] });
   };
 
   const handleEdit = () => {
@@ -190,19 +224,126 @@ const MaintenanceTable = () => {
 
   const handleSave = async () => {
     try {
-      await api.put(`/mantenimientos/${selectedMaintenance.id}`, selectedMaintenance);
-      setIsEditing(false);
+      // 1. Actualizar la información del mantenimiento
+      await api.put(`/mantenimientos/${selectedMaintenance.id}`, {
+        ...selectedMaintenance,
+        componentes: undefined, // Excluye los componentes al actualizar el mantenimiento general
+      });
+  
+      // 2. Procesar los componentes añadidos
+      if (componentChanges.added.length > 0) {
+        await Promise.all(
+          componentChanges.added.map((component) =>
+            api.post(`/mantenimientos/${selectedMaintenance.id}/componentes`, {
+              componentes: [
+                {
+                  id: component.id,
+                  cantidad: component.cantidad,
+                },
+              ],
+            })
+          )
+        );
+      }
+  
+      // 3. Procesar los componentes eliminados
+      if (componentChanges.removed.length > 0) {
+        await Promise.all(
+          componentChanges.removed.map((componentId) =>
+            api.delete(`/mantenimientos/${selectedMaintenance.id}/componentes/${componentId}`)
+        )
+        );
+      }
+  
+      // 4. Recargar los datos actualizados
       const response = await api.get('/mantenimientos');
       setData(response.data);
+  
+      // Resetear estado de cambios
+      setComponentChanges({ added: [], removed: [] });
+      setIsEditing(false);
+      setOpenDialog(false);
     } catch (error) {
       console.error('Error al guardar los cambios:', error);
     }
   };
-
+  
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setSelectedMaintenance(prev => ({ ...prev, [name]: value }));
+    setSelectedMaintenance((prev) => {
+      const updatedState = { ...prev, [name]: value };
+  
+      if (name === 'tipo') {
+        console.log(`Tipo seleccionado: ${value}`); 
+        if (value === 'Externo') {
+          fetchProveedores(); 
+        } else if (value === 'Interno') {
+          updatedState.proveedor = '';
+          updatedState.contacto_proveedor = '';
+          updatedState.costo = '';
+          setProveedores([]); 
+        }
+      }
+      return updatedState;
+    });
   };
+  
+  const fetchAvailableComponents = async () => {
+    try {
+      const response = await api.get('/componentes');
+      setAvailableComponents(response.data);
+    } catch (error) {
+      console.error('Error al cargar componentes:', error);
+    }
+  };
+
+  const handleAddComponent = () => {
+    if (!selectedComponent) return;
+  
+    const componentToAdd = availableComponents.find(c => c.id === parseInt(selectedComponent));
+    if (!componentToAdd) return;
+  
+    // Actualiza el estado local del mantenimiento
+    setSelectedMaintenance((prev) => ({
+      ...prev,
+      componentes: [
+        ...(prev.componentes || []),
+        { ...componentToAdd, cantidad: componentQuantity },
+      ],
+    }));
+  
+    // Añade al estado de cambios
+    setComponentChanges((prev) => ({
+      ...prev,
+      added: [
+        ...prev.added,
+        { id: componentToAdd.id, cantidad: componentQuantity },
+      ],
+    }));
+  
+    setSelectedComponent('');
+    setComponentQuantity(1);
+  };
+  
+
+  const handleRemoveComponent = (componentId) => {
+    const componentToRemove = selectedMaintenance.componentes.find((c) => c.id === componentId);
+  
+    // Actualiza el estado local del mantenimiento
+    setSelectedMaintenance((prev) => ({
+      ...prev,
+      componentes: prev.componentes.filter((c) => c.id !== componentId),
+    }));
+  
+    // Si el componente ya existe en la base de datos, añádelo al estado de cambios
+    if (componentToRemove) {
+      setComponentChanges((prev) => ({
+        ...prev,
+        removed: [...prev.removed, componentId],
+      }));
+    }
+  };
+  
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -216,7 +357,21 @@ const MaintenanceTable = () => {
       .catch((error) => {
         console.error('Error al obtener los datos:', error);
       });
+    fetchProveedores();
+    fetchAvailableComponents();
   }, []);
+
+  useEffect(() => {
+    if (selectedMaintenance?.tipo === 'Externo') {
+      fetchProveedores();
+    }
+  }, [selectedMaintenance?.tipo]);
+
+  useEffect(() => {
+    if (!openDialog) {
+      setComponentChanges({ added: [], removed: [] });
+    }
+  }, [openDialog]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -358,6 +513,7 @@ const MaintenanceTable = () => {
           <DialogTitle sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             {isEditing ? 'Editar Mantenimiento' : 'Detalles del Mantenimiento'}
           </DialogTitle>
+          
           <DialogContent sx={{ mt: 2, p: 0 }}>
             {isLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
@@ -393,14 +549,25 @@ const MaintenanceTable = () => {
                         name="codigo_mantenimiento"
                         onChange={handleInputChange}
                       />
-                      <TextField
-                        label="Tipo"
-                        value={selectedMaintenance.tipo || ''}
-                        fullWidth
-                        disabled={!isEditing}
-                        name="tipo"
-                        onChange={handleInputChange}
-                      />
+       <TextField
+  select
+  label="Tipo"
+  value={selectedMaintenance?.tipo || ''}
+  fullWidth
+  disabled={!isEditing}
+  name="tipo"
+  onChange={handleInputChange}
+  SelectProps={{
+    native: true, 
+  }}
+   >
+  <option value="Interno">Interno</option>
+  <option value="Externo">Externo</option>
+    </TextField>
+
+
+
+
                       <TextField
                         label="Fecha Inicio"
                         value={formatDate(selectedMaintenance.fecha_inicio) || ''}
@@ -417,16 +584,32 @@ const MaintenanceTable = () => {
                         name="fecha_fin"
                         onChange={handleInputChange}
                       />
-                      {selectedMaintenance.tipo !== 'Interno' && (
-                        <>
-                          <TextField
-                            label="Proveedor"
-                            value={selectedMaintenance.proveedor || ''}
-                            fullWidth
-                            disabled={!isEditing}
-                            name="proveedor"
-                            onChange={handleInputChange}
-                          />
+                      {selectedMaintenance.tipo == 'Externo' && (
+             <>
+             {isLoadingProveedores ? (
+               <CircularProgress />
+             ) : (
+               <TextField
+                 select
+                 label="Proveedor"
+                 value={selectedMaintenance?.proveedor || ''}
+                 fullWidth
+                 disabled={!isEditing}
+                 name="proveedor"
+                 onChange={handleInputChange}
+                 SelectProps={{
+                   native: true,
+                 }}
+               >
+                 <option value="">Seleccione un proveedor</option>
+                 {proveedores.map((prov, index) => (
+                   <option key={index} value={typeof prov === 'string' ? prov : prov.nombre}>
+                     {typeof prov === 'string' ? prov : prov.nombre}
+                   </option>
+                 ))}
+               </TextField>
+
+                )}
                           <TextField
                             label="Contacto Proveedor"
                             value={selectedMaintenance.contacto_proveedor || ''}
@@ -492,53 +675,114 @@ const MaintenanceTable = () => {
                   )}
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
-                  {selectedMaintenance?.componentes?.length > 0 ? (
-                    <List>
-                      {selectedMaintenance.componentes.map((componente) => (
-                        <ListItem 
-                          key={componente.id}
-                          sx={{
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            borderRadius: 1,
-                            mb: 1,
-                            backgroundColor: 'background.paper'
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {isEditing && (
+                      <Box sx={{ 
+                        display: 'flex', 
+                        gap: 2, 
+                        alignItems: 'flex-start',
+                        p: 2,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        bgcolor: 'background.paper'
+                      }}>
+                        <TextField
+                          select
+                          label="Componente"
+                          value={selectedComponent}
+                          onChange={(e) => setSelectedComponent(e.target.value)}
+                          sx={{ minWidth: 200 }}
+                          SelectProps={{
+                            native: true,
                           }}
                         >
-                          <ListItemText 
-                            primary={
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                  {componente.nombre}
-                                </Typography>
-                                <Chip 
-                                  label={`Cantidad: ${componente.cantidad}`}
-                                  color="primary"
-                                  size="small"
-                                />
-                              </Box>
+                          <option value="">Seleccione un componente</option>
+                          {availableComponents.map((comp) => (
+                            <option key={comp.id} value={comp.id}>
+                              {comp.nombre}
+                            </option>
+                          ))}
+                        </TextField>
+                        <TextField
+                          type="number"
+                          label="Cantidad"
+                          value={componentQuantity}
+                          onChange={(e) => setComponentQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                          InputProps={{ inputProps: { min: 1 } }}
+                          sx={{ width: 100 }}
+                        />
+                        <Button
+                          variant="contained"
+                          onClick={handleAddComponent}
+                          startIcon={<AddIcon />}
+                          disabled={!selectedComponent}
+                        >
+                          Agregar
+                        </Button>
+                      </Box>
+                    )}
+                    
+                    {selectedMaintenance?.componentes?.length > 0 ? (
+                      <List>
+                        {selectedMaintenance.componentes.map((componente) => (
+                          <ListItem 
+                            key={componente.id}
+                            sx={{
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              borderRadius: 1,
+                              mb: 1,
+                              backgroundColor: 'background.paper'
+                            }}
+                            secondaryAction={
+                              isEditing && (
+                                <IconButton 
+                                  edge="end" 
+                                  aria-label="delete"
+                                  onClick={() => handleRemoveComponent(componente.id)}
+                                  color="error"
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              )
                             }
-                            secondary={
-                              <>
-                                <Typography component="span" display="block">
-                                  ID: {componente.id}
-                                </Typography>
-                                {componente.descripcion && (
-                                  <Typography component="span" display="block">
-                                    Descripción: {componente.descripcion}
+                          >
+                            <ListItemText 
+                              primary={
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <Typography variant="subtitle1" fontWeight="bold">
+                                    {componente.nombre}
                                   </Typography>
-                                )}
-                              </>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  ) : (
-                    <Typography color="text.secondary" align="center">
-                      No hay componentes registrados
-                    </Typography>
-                  )}
+                                  <Chip 
+                                    label={`Cantidad: ${componente.cantidad}`}
+                                    color="primary"
+                                    size="small"
+                                  />
+                                </Box>
+                              }
+                              secondary={
+                                <>
+                                  <Typography component="span" display="block">
+                                    ID: {componente.id}
+                                  </Typography>
+                                  {componente.descripcion && (
+                                    <Typography component="span" display="block">
+                                      Descripción: {componente.descripcion}
+                                    </Typography>
+                                  )}
+                                </>
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography color="text.secondary" align="center">
+                        No hay componentes registrados
+                      </Typography>
+                    )}
+                  </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={3}>
                   {selectedMaintenance?.equipos?.length > 0 ? (
