@@ -107,10 +107,13 @@ Route::controller(EquipoController::class)->group(function(){
     Route::post('/equipoDisponibles','obtenerEquiposDisponibles');
     Route::get('/equiposComponentes/{id}','obtenerComponentesDeEquipo');
 });
+Route::delete('/equipos-componentes/{equipoMantenimientoId}/{componenteId}', [EquipoComponenteController::class, 'destroy']);
+Route::post('/equipos-componentes/{equipoMantenimientoId}', [EquipoComponenteController::class, 'store']);
 
 Route::prefix('equipo-componentes')->group(function () {
     Route::get('/{equipoMantenimientoId}', [EquipoComponenteController::class, 'index']);
-    Route::post('/', [EquipoComponenteController::class, 'store']);
+    Route::post('/{equipoMantenimientoId}', [EquipoComponenteController::class, 'store']);
+    Route::post('/AniadirComponentes', [EquipoComponenteController::class, 'create']);  //Endpoint Añadido
     Route::put('/{id}', [EquipoComponenteController::class, 'update']);
     Route::delete('/{id}', [EquipoComponenteController::class, 'destroy']);
 });

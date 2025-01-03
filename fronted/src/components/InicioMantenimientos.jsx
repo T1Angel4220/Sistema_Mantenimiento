@@ -233,16 +233,13 @@ const MaintenanceTable = () => {
       // 2. Procesar los componentes añadidos
       if (componentChanges.added.length > 0) {
         await Promise.all(
-          componentChanges.added.map((component) =>
-            api.post(`/mantenimientos/${selectedMaintenance.id}/componentes`, {
-              componentes: [
-                {
-                  id: component.id,
-                  cantidad: component.cantidad,
-                },
-              ],
-            })
-          )
+          componentChanges.added.map(async (component) => {
+            const response = await api.post(`/equipos-componentes/${selectedMaintenance.id}`, {
+              componente_id: component.id,
+              cantidad: component.cantidad,
+            });
+            return response.data;
+          })
         );
       }
   
@@ -293,54 +290,63 @@ const MaintenanceTable = () => {
       const response = await api.get('/componentes');
       setAvailableComponents(response.data);
     } catch (error) {
-      console.error('Error al cargar componentes:', error);
+      console.error('Error al cargar los componentes disponibles:', error);
     }
   };
-
-  const handleAddComponent = () => {
-    if (!selectedComponent) return;
   
-    const componentToAdd = availableComponents.find(c => c.id === parseInt(selectedComponent));
-    if (!componentToAdd) return;
   
-    // Actualiza el estado local del mantenimiento
-    setSelectedMaintenance((prev) => ({
-      ...prev,
-      componentes: [
-        ...(prev.componentes || []),
-        { ...componentToAdd, cantidad: componentQuantity },
-      ],
-    }));
+  const handleAddComponent = async () => {
+    if (!selectedComponent || !componentQuantity) {
+      console.error("Componente o cantidad no definidos");
+      return;
+    }
   
-    // Añade al estado de cambios
-    setComponentChanges((prev) => ({
-      ...prev,
-      added: [
-        ...prev.added,
-        { id: componentToAdd.id, cantidad: componentQuantity },
-      ],
-    }));
+    try {
+      const response = await api.post(`/equipos-componentes/${selectedMaintenance.id}`, {
+        componente_id: selectedComponent, // ID del componente
+        cantidad: componentQuantity,     // Cantidad del componente
+        mantenimiento_id: selectedMaintenance.id // Agrega este campo si es requerido
+      });
   
-    setSelectedComponent('');
-    setComponentQuantity(1);
+      const newComponent = response.data;
+  
+      setSelectedMaintenance((prev) => ({
+        ...prev,
+        componentes: [...prev.componentes, newComponent],
+      }));
+  
+      setSelectedComponent('');
+      setComponentQuantity(1);
+    } catch (error) {
+      if (error.response) {
+        console.error("Error al agregar el componente:", error.response.data);
+      } else {
+        console.error("Error de red o configuración:", error.message);
+      }
+    }
   };
   
+  
+  
 
-  const handleRemoveComponent = (componentId) => {
-    const componentToRemove = selectedMaintenance.componentes.find((c) => c.id === componentId);
+  const handleRemoveComponent = async (equipoMantenimientoId, componentId) => {
+    console.log("Intentando eliminar componente:", {
+      equipoMantenimientoId,
+      componentId,
+    });
   
-    // Actualiza el estado local del mantenimiento
-    setSelectedMaintenance((prev) => ({
-      ...prev,
-      componentes: prev.componentes.filter((c) => c.id !== componentId),
-    }));
-  
-    // Si el componente ya existe en la base de datos, añádelo al estado de cambios
-    if (componentToRemove) {
-      setComponentChanges((prev) => ({
+    try {
+      await api.delete(`/equipos-componentes/${equipoMantenimientoId}/${componentId}`);
+      
+      setSelectedMaintenance((prev) => ({
         ...prev,
-        removed: [...prev.removed, componentId],
+        componentes: prev.componentes.filter((c) => c.id !== componentId),
       }));
+  
+      const response = await api.get('/mantenimientos');
+      setData(response.data);
+    } catch (error) {
+      console.error('Error al eliminar el componente:', error);
     }
   };
   
@@ -361,12 +367,15 @@ const MaintenanceTable = () => {
     fetchAvailableComponents();
   }, []);
 
+
   useEffect(() => {
     if (selectedMaintenance?.tipo === 'Externo') {
       fetchProveedores();
     }
   }, [selectedMaintenance?.tipo]);
-
+  useEffect(() => {
+    fetchAvailableComponents();
+  }, []);
   useEffect(() => {
     if (!openDialog) {
       setComponentChanges({ added: [], removed: [] });
@@ -740,7 +749,7 @@ const MaintenanceTable = () => {
                                 <IconButton 
                                   edge="end" 
                                   aria-label="delete"
-                                  onClick={() => handleRemoveComponent(componente.id)}
+                                  onClick={() => handleRemoveComponent(selectedMaintenance?.id, componente.id)}
                                   color="error"
                                 >
                                   <DeleteIcon />
