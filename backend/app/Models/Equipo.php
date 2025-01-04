@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Mantenimiento;
-
+use App\Models\Componente;
 class Equipo extends Model
 {
     use HasFactory;
@@ -14,4 +14,9 @@ class Equipo extends Model
         return $this->belongsToMany(Mantenimiento::class, 'equipo_mantenimiento', 'mantenimiento_id', 'equipo_id')
             ->withTimestamps();
     }
+    public function componentes()
+    {
+        return $this->belongsToMany(Componente::class, 'equipo_componentes', 'componente_id', 'equipo_mantenimiento_id');
+    }
+
 }

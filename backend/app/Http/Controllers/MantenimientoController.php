@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Mantenimiento;
 use App\Models\EquipoMantenimiento;
+use App\Models\EquipoComponente;
+use App\Models\Equipo;
+use App\Models\Actividad;
 class MantenimientoController extends Controller
 {
    
@@ -132,27 +135,158 @@ class MantenimientoController extends Controller
         // Si se requiere un formulario de edición, puedes devolver una vista
         // return view('mantenimiento.edit', compact('id'));
     }
-
+    public function updateDetalles(Request $request, $id)
+    {
+        // Validación de los datos de entrada
+        $validatedData = $request->validate([
+            'id'=> 'required|integer',
+            'codigo_mantenimiento' => 'required|string|max:20',
+            'tipo' => 'required|string|max:50',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'proveedor' => 'nullable|string|max:100',
+            'contacto_proveedor' => 'nullable|string|max:100',
+            'costo' => 'nullable|numeric|min:0',
+            'observaciones' => 'nullable|string|max:500',
+            'equipos' => 'required|array',
+            'equipos.*.id' => 'required|exists:equipos,id',
+            'equipos.*.componentes' => 'nullable|array',
+            'equipos.*.componentes.*.id' => 'required|exists:componentes,id',
+            'equipos.*.componentes.*.cantidad' => 'required|integer|min:1',
+            'actividades' => 'required|array',
+            'actividades.*.id' => 'required|exists:actividades,id',
+            'actividades.*.nombre' => 'required|string|max:255',
+        ]);
+    
+        // Buscar el mantenimiento a actualizar
+        $mantenimiento = Mantenimiento::findOrFail($id);
+    
+        // Actualizar los datos principales del mantenimiento
+        $mantenimiento->update([
+            'codigo_mantenimiento' => $validatedData['codigo_mantenimiento'],
+            'tipo' => $validatedData['tipo'],
+            'fecha_inicio' => $validatedData['fecha_inicio'],
+            'fecha_fin' => $validatedData['fecha_fin'],
+            'proveedor' => $validatedData['proveedor'],
+            'contacto_proveedor' => $validatedData['contacto_proveedor'],
+            'costo' => $validatedData['costo'],
+            'observaciones' => $validatedData['observaciones'] ?? $mantenimiento->observaciones,
+        ]);
+    
+        // Actualizar los equipos y sus componentes
+        foreach ($validatedData['equipos'] as $equipoData) {
+            $equipo = Equipo::findOrFail($equipoData['id']);
+    
+            // Limpiar los componentes actuales del equipo en este mantenimiento
+            EquipoComponente::where('equipo_mantenimiento_id', $equipo->id)
+                ->where('mantenimiento_id', $mantenimiento->id)
+                ->delete();
+    
+            // Agregar los nuevos componentes para el equipo
+            if (!empty($equipoData['componentes'])) {
+                foreach ($equipoData['componentes'] as $componenteData) {
+                    EquipoComponente::create([
+                        'equipo_mantenimiento_id' => $equipo->id,
+                        'mantenimiento_id' => $validatedData['id'],
+                        'componente_id' => $componenteData['id'],
+                        'cantidad' => $componenteData['cantidad'],
+                    ]);
+                }
+            }
+        }
+    
+        // Actualizar las actividades
+        foreach ($validatedData['actividades'] as $actividadData) {
+            $actividad = Actividad::findOrFail($actividadData['id']);
+            $actividad->update([
+                'nombre' => $actividadData['nombre'],
+            ]);
+        }
+    
+        // Devuelve una respuesta con el mantenimiento actualizado
+        return response()->json([
+            'message' => 'Mantenimiento actualizado correctamente',
+            'mantenimiento' => $mantenimiento->load('equipos.componentes', 'actividades'),
+        ], 200);
+    }
    
     public function update(Request $request, $id)
-    {
-        $mantenimiento = Mantenimiento::findOrFail($id);
+{
+    $mantenimiento = Mantenimiento::findOrFail($id);
 
-        $request->validate([
-            'codigo_mantenimiento' => 'required|max:20|unique:mantenimiento,codigo_mantenimiento,' . $mantenimiento->id,
-            'tipo' => 'required|in:Interno,Externo',
-            'fecha_inicio' => 'nullable|date',
-            'fecha_fin' => 'required|date',
-            'proveedor' => 'nullable|in:ACME Maintenance,TechSupport S.A.,ServiMaq Ltda.,Otro',
-            'contacto_proveedor' => 'nullable|string|max:255',
-            'costo' => 'nullable|numeric',
-            'observaciones' => 'nullable|string',
-        ]);
+    // Actualizar los campos del mantenimiento
+    $mantenimiento->update($request->only([
+        'codigo_mantenimiento',
+        'tipo',
+        'fecha_inicio',
+        'fecha_fin',
+        'proveedor',
+        'contacto_proveedor',
+        'costo',
+        'observaciones',
+    ]));
 
-        $mantenimiento->update($request->all());
-
-        return response()->json($mantenimiento);
+    // Actualizar las actividades
+    if ($request->has('actividades')) {
+        $actividadIds = collect($request->input('actividades'))->pluck('id');
+        $mantenimiento->actividades()->sync($actividadIds);
     }
+
+    // Actualizar los equipos
+    if ($request->has('equipos')) {
+        $equipoIds = collect($request->input('equipos'))->pluck('id');
+        $mantenimiento->equipos()->sync($equipoIds);
+    }
+
+    return response()->json([
+        'message' => 'Mantenimiento actualizado con éxito',
+        'mantenimiento' => $mantenimiento->load(['actividades', 'equipos']),
+    ]);
+}
+public function showMantenimientoDetalles($id)
+{
+    // Obtener el mantenimiento con sus datos básicos
+    $mantenimiento = DB::table('mantenimiento')->where('id', $id)->first();
+
+    if (!$mantenimiento) {
+        return response()->json(['error' => 'Mantenimiento no encontrado'], 404);
+    }
+
+    // Obtener los equipos asociados al mantenimiento
+    $equipos = DB::table('equipos')
+        ->join('equipo_componentes', 'equipos.id', '=', 'equipo_componentes.equipo_mantenimiento_id')
+        ->where('equipo_componentes.mantenimiento_id', $id)
+        ->select('equipos.*')
+        ->distinct()
+        ->get();
+
+    // Para cada equipo, obtener sus componentes
+    $equiposConComponentes = $equipos->map(function ($equipo) use ($id) {
+        $componentes = DB::table('componentes')
+            ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
+            ->where('equipo_componentes.equipo_mantenimiento_id', $equipo->id)
+            ->where('equipo_componentes.mantenimiento_id', $id)
+            ->select('componentes.*', 'equipo_componentes.cantidad')
+            ->get();
+
+        $equipo->componentes = $componentes;
+        return $equipo;
+    });
+
+    // Obtener las actividades asociadas al mantenimiento
+    $actividades = DB::table('actividades')
+        ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
+        ->where('mantenimiento_actividad.mantenimiento_id', $id)
+        ->select('actividades.*')
+        ->get();
+
+    // Combinar los datos del mantenimiento, equipos y actividades en un solo array
+    $response = (array) $mantenimiento;
+    $response['equipos'] = $equiposConComponentes;
+    $response['actividades'] = $actividades;
+
+    return response()->json($response);
+}
 
     
     public function destroy($id)

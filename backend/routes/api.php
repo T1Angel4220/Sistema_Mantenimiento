@@ -16,12 +16,6 @@ use App\Http\Controllers\EquipoComponenteController;
 use Illuminate\Support\Facades\DB;
 
 Route::get('/mantenimientos/{id}', [MantenimientoController::class, 'show']);
-Route::get('/mantenimiento-actividad/{id}', [MantenimientoController::class, 'getActividades']);
-Route::get('/equipo-componentes/{id}', [MantenimientoController::class, 'getComponentes']);
-Route::get('/mantenimiento-equipos/{id}', [MantenimientoController::class, 'getEquipos']);
-
-
-// Get activities for a maintenance
 Route::get('/mantenimiento-actividad/{id}', function ($id) {
     return DB::table('mantenimiento_actividad')
         ->join('actividades', 'mantenimiento_actividad.actividad_id', '=', 'actividades.id')
@@ -29,8 +23,6 @@ Route::get('/mantenimiento-actividad/{id}', function ($id) {
         ->select('actividades.*')
         ->get();
 });
-
-// Get components for a maintenance
 Route::get('/equipo-componentes/{id}', function ($id) {
     return DB::table('equipo_componentes')
         ->join('componentes', 'equipo_componentes.componente_id', '=', 'componentes.id')
@@ -39,7 +31,6 @@ Route::get('/equipo-componentes/{id}', function ($id) {
         ->select('componentes.*', 'equipo_componentes.cantidad')
         ->get();
 });
-
 Route::get('/mantenimiento-equipos/{id}', function ($id) {
     return DB::table('mantenimiento_equipos')
         ->join('equipos', 'mantenimiento_equipos.equipo_id', '=', 'equipos.id')
@@ -65,47 +56,41 @@ Route::controller(ComponenteController::class)->group(function () {
     Route::put('/componentes/{id}', 'update');
     Route::delete('/componentes/{id}', 'destroy');
 });
+
 Route::controller(EquipoComponenteController::class)->group(function () {
     Route::get('/componentesEquipos', 'index');
-    Route::post('/componentesEquipos',  'store');
+    Route::post('/componentesEquipos', 'store');
 });
 
 Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
-
-
 Route::get('/proceso-compra', [ProcesoCompraController::class, 'index']);
-Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
-
-
 
 Route::controller(MantenimientoController::class)->group(function () {
     Route::get('/mantenimientos', 'index');
     Route::post('/mantenimientos', 'store');
     Route::get('/mantenimientos/{id}', 'show');
     Route::put('/mantenimientos/{id}', 'update');
+    Route::put('/mantenimientosDetalles/{id}', 'updateDetalles');
+
     Route::delete('/mantenimientos/{id}', 'destroy');
     Route::get('/mantenimientos_idMax', 'obtenerIdMaximo');
-    
+    Route::get('/mantenimientoDetalles/{id}', 'showMantenimientoDetalles');
 });
 
 Route::post('/equipos/import', [EquipoImportController::class, 'import']);
 
-
-Route::post('/register', [RegisterController::class, 'register']);
-
-Route::post('register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('me', [AuthController::class, 'me'])->middleware('auth:api');
-Route::post('login', [LoginController::class, 'login']);
 
-Route::controller(EquipoController::class)->group(function(){
-    Route::get('/equipos','index');
-    Route::post('/equipo','store');
-    Route::get('/equipo/{id}','show');
-    Route::put('/equipo/{id}','update');
-    Route::delete('/equipo/{id}','destroy');
-    Route::post('/equipoDisponibles','obtenerEquiposDisponibles');
-    Route::get('/equiposComponentes/{id}','obtenerComponentesDeEquipo');
+Route::controller(EquipoController::class)->group(function () {
+    Route::get('/equipos', 'index');
+    Route::post('/equipo', 'store');
+    Route::get('/equipo/{id}', 'show');
+    Route::put('/equipo/{id}', 'update');
+    Route::delete('/equipo/{id}', 'destroy');
+    Route::post('/equipoDisponibles', 'obtenerEquiposDisponibles');
+    Route::get('/equiposComponentes/{id}', 'obtenerComponentesDeEquipo');
 });
 
 Route::prefix('equipo-componentes')->group(function () {
@@ -114,6 +99,3 @@ Route::prefix('equipo-componentes')->group(function () {
     Route::put('/{id}', [EquipoComponenteController::class, 'update']);
     Route::delete('/{id}', [EquipoComponenteController::class, 'destroy']);
 });
-Route::post('/componentesEquipos', [EquipoComponenteController::class, 'store']);
-
-

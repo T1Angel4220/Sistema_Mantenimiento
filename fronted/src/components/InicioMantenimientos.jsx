@@ -154,9 +154,66 @@ const MaintenanceTable = () => {
       setIsLoadingProveedores(false);
     }
   };
+
+
+  const handleSelectComponent = (e, equipoId) => {
+    setSelectedMaintenance((prevState) => ({
+      ...prevState,
+      equipos: prevState.equipos.map((equipo) =>
+        equipo.id === equipoId
+          ? { ...equipo, selectedComponent: e.target.value }
+          : equipo
+      ),
+    }));
+  };
   
-
-
+  const handleSetComponentQuantity = (e, equipoId) => {
+    setSelectedMaintenance((prevState) => ({
+      ...prevState,
+      equipos: prevState.equipos.map((equipo) =>
+        equipo.id === equipoId
+          ? { ...equipo, componentQuantity: parseInt(e.target.value) || 1 }
+          : equipo
+      ),
+    }));
+  };
+  
+  const handleAddComponentToEquipo = (equipoId) => {
+    setSelectedMaintenance((prevState) => ({
+      ...prevState,
+      equipos: prevState.equipos.map((equipo) =>
+        equipo.id === equipoId
+          ? {
+              ...equipo,
+              componentes: [
+                ...equipo.componentes,
+                {
+                  id: parseInt(equipo.selectedComponent),
+                  nombre: availableComponents.find((c) => c.id === equipo.selectedComponent)?.nombre || '',
+                  cantidad: equipo.componentQuantity || 1,
+                },
+              ],
+              selectedComponent: '',
+              componentQuantity: 1,
+            }
+          : equipo
+      ),
+    }));
+  };
+  
+  const handleRemoveComponent = (equipoId, componenteId) => {
+    setSelectedMaintenance((prevState) => ({
+      ...prevState,
+      equipos: prevState.equipos.map((equipo) =>
+        equipo.id === equipoId
+          ? {
+              ...equipo,
+              componentes: equipo.componentes.filter((comp) => comp.id !== componenteId),
+            }
+          : equipo
+      ),
+    }));
+  };
   const filteredData = data.filter((item) => {
     return (
       Object.entries(filters).every(([key, value]) => {
@@ -172,7 +229,7 @@ const MaintenanceTable = () => {
   const handleReturn = () => {
     navigate('/Main');
   };
-  
+
   const handleNewMaintenance = () => {
     navigate('/AniadirMantenimiento');
   };
@@ -181,13 +238,13 @@ const MaintenanceTable = () => {
     setIsLoading(true);
     setSelectedMaintenance(null);
     try {
-      const response = await api.get(`/mantenimientos/${maintenance.id}`);
+      const response = await axios.get(`http://localhost:8000/api/mantenimientoDetalles/${maintenance.id}`);
       console.log('Maintenance data:', response.data);
+      console.log('Maintenance data:', maintenance.id);
 
-      const maintenanceData = {
-        ...response.data.mantenimiento,
-        componentes: response.data.componentes
-      };
+      const maintenanceData = response.data;
+
+
 
       setSelectedMaintenance(maintenanceData);
 
@@ -224,41 +281,20 @@ const MaintenanceTable = () => {
 
   const handleSave = async () => {
     try {
+      console.log("Mantenimiento guardado")
+      console.log(selectedMaintenance)
       // 1. Actualizar la información del mantenimiento
-      await api.put(`/mantenimientos/${selectedMaintenance.id}`, {
-        ...selectedMaintenance,
-        componentes: undefined, // Excluye los componentes al actualizar el mantenimiento general
-      });
-  
+      await api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`,
+        selectedMaintenance,
+      );
+      console.log(componentChanges);
       // 2. Procesar los componentes añadidos
-      if (componentChanges.added.length > 0) {
-        await Promise.all(
-          componentChanges.added.map((component) =>
-            api.post(`/mantenimientos/${selectedMaintenance.id}/componentes`, {
-              componentes: [
-                {
-                  id: component.id,
-                  cantidad: component.cantidad,
-                },
-              ],
-            })
-          )
-        );
-      }
-  
-      // 3. Procesar los componentes eliminados
-      if (componentChanges.removed.length > 0) {
-        await Promise.all(
-          componentChanges.removed.map((componentId) =>
-            api.delete(`/mantenimientos/${selectedMaintenance.id}/componentes/${componentId}`)
-        )
-        );
-      }
-  
+      
+
       // 4. Recargar los datos actualizados
       const response = await api.get('/mantenimientos');
       setData(response.data);
-  
+
       // Resetear estado de cambios
       setComponentChanges({ added: [], removed: [] });
       setIsEditing(false);
@@ -267,27 +303,27 @@ const MaintenanceTable = () => {
       console.error('Error al guardar los cambios:', error);
     }
   };
-  
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setSelectedMaintenance((prev) => {
       const updatedState = { ...prev, [name]: value };
-  
+
       if (name === 'tipo') {
-        console.log(`Tipo seleccionado: ${value}`); 
+        console.log(`Tipo seleccionado: ${value}`);
         if (value === 'Externo') {
-          fetchProveedores(); 
+          fetchProveedores();
         } else if (value === 'Interno') {
           updatedState.proveedor = '';
           updatedState.contacto_proveedor = '';
           updatedState.costo = '';
-          setProveedores([]); 
+          setProveedores([]);
         }
       }
       return updatedState;
     });
   };
-  
+
   const fetchAvailableComponents = async () => {
     try {
       const response = await api.get('/componentes');
@@ -299,10 +335,10 @@ const MaintenanceTable = () => {
 
   const handleAddComponent = () => {
     if (!selectedComponent) return;
-  
+
     const componentToAdd = availableComponents.find(c => c.id === parseInt(selectedComponent));
     if (!componentToAdd) return;
-  
+
     // Actualiza el estado local del mantenimiento
     setSelectedMaintenance((prev) => ({
       ...prev,
@@ -311,7 +347,7 @@ const MaintenanceTable = () => {
         { ...componentToAdd, cantidad: componentQuantity },
       ],
     }));
-  
+
     // Añade al estado de cambios
     setComponentChanges((prev) => ({
       ...prev,
@@ -320,30 +356,12 @@ const MaintenanceTable = () => {
         { id: componentToAdd.id, cantidad: componentQuantity },
       ],
     }));
-  
+
     setSelectedComponent('');
     setComponentQuantity(1);
   };
-  
 
-  const handleRemoveComponent = (componentId) => {
-    const componentToRemove = selectedMaintenance.componentes.find((c) => c.id === componentId);
-  
-    // Actualiza el estado local del mantenimiento
-    setSelectedMaintenance((prev) => ({
-      ...prev,
-      componentes: prev.componentes.filter((c) => c.id !== componentId),
-    }));
-  
-    // Si el componente ya existe en la base de datos, añádelo al estado de cambios
-    if (componentToRemove) {
-      setComponentChanges((prev) => ({
-        ...prev,
-        removed: [...prev.removed, componentId],
-      }));
-    }
-  };
-  
+
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -432,7 +450,7 @@ const MaintenanceTable = () => {
               value={filters[field]}
               onChange={(e) => handleFilterChange(field, e.target.value)}
               variant="outlined"
-              sx={{ 
+              sx={{
                 backgroundColor: 'background.paper',
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
@@ -504,16 +522,16 @@ const MaintenanceTable = () => {
           </Table>
         </TableContainer>
 
-        <Dialog 
-          open={openDialog} 
-          onClose={handleCloseDialog} 
-          maxWidth="md" 
+        <Dialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          maxWidth="md"
           fullWidth
         >
           <DialogTitle sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             {isEditing ? 'Editar Mantenimiento' : 'Detalles del Mantenimiento'}
           </DialogTitle>
-          
+
           <DialogContent sx={{ mt: 2, p: 0 }}>
             {isLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
@@ -522,8 +540,8 @@ const MaintenanceTable = () => {
             ) : (
               <>
                 {selectedMaintenance?.error && (
-                  <Alert 
-                    severity="error" 
+                  <Alert
+                    severity="error"
                     sx={{ m: 2 }}
                     onClose={() => {
                       setSelectedMaintenance(prev => ({ ...prev, error: null }))
@@ -549,21 +567,21 @@ const MaintenanceTable = () => {
                         name="codigo_mantenimiento"
                         onChange={handleInputChange}
                       />
-       <TextField
-  select
-  label="Tipo"
-  value={selectedMaintenance?.tipo || ''}
-  fullWidth
-  disabled={!isEditing}
-  name="tipo"
-  onChange={handleInputChange}
-  SelectProps={{
-    native: true, 
-  }}
-   >
-  <option value="Interno">Interno</option>
-  <option value="Externo">Externo</option>
-    </TextField>
+                      <TextField
+                        select
+                        label="Tipo"
+                        value={selectedMaintenance?.tipo || ''}
+                        fullWidth
+                        disabled={!isEditing}
+                        name="tipo"
+                        onChange={handleInputChange}
+                        SelectProps={{
+                          native: true,
+                        }}
+                      >
+                        <option value="Interno">Interno</option>
+                        <option value="Externo">Externo</option>
+                      </TextField>
 
 
 
@@ -585,31 +603,31 @@ const MaintenanceTable = () => {
                         onChange={handleInputChange}
                       />
                       {selectedMaintenance.tipo == 'Externo' && (
-             <>
-             {isLoadingProveedores ? (
-               <CircularProgress />
-             ) : (
-               <TextField
-                 select
-                 label="Proveedor"
-                 value={selectedMaintenance?.proveedor || ''}
-                 fullWidth
-                 disabled={!isEditing}
-                 name="proveedor"
-                 onChange={handleInputChange}
-                 SelectProps={{
-                   native: true,
-                 }}
-               >
-                 <option value="">Seleccione un proveedor</option>
-                 {proveedores.map((prov, index) => (
-                   <option key={index} value={typeof prov === 'string' ? prov : prov.nombre}>
-                     {typeof prov === 'string' ? prov : prov.nombre}
-                   </option>
-                 ))}
-               </TextField>
+                        <>
+                          {isLoadingProveedores ? (
+                            <CircularProgress />
+                          ) : (
+                            <TextField
+                              select
+                              label="Proveedor"
+                              value={selectedMaintenance?.proveedor || ''}
+                              fullWidth
+                              disabled={!isEditing}
+                              name="proveedor"
+                              onChange={handleInputChange}
+                              SelectProps={{
+                                native: true,
+                              }}
+                            >
+                              <option value="">Seleccione un proveedor</option>
+                              {proveedores.map((prov, index) => (
+                                <option key={index} value={typeof prov === 'string' ? prov : prov.nombre}>
+                                  {typeof prov === 'string' ? prov : prov.nombre}
+                                </option>
+                              ))}
+                            </TextField>
 
-                )}
+                          )}
                           <TextField
                             label="Contacto Proveedor"
                             value={selectedMaintenance.contacto_proveedor || ''}
@@ -645,7 +663,7 @@ const MaintenanceTable = () => {
                   {selectedMaintenance?.actividades?.length > 0 ? (
                     <List>
                       {selectedMaintenance.actividades.map((actividad) => (
-                        <ListItem 
+                        <ListItem
                           key={actividad.id}
                           sx={{
                             border: '1px solid',
@@ -655,7 +673,7 @@ const MaintenanceTable = () => {
                             backgroundColor: 'background.paper'
                           }}
                         >
-                          <ListItemText 
+                          <ListItemText
                             primary={
                               <Typography variant="subtitle1" fontWeight="bold">
                                 {actividad.nombre}
@@ -676,119 +694,141 @@ const MaintenanceTable = () => {
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {isEditing && (
-                      <Box sx={{ 
-                        display: 'flex', 
-                        gap: 2, 
-                        alignItems: 'flex-start',
-                        p: 2,
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        borderRadius: 1,
-                        bgcolor: 'background.paper'
-                      }}>
-                        <TextField
-                          select
-                          label="Componente"
-                          value={selectedComponent}
-                          onChange={(e) => setSelectedComponent(e.target.value)}
-                          sx={{ minWidth: 200 }}
-                          SelectProps={{
-                            native: true,
-                          }}
-                        >
-                          <option value="">Seleccione un componente</option>
-                          {availableComponents.map((comp) => (
-                            <option key={comp.id} value={comp.id}>
-                              {comp.nombre}
-                            </option>
-                          ))}
-                        </TextField>
-                        <TextField
-                          type="number"
-                          label="Cantidad"
-                          value={componentQuantity}
-                          onChange={(e) => setComponentQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                          InputProps={{ inputProps: { min: 1 } }}
-                          sx={{ width: 100 }}
-                        />
-                        <Button
-                          variant="contained"
-                          onClick={handleAddComponent}
-                          startIcon={<AddIcon />}
-                          disabled={!selectedComponent}
-                        >
-                          Agregar
-                        </Button>
-                      </Box>
-                    )}
-                    
-                    {selectedMaintenance?.componentes?.length > 0 ? (
+                    {selectedMaintenance?.equipos?.length > 0 ? (
                       <List>
-                        {selectedMaintenance.componentes.map((componente) => (
-                          <ListItem 
-                            key={componente.id}
-                            sx={{
-                              border: '1px solid',
-                              borderColor: 'divider',
-                              borderRadius: 1,
-                              mb: 1,
-                              backgroundColor: 'background.paper'
-                            }}
-                            secondaryAction={
-                              isEditing && (
-                                <IconButton 
-                                  edge="end" 
-                                  aria-label="delete"
-                                  onClick={() => handleRemoveComponent(componente.id)}
-                                  color="error"
+                        {selectedMaintenance.equipos.map((equipo) => (
+                          <Box key={equipo.id} sx={{ mb: 3 }}>
+                            {/* Encabezado del equipo */}
+                            <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+                              Equipo: {equipo.Nombre_Producto}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                              Código de Barras: {equipo.Codigo_Barras}
+                            </Typography>
+
+                            {/* Opción para agregar componentes al equipo */}
+                            {isEditing && (
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  gap: 2,
+                                  alignItems: 'flex-start',
+                                  p: 2,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  borderRadius: 1,
+                                  bgcolor: 'background.paper',
+                                  mb: 2,
+                                }}
+                              >
+                                <TextField
+                                  select
+                                  label="Componente"
+                                  value={equipo.selectedComponent || ''}
+                                  onChange={(e) => handleSelectComponent(e, equipo.id)}
+                                  sx={{ minWidth: 200 }}
+                                  SelectProps={{
+                                    native: true,
+                                  }}
                                 >
-                                  <DeleteIcon />
-                                </IconButton>
-                              )
-                            }
-                          >
-                            <ListItemText 
-                              primary={
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <Typography variant="subtitle1" fontWeight="bold">
-                                    {componente.nombre}
-                                  </Typography>
-                                  <Chip 
-                                    label={`Cantidad: ${componente.cantidad}`}
-                                    color="primary"
-                                    size="small"
-                                  />
-                                </Box>
-                              }
-                              secondary={
-                                <>
-                                  <Typography component="span" display="block">
-                                    ID: {componente.id}
-                                  </Typography>
-                                  {componente.descripcion && (
-                                    <Typography component="span" display="block">
-                                      Descripción: {componente.descripcion}
-                                    </Typography>
-                                  )}
-                                </>
-                              }
-                            />
-                          </ListItem>
+                                  <option value="">Seleccione un componente</option>
+                                  {availableComponents.map((comp) => (
+                                    <option key={comp.id} value={comp.id}>
+                                      {comp.nombre}
+                                    </option>
+                                  ))}
+                                </TextField>
+                                <TextField
+                                  type="number"
+                                  label="Cantidad"
+                                  value={equipo.componentQuantity || ''}
+                                  onChange={(e) => handleSetComponentQuantity(e, equipo.id)}
+                                  InputProps={{ inputProps: { min: 1 } }}
+                                  sx={{ width: 100 }}
+                                />
+                                <Button
+                                  variant="contained"
+                                  onClick={() => handleAddComponentToEquipo(equipo.id)}
+                                  startIcon={<AddIcon />}
+                                  disabled={!equipo.selectedComponent}
+                                >
+                                  Agregar
+                                </Button>
+                              </Box>
+                            )}
+
+                            {/* Lista de componentes del equipo */}
+                            {equipo.componentes?.length > 0 ? (
+                              <List>
+                                {equipo.componentes.map((componente) => (
+                                  <ListItem
+                                    key={componente.id}
+                                    sx={{
+                                      border: '1px solid',
+                                      borderColor: 'divider',
+                                      borderRadius: 1,
+                                      mb: 1,
+                                      backgroundColor: 'background.paper',
+                                    }}
+                                    secondaryAction={
+                                      isEditing && (
+                                        <IconButton
+                                          edge="end"
+                                          aria-label="delete"
+                                          onClick={() => handleRemoveComponent(equipo.id, componente.id)}
+                                          color="error"
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      )
+                                    }
+                                  >
+                                    <ListItemText
+                                      primary={
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                          <Typography variant="subtitle1" fontWeight="bold">
+                                            {componente.nombre}
+                                          </Typography>
+                                          <Chip label={`Cantidad: ${componente.cantidad}`} color="primary" size="small" />
+                                        </Box>
+                                      }
+                                      secondary={
+                                        <>
+                                          <Typography component="span" display="block">
+                                            ID: {componente.id}
+                                          </Typography>
+                                          {componente.descripcion && (
+                                            <Typography component="span" display="block">
+                                              Descripción: {componente.descripcion}
+                                            </Typography>
+                                          )}
+                                        </>
+                                      }
+                                    />
+                                  </ListItem>
+                                ))}
+                              </List>
+                            ) : (
+                              <Typography color="text.secondary" align="center">
+                                No hay componentes registrados para este equipo
+                              </Typography>
+                            )}
+                          </Box>
                         ))}
                       </List>
                     ) : (
                       <Typography color="text.secondary" align="center">
-                        No hay componentes registrados
+                        No hay equipos registrados
                       </Typography>
                     )}
                   </Box>
                 </TabPanel>
+
                 <TabPanel value={tabValue} index={3}>
                   {selectedMaintenance?.equipos?.length > 0 ? (
                     <List>
                       {selectedMaintenance.equipos.map((equipo) => (
-                        <ListItem 
+                        <ListItem
                           key={equipo.id}
                           sx={{
                             border: '1px solid',
@@ -798,13 +838,13 @@ const MaintenanceTable = () => {
                             backgroundColor: 'background.paper'
                           }}
                         >
-                          <ListItemText 
+                          <ListItemText
                             primary={
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Typography variant="subtitle1" fontWeight="bold">
                                   {equipo.Nombre_Producto}
                                 </Typography>
-                                <Chip 
+                                <Chip
                                   label={equipo.Tipo_Equipo}
                                   color="primary"
                                   size="small"
@@ -841,18 +881,18 @@ const MaintenanceTable = () => {
           </DialogContent>
           <DialogActions sx={{ p: 2, gap: 1 }}>
             {isEditing ? (
-              <Button 
-                onClick={handleSave} 
-                variant="contained" 
+              <Button
+                onClick={handleSave}
+                variant="contained"
                 color="primary"
                 sx={{ color: 'primary.contrastText' }}
               >
                 Guardar
               </Button>
             ) : (
-              <Button 
-                onClick={handleEdit} 
-                startIcon={<EditIcon />} 
+              <Button
+                onClick={handleEdit}
+                startIcon={<EditIcon />}
                 variant="contained"
                 color="primary"
                 sx={{ color: 'primary.contrastText' }}
@@ -860,9 +900,9 @@ const MaintenanceTable = () => {
                 Editar
               </Button>
             )}
-            <Button 
-              onClick={handleCloseDialog} 
-              variant="outlined" 
+            <Button
+              onClick={handleCloseDialog}
+              variant="outlined"
               color="primary"
               sx={{
                 borderColor: 'primary.main',

@@ -21,6 +21,7 @@ class EquipoComponente extends Model
      * Columnas que pueden asignarse masivamente.
      */
     protected $fillable = [
+        'mantenimiento_id',
         'equipo_mantenimiento_id',
         'componente_id',
         'cantidad',
@@ -41,6 +42,13 @@ class EquipoComponente extends Model
      *
      * Un registro de equipo_componente pertenece a un componente.
      */
+    
+    public function equipo()
+    {
+        return $this->belongsTo(Equipo::class, 'equipo_mantenimiento_id');
+    }
+
+    // Relación con el modelo Componente
     public function componente()
     {
         return $this->belongsTo(Componente::class, 'componente_id');
