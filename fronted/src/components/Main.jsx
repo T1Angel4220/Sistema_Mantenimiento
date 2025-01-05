@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Home, ShoppingCart, Box, PenTool, FileText, LogOut } from 'lucide-react';
 import './main.css';
 
 const Main = () => {
   const navigate = useNavigate();
-  const [equipos, setEquipos] = useState([]); // Estado para almacenar todos los equipos
-  const [filteredEquipos, setFilteredEquipos] = useState([]); // Estado para los equipos filtrados
-  const [filters, setFilters] = useState({}); // Estado para los filtros activos
-  const [currentPage, setCurrentPage] = useState(1); // Página actual
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // Estado del modal para cerrar sesión
-  const itemsPerPage = 9; // Número de elementos por página
+  const [equipos, setEquipos] = useState([]);
+  const [filteredEquipos, setFilteredEquipos] = useState([]);
+  const [filters, setFilters] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -23,11 +24,10 @@ const Main = () => {
 
   const getEquipos = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/equipos'); // Endpoint para obtener todos los equipos
+      const response = await axios.get('http://localhost:8000/api/equipos');
       const equipos = response.data;
-
       setEquipos(equipos);
-      setFilteredEquipos(equipos); // Inicialmente, todos los equipos están visibles
+      setFilteredEquipos(equipos);
     } catch (error) {
       console.error('Error al obtener los equipos:', error);
     }
@@ -37,7 +37,7 @@ const Main = () => {
     const newFilters = { ...filters, [type]: value };
     setFilters(newFilters);
 
-    let filtered = [...equipos]; // Crear una copia para evitar mutaciones
+    let filtered = [...equipos];
 
     if (newFilters.Tipo_Equipo) {
       filtered = filtered.filter((equipo) => equipo.Tipo_Equipo === newFilters.Tipo_Equipo);
@@ -52,17 +52,14 @@ const Main = () => {
       filtered = filtered.sort((a, b) => {
         const fechaA = new Date(a.Fecha_Adquisicion);
         const fechaB = new Date(b.Fecha_Adquisicion);
-
-        return newFilters.Orden_Fecha === "Reciente"
-          ? fechaB - fechaA // Más reciente primero
-          : fechaA - fechaB; // Más antigua primero
+        return newFilters.Orden_Fecha === "Reciente" ? fechaB - fechaA : fechaA - fechaB;
       });
     }
     setFilteredEquipos(filtered);
   };
 
   const handleLogout = () => {
-    setShowLogoutModal(true); // Mostrar modal de confirmación
+    setShowLogoutModal(true);
   };
 
   const confirmLogout = () => {
@@ -71,7 +68,7 @@ const Main = () => {
   };
 
   const cancelLogout = () => {
-    setShowLogoutModal(false); // Cerrar modal
+    setShowLogoutModal(false);
   };
 
   const totalPages = Math.ceil(filteredEquipos.length / itemsPerPage);
@@ -87,41 +84,55 @@ const Main = () => {
     currentPage * itemsPerPage
   );
 
+  const navItems = [
+    { icon: Home, label: 'Inicio', route: '/Main' },
+    { icon: ShoppingCart, label: 'Proceso de Compra', route: '/ProcesoCompra' },
+    { icon: Box, label: 'Activos', route: '/equipos' },
+    { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
+    { icon: FileText, label: 'Reportes', route: '/reportes' },
+  ];
+
   return (
-    <div className="body-main">
-      <div className="main-container">
-        <div className="main-sidebar">
-          <div className="main-sidebar-header">
-            <h2 className="main-sidebar-title">SK TELECOM</h2>
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
-              alt="Logo SK Telecom"
-              className="main-sidebar-logo"
-            />
-          </div>
-          <button className="main-sidebar-btn" onClick={() => navigate('/Main')}>
-            Inicio
-          </button>
-          <button className="main-sidebar-btn" onClick={() => navigate('/ProcesoCompra')}>
-            Proceso de Compra
-          </button>
-          <button className="main-sidebar-btn" onClick={() => navigate('/equipos')}>
-            Activos
-          </button>
-          <button className="main-sidebar-btn" onClick={() => navigate('/InicioMantenimientos')}>
-            Mantenimientos
-          </button>
-          <button className="main-sidebar-btn" onClick={() => navigate('/reportes')}>
-            Reportes
-          </button>
-          <button className="main-logout-btn" onClick={handleLogout}>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-64 bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
+        <div className="p-6 space-y-2">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
+            alt="Logo SK Telecom"
+            className="h-12 w-auto"
+          />
+        </div>
+        <nav className="space-y-1 px-3 flex-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.route}
+                className="w-full flex items-center px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
+                onClick={() => navigate(item.route)}
+              >
+                <Icon className="mr-2 h-5 w-5" />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="p-4 mt-auto">
+          <button 
+            className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-5 w-5" />
             Salir
           </button>
         </div>
+      </aside>
 
+      <div className="flex-1">
         <div className="main-content">
           <div className="main-header">
-            <h1 className="main-header-title">Bienvenido al Sistema de Gestión de Mantemientos</h1>
+            <h1 className="main-header-title">Bienvenido al Sistema de Gestión de Mantenimientos</h1>
           </div>
 
           {/* Sección de "Últimos Registros" */}
@@ -223,79 +234,71 @@ const Main = () => {
             </table>
           </div>
 
-{/* Paginación */}
-<div className="pagination">
-  <button
-    onClick={() => handlePageChange(currentPage - 1)}
-    disabled={currentPage === 1}
-  >
-    &lt; Anterior
-  </button>
-  {totalPages <= 26 ? (
-    // Mostrar todas las páginas si hay 26 o menos
-    [...Array(totalPages)].map((_, index) => (
-      <button
-        key={index + 1}
-        onClick={() => handlePageChange(index + 1)}
-        className={currentPage === index + 1 ? 'active' : ''}
-      >
-        {index + 1}
-      </button>
-    ))
-  ) : (
-    <>
-      {/* Mostrar las primeras 26 páginas */}
-      {[...Array(23)].map((_, index) => (
-        <button
-          key={index + 1}
-          onClick={() => handlePageChange(index + 1)}
-          className={currentPage === index + 1 ? 'active' : ''}
-        >
-          {index + 1}
-        </button>
-      ))}
-{/* Botón de puntos suspensivos */}
-<div style={{ position: 'relative' }}>
-  <button
-    onClick={() => {
-      const extraPages = document.getElementById('extra-pages');
-      extraPages.classList.toggle('hidden'); // Alternar la visibilidad del menú
-    }}
-  >
-    ...
-  </button>
-  {/* Contenedor para las páginas adicionales */}
-  <div id="extra-pages" className="extra-pages-menu hidden">
-    {[...Array(totalPages - 23)].map((_, index) => {
-      const pageNumber = index + 24; // Calcula el número de página
-      return (
-        <button
-          key={pageNumber}
-          onClick={() => {
-            handlePageChange(pageNumber);
-            document.getElementById('extra-pages').classList.add('hidden'); // Cerrar el menú
-          }}
-          className={currentPage === pageNumber ? 'active' : ''} // Clase 'active' para la página actual
-        >
-          {pageNumber}
-        </button>
-      );
-    })}
-  </div>
-</div>
-
-    </>
-  )}
-  <button
-    onClick={() => handlePageChange(currentPage + 1)}
-    disabled={currentPage === totalPages}
-  >
-    Siguiente &gt;
-  </button>
-</div>
-
-
-
+          {/* Paginación */}
+          <div className="pagination">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              &lt; Anterior
+            </button>
+            {totalPages <= 26 ? (
+              [...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={currentPage === index + 1 ? 'active' : ''}
+                >
+                  {index + 1}
+                </button>
+              ))
+            ) : (
+              <>
+                {[...Array(23)].map((_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={currentPage === index + 1 ? 'active' : ''}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <div style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => {
+                      const extraPages = document.getElementById('extra-pages');
+                      extraPages.classList.toggle('hidden');
+                    }}
+                  >
+                    ...
+                  </button>
+                  <div id="extra-pages" className="extra-pages-menu hidden">
+                    {[...Array(totalPages - 23)].map((_, index) => {
+                      const pageNumber = index + 24;
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => {
+                            handlePageChange(pageNumber);
+                            document.getElementById('extra-pages').classList.add('hidden');
+                          }}
+                          className={currentPage === pageNumber ? 'active' : ''}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente &gt;
+            </button>
+          </div>
         </div>
       </div>
 
@@ -320,3 +323,4 @@ const Main = () => {
 };
 
 export default Main;
+
