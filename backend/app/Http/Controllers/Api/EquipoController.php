@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Equipo;
+use App\Models\ProcesoCompra;
 
 class EquipoController extends Controller
 {
@@ -43,28 +44,24 @@ class EquipoController extends Controller
 }
 
 
- 
- public function store(Request $request)
+public function store(Request $request)
 {
     // Validar el request directamente
-    $request->validate([
+    $validatedData = $request->validate([
         'Nombre_Producto' => 'required|string|max:255',
-        'Codigo_Barras'=>'required|string|max:100',
+        'Codigo_Barras' => 'required|string|max:100|unique:equipos,Codigo_Barras',
         'Tipo_Equipo' => 'required|string|in:Informático,Electrónicos y Eléctricos,Industriales,Audiovisuales',
         'Fecha_Adquisicion' => 'required|date',
         'Ubicacion_Equipo' => 'required|string|in:Departamento de TI,Laboratorio de Redes,Sala de reuniones,Laboratorio CTT',
         'Descripcion_Equipo' => 'nullable|string|max:500',
+        'proceso_compra_id' => 'required|string|exists:procesos_compra,id',
     ]);
 
-    // Usar directamente el request para asignar datos
-    $equipo = new Equipo();
-    $equipo->Nombre_Producto = $request->Nombre_Producto;
-    $equipo->Codigo_Barras=$request->Codigo_Barras;
-    $equipo->Tipo_Equipo = $request->Tipo_Equipo;
-    $equipo->Fecha_Adquisicion = $request->Fecha_Adquisicion;
-    $equipo->Ubicacion_Equipo = $request->Ubicacion_Equipo;
-    $equipo->Descripcion_Equipo = $request->Descripcion_Equipo;
-    $equipo->save();
+    // Verificar si el proceso de compra existe
+    $procesoCompra = ProcesoCompra::findOrFail($validatedData['proceso_compra_id']);
+
+    // Crear el equipo
+    $equipo = Equipo::create($validatedData);
 
     return response()->json(['success' => true, 'equipo' => $equipo], 201);
 }
@@ -78,34 +75,29 @@ class EquipoController extends Controller
     }
 
 
+    
     public function update(Request $request, string $id)
     {
         // Validar los datos enviados en el request
-        $request->validate([
+        $validatedData = $request->validate([
             'Nombre_Producto' => 'required|string|max:255',
+            'Codigo_Barras' => 'required|string|max:100|unique:equipos,Codigo_Barras,' . $id,
             'Tipo_Equipo' => 'required|string|in:Informático,Electrónicos y Eléctricos,Industriales,Audiovisuales',
             'Fecha_Adquisicion' => 'required|date',
             'Ubicacion_Equipo' => 'required|string|in:Departamento de TI,Laboratorio de Redes,Sala de reuniones,Laboratorio CTT',
             'Descripcion_Equipo' => 'nullable|string|max:500',
+            'proceso_compra_id' => 'required|string|exists:procesos_compra,id',
         ]);
-    
+
         // Encuentra el equipo por su ID
         $equipo = Equipo::findOrFail($id);
-    
+
         // Actualiza los campos
-        $equipo->Nombre_Producto = $request->Nombre_Producto;
-        $equipo->Tipo_Equipo = $request->Tipo_Equipo;
-        $equipo->Fecha_Adquisicion = $request->Fecha_Adquisicion;
-        $equipo->Ubicacion_Equipo = $request->Ubicacion_Equipo;
-        $equipo->Descripcion_Equipo = $request->Descripcion_Equipo;
-    
-        // Guarda los cambios
-        $equipo->save();
-    
+        $equipo->update($validatedData);
+
         // Retorna el equipo actualizado
         return response()->json(['success' => true, 'equipo' => $equipo], 200);
     }
-    
 
     public function destroy(string $id)
     {

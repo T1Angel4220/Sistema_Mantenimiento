@@ -16,9 +16,14 @@ return new class extends Migration
             $table->string('Nombre_Producto');
             $table->string('Codigo_Barras', 100)->unique();
             $table->enum('Tipo_Equipo', ['Informático', 'Electrónicos y Eléctricos', 'Industriales', 'Audiovisuales']); // Opciones predefinidas
-            $table->date('Fecha_Adquisicion'); 
-            $table->enum('Ubicacion_Equipo', ['Departamento de TI', 'Laboratorio de Redes', 'Sala de reuniones', 'Laboratorio CTT']); 
+            $table->date('Fecha_Adquisicion');
+            $table->enum('Ubicacion_Equipo', ['Departamento de TI', 'Laboratorio de Redes', 'Sala de reuniones', 'Laboratorio CTT']);
             $table->string('Descripcion_Equipo');
+
+            // Campo para la relación con procesos_compra
+            $table->string('proceso_compra_id');
+            $table->foreign('proceso_compra_id')->references('id')->on('procesos_compra')->onDelete('cascade');
+
             $table->timestamps();
         });
     }
@@ -28,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('DROP TABLE IF EXISTS equipos CASCADE');
+        Schema::dropIfExists('equipos');
     }
 };

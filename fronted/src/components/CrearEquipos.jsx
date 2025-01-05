@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Notification from './Notification'; // Importar el componente Notification
+import Notification from './Notification';
 import './CrearEquipos.css';
 
-const endpoint = 'http://localhost:8000/api/equipo';
+const endpoint = 'http://localhost:8000/api';
 
 const CrearEquipos = () => {
     const [formData, setFormData] = useState({
         Nombre_Producto: '',
-        Codigo_Barras: '', // Nuevo campo para el código de barras
+        Codigo_Barras: '',
         Tipo_Equipo: '',
         Fecha_Adquisicion: '',
         Ubicacion_Equipo: '',
-        Descripcion_Equipo: ''
+        Descripcion_Equipo: '',
+        proceso_compra_id: '' // This will store the PRC-XXX format ID
     });
 
-    const [error, setError] = useState(''); // Estado para manejar mensajes de error
-    const [notification, setNotification] = useState({ message: '', type: '' }); // Estado para manejar notificaciones
+    const [error, setError] = useState('');
+    const [notification, setNotification] = useState({ message: '', type: '' });
+    const [procesosCompra, setProcesosCompra] = useState([]);
     const navigate = useNavigate();
 
     const tiposDeEquipos = ['Informático', 'Electrónicos y Eléctricos', 'Industriales', 'Audiovisuales'];
@@ -30,9 +32,26 @@ const CrearEquipos = () => {
             navigate('/equipos', { replace: true });
         };
 
-        // Reemplazar la entrada actual en el historial
         window.history.replaceState(null, '', window.location.href);
         window.addEventListener('popstate', handlePopState);
+
+        // Updated fetch function to handle errors properly
+        const fetchProcesosCompra = async () => {
+            try {
+                const response = await axios.get(`${endpoint}/procesos-compra`);
+                if (response.data) {
+                    setProcesosCompra(response.data);
+                }
+            } catch (error) {
+                console.error('Error al cargar procesos de compra:', error);
+                setNotification({
+                    message: 'Error al cargar procesos de compra. Por favor, intente nuevamente.',
+                    type: 'error'
+                });
+            }
+        };
+
+        fetchProcesosCompra();
 
         return () => {
             window.removeEventListener('popstate', handlePopState);
@@ -47,7 +66,7 @@ const CrearEquipos = () => {
             return;
         }
 
-        setError(''); // Limpiar el mensaje de error si todo es válido
+        setError('');
 
         setFormData(prevState => ({
             ...prevState,
@@ -64,23 +83,31 @@ const CrearEquipos = () => {
         }
 
         try {
-            const response = await axios.post(endpoint, formData);
+            // Ensure proceso_compra_id is included in the request
+            const response = await axios.post(`${endpoint}/equipo`, {
+                ...formData,
+                proceso_compra_id: formData.proceso_compra_id // Make sure this is included
+            });
+            
             if (response.status === 201) {
-                setNotification({ message: 'Equipo creado correctamente.', type: 'success' }); // Mostrar notificación
-                setTimeout(() => navigate('/equipos', { replace: true }), 2000); // Redirigir después de 2 segundos
-            } else {
-                setNotification({ message: 'Error al crear el equipo.', type: 'error' }); // Mostrar error
+                setNotification({
+                    message: 'Equipo creado correctamente.',
+                    type: 'success'
+                });
+                setTimeout(() => navigate('/equipos', { replace: true }), 2000);
             }
         } catch (error) {
             console.error('Error al crear el equipo:', error);
-            setNotification({ message: 'Hubo un error al crear el equipo. Intenta nuevamente.', type: 'error' });
+            setNotification({
+                message: error.response?.data?.message || 'Error al crear el equipo. Por favor, intente nuevamente.',
+                type: 'error'
+            });
         }
     };
 
     return (
         <div className="crear-equipos-body">
             <div className="crear-equipos-container">
-                {/* Notificación */}
                 {notification.message && (
                     <Notification
                         message={notification.message}
@@ -104,7 +131,6 @@ const CrearEquipos = () => {
                         />
                     </div>
 
-                    {/* Nuevo campo para el código de barras debajo del nombre del producto */}
                     <div className="crear-equipos-form-group">
                         <label htmlFor="Codigo_Barras" className="crear-equipos-label">Código de Barras</label>
                         <input
@@ -150,7 +176,7 @@ const CrearEquipos = () => {
                             required
                         />
                     </div>
-                    {error && <p className="crear-equipos-error">{error}</p>} {/* Mostrar mensaje de error */}
+                    {error && <p className="crear-equipos-error">{error}</p>}
 
                     <div className="crear-equipos-form-group">
                         <label htmlFor="Ubicacion_Equipo" className="crear-equipos-label">Ubicación del Equipo</label>
@@ -183,6 +209,28 @@ const CrearEquipos = () => {
                         />
                     </div>
 
+                    {/* Updated Proceso de Compra field */}
+                    <div className="crear-equipos-form-group">
+                        <label htmlFor="proceso_compra_id" className="crear-equipos-label">
+                            Proceso de Compra
+                        </label>
+                        <select
+                            id="proceso_compra_id"
+                            name="proceso_compra_id"
+                            className="crear-equipos-select"
+                            value={formData.proceso_compra_id}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Seleccione un proceso de compra</option>
+                            {procesosCompra.map((proceso) => (
+                                <option key={proceso.id} value={proceso.id}>
+                                    {`${proceso.id} - ${proceso.nombre}`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <button type="submit" className="crear-equipos-submit-btn" disabled={!!error}>Crear Equipo</button>
                     <button type="button" className="crear-equipos-cancel-btn" onClick={() => navigate('/equipos')}>Regresar</button>
                 </form>
@@ -192,3 +240,4 @@ const CrearEquipos = () => {
 };
 
 export default CrearEquipos;
+

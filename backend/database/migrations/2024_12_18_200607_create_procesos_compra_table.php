@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('procesos_compra', function (Blueprint $table) {
-            $table->id(); // ID autoincremental
+            $table->string('id')->primary(); // Cambiado a string para permitir formato PRC-XXX
             $table->string('nombre', 150); // Nombre del proceso de compra
             $table->text('descripcion')->nullable(); // Descripción opcional
             $table->date('fecha'); // Fecha

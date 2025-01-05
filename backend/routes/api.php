@@ -99,3 +99,6 @@ Route::prefix('equipo-componentes')->group(function () {
     Route::put('/{id}', [EquipoComponenteController::class, 'update']);
     Route::delete('/{id}', [EquipoComponenteController::class, 'destroy']);
 });
+
+Route::get('/procesos-compra', [ProcesoCompraController::class, 'index']);
+Route::post('/equipo', [EquipoController::class, 'store']);

@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import Notification from "./Notification"; // Importar el componente Notification
+import Notification from "./Notification";
 import './EditarEquipo.css';
 
-const endpoint = 'http://localhost:8000/api/equipo';
+const endpoint = 'http://localhost:8000/api';
 
 const EditarEquipo = () => {
     const [formData, setFormData] = useState({
-        Codigo_Barras: '', // Añadido el campo Código de Barras
+        Codigo_Barras: '',
         Nombre_Producto: '',
         Tipo_Equipo: '',
         Fecha_Adquisicion: '',
         Ubicacion_Equipo: '',
-        Descripcion_Equipo: ''
+        Descripcion_Equipo: '',
+        proceso_compra_id: '' // Added proceso_compra_id field
     });
 
-    const [error, setError] = useState(''); // Estado para manejar mensajes de error
-    const [notification, setNotification] = useState({ message: '', type: '' }); // Estado para manejar notificaciones
+    const [error, setError] = useState('');
+    const [notification, setNotification] = useState({ message: '', type: '' });
+    const [procesosCompra, setProcesosCompra] = useState([]); // State to store procesos de compra
     const tiposDeEquipos = ['Informático', 'Electrónicos y Eléctricos', 'Industriales', 'Audiovisuales'];
     const ubicacionesDeEquipo = ['Departamento de TI', 'Laboratorio de Redes', 'Sala de reuniones', 'Laboratorio CTT'];
 
@@ -29,7 +31,7 @@ const EditarEquipo = () => {
     useEffect(() => {
         const fetchEquipo = async () => {
             try {
-                const response = await axios.get(`${endpoint}/${id}`);
+                const response = await axios.get(`${endpoint}/equipo/${id}`);
                 setFormData(response.data);
             } catch (error) {
                 console.error("Error al cargar el equipo:", error);
@@ -37,7 +39,18 @@ const EditarEquipo = () => {
             }
         };
 
+        const fetchProcesosCompra = async () => {
+            try {
+                const response = await axios.get(`${endpoint}/procesos-compra`);
+                setProcesosCompra(response.data);
+            } catch (error) {
+                console.error("Error al cargar procesos de compra:", error);
+                setNotification({ message: "Error al cargar procesos de compra.", type: "error" });
+            }
+        };
+
         fetchEquipo();
+        fetchProcesosCompra();
     }, [id]);
 
     const handleChange = (e) => {
@@ -48,7 +61,7 @@ const EditarEquipo = () => {
             return;
         }
 
-        setError(''); // Limpiar el mensaje de error si todo es válido
+        setError('');
 
         setFormData(prevState => ({
             ...prevState,
@@ -65,9 +78,9 @@ const EditarEquipo = () => {
         }
 
         try {
-            await axios.put(`${endpoint}/${id}`, formData);
+            await axios.put(`${endpoint}/equipo/${id}`, formData);
             setNotification({ message: "Equipo actualizado correctamente.", type: "success" });
-            setTimeout(() => navigate('/equipos', { replace: true }), 2000); // Redirigir con replace para evitar volver con las flechas
+            setTimeout(() => navigate('/equipos', { replace: true }), 2000);
         } catch (error) {
             console.error('Error al actualizar el equipo:', error);
             setNotification({ message: "Hubo un error al actualizar el equipo. Intenta nuevamente.", type: "error" });
@@ -76,7 +89,6 @@ const EditarEquipo = () => {
 
     return (
         <div className="main-editar-equipos-body">
-            {/* Notificación fuera del contenedor */}
             {notification.message && (
                 <Notification
                     message={notification.message}
@@ -88,14 +100,14 @@ const EditarEquipo = () => {
             <div className="main-editar-equipo-container">
                 <h2>Editar Equipo</h2>
                 <form className="main-editar-equipo-form" onSubmit={handleSubmit}>
-                <div className="form-group">
+                    <div className="form-group">
                         <label htmlFor="Codigo_Barras">Código de Barras</label>
                         <input
                             type="text"
                             id="Codigo_Barras"
                             name="Codigo_Barras"
                             value={formData.Codigo_Barras}
-                            readOnly // Campo no editable
+                            readOnly
                         />
                     </div>
 
@@ -141,7 +153,7 @@ const EditarEquipo = () => {
                             required
                         />
                     </div>
-                    {error && <p className="editar-equipo-error">{error}</p>} {/* Mostrar mensaje de error */}
+                    {error && <p className="editar-equipo-error">{error}</p>}
 
                     <div className="form-group">
                         <label htmlFor="Ubicacion_Equipo">Ubicación del Equipo</label>
@@ -172,6 +184,25 @@ const EditarEquipo = () => {
                         />
                     </div>
 
+                    {/* New form group for Proceso de Compra */}
+                    <div className="form-group">
+                        <label htmlFor="proceso_compra_id">Proceso de Compra</label>
+                        <select
+                            id="proceso_compra_id"
+                            name="proceso_compra_id"
+                            value={formData.proceso_compra_id}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Seleccione un proceso de compra</option>
+                            {procesosCompra.map((proceso) => (
+                                <option key={proceso.id} value={proceso.id}>
+                                    {`${proceso.id} - ${proceso.nombre}`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="main-editar-equipo-buttons">
                         <a href="/equipos" className="main-editar-equipo-btn-regresar">Regresar a la Lista de Equipos</a>
                         <button type="submit" className="main-editar-equipo-btn" disabled={!!error}>
@@ -185,3 +216,4 @@ const EditarEquipo = () => {
 };
 
 export default EditarEquipo;
+

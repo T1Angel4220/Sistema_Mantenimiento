@@ -10,7 +10,7 @@ class ProcesoCompraController extends Controller
     // Obtener todos los procesos de compra
     public function index()
     {
-        $compras = ProcesoCompra::all();
+        $compras = ProcesoCompra::orderBy('created_at', 'desc')->get();
         return response()->json($compras);
     }
 
@@ -24,16 +24,23 @@ class ProcesoCompraController extends Controller
             'date' => 'required|date',
             'provider' => 'required|string|max:255',
         ]);
-    
-        // Guardar los datos en la base de datos
-        $compra = ProcesoCompra::create([
-            'nombre' => $request->name,
-            'descripcion' => $request->description,
-            'fecha' => $request->date,
-            'proveedor' => $request->provider,
-        ]);
-    
-        return response()->json($compra, 201);
-    }    
-    
+
+        try {
+            // Guardar los datos en la base de datos
+            $compra = ProcesoCompra::create([
+                'nombre' => $request->name,
+                'descripcion' => $request->description,
+                'fecha' => $request->date,
+                'proveedor' => $request->provider === 'Otro' ? $request->providerOther : $request->provider,
+            ]);
+
+            return response()->json($compra, 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear el proceso de compra',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
+
