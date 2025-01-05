@@ -219,6 +219,7 @@ const MostrarEquipos = () => {
                         <table className="w-full">
                             <thead className="bg-gray-100">
                                 <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Código de Barras</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Nombre del Producto</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Tipo de Equipo</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Fecha de Adquisición</th>
@@ -230,6 +231,7 @@ const MostrarEquipos = () => {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {displayedEquipos.map((equipo) => (
                                     <tr key={equipo.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{equipo.Codigo_Barras}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{equipo.Nombre_Producto}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{equipo.Tipo_Equipo}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{equipo.Fecha_Adquisicion}</td>
@@ -336,4 +338,3 @@ const MostrarEquipos = () => {
 };
 
 export default MostrarEquipos;
-
