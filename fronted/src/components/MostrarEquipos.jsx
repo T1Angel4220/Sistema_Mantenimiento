@@ -74,18 +74,24 @@ const MostrarEquipos = () => {
           });
   
           setMessage(response.data.message);
-          setNotification({ message: 'Información insertada correctamente.', type: 'success' });
+          setNotification({ message: response.data.message, type: 'success' });
           setShowModal(false); // Cierra el modal
           getAllEquipos(); // Actualiza la tabla después de cargar el archivo
           setFile(null); // Reinicia el archivo seleccionado
-      } catch (error) {
-          const errorMessage = error.response?.data?.message || 'Error desconocido al cargar el archivo.';
-          setMessage(errorMessage);
-          setNotification({ message: 'Sube otro archivo válido. El archivo no cumple con el formato requerido o esta vacío.', type: 'error' });
-          getAllEquipos(); // Actualiza la tabla después de cargar el archivo
-          setFile(null); // Reinicia el archivo seleccionado
-      }
-  };
+        } catch (error) {
+            if (error.response?.status === 422) {
+                const duplicatedCodes = error.response?.data?.duplicated_codes || [];
+                const errorMessage = `${error.response?.data?.message} Códigos duplicados: ${duplicatedCodes.join(', ')}`;
+                setNotification({ message: errorMessage, type: 'warning' });
+            } else {
+                const errorMessage = error.response?.data?.message || 'Error desconocido al cargar el archivo.';
+                setNotification({ message: errorMessage, type: 'error' });
+            }
+    
+            getAllEquipos(); // Actualiza la tabla después de cargar el archivo
+            setFile(null); // Reinicia el archivo seleccionado
+        }
+    };
   
     const confirmDelete = (id) => {
         setDeleteId(id);
@@ -206,6 +212,7 @@ const MostrarEquipos = () => {
                         <table className="tableEquipos">
                             <thead>
                                 <tr>
+                                <th>Código de Barras</th>
                                     <th>Nombre del Producto</th>
                                     <th>Tipo de Equipo</th>
                                     <th>Fecha de Adquisición</th>
@@ -218,6 +225,8 @@ const MostrarEquipos = () => {
                                 {displayedEquipos.length > 0 ? (
                                     displayedEquipos.map((equipo) => (
                                         <tr key={equipo.id}>
+                                            <td>{equipo.Codigo_Barras}</td>
+
                                             <td>{equipo.Nombre_Producto}</td>
                                             <td>{equipo.Tipo_Equipo}</td>
                                             <td>{equipo.Fecha_Adquisicion}</td>

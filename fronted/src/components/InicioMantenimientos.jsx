@@ -30,6 +30,7 @@ import {
   CircularProgress,
   Grid,
   Alert,
+  Snackbar,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -48,7 +49,6 @@ import { format } from 'date-fns';
 
 const endpoint = 'http://localhost:8000/api';
 
-// Create an axios instance with default config
 const api = axios.create({
   baseURL: endpoint,
   headers: {
@@ -78,6 +78,37 @@ const theme = createTheme({
     text: {
       primary: '#2f3b52',
       secondary: '#34495e',
+    },
+  },
+  components: {
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          padding: '14px',
+          backgroundColor: '#ffffff',
+          '&:focus': {
+            backgroundColor: '#ffffff',
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: '#ffffff',
+            '& fieldset': {
+              borderColor: 'rgba(0, 0, 0, 0.23)',
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(0, 0, 0, 0.87)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#2f3b52',
+            },
+          },
+        },
+      },
     },
   },
 });
@@ -127,34 +158,31 @@ const MaintenanceTable = () => {
   const [availableComponents, setAvailableComponents] = useState([]);
   const [selectedComponent, setSelectedComponent] = useState('');
   const [componentQuantity, setComponentQuantity] = useState(1);
-  const [componentChanges, setComponentChanges] = useState({ added: [], removed: [] }); // Added state for component changes
+  const [componentChanges, setComponentChanges] = useState({ added: [], removed: [] });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const navigate = useNavigate();
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
+
   const fetchProveedores = async () => {
     setIsLoadingProveedores(true);
     try {
       const response = await api.get('/proveedores');
-      console.log('Proveedores response:', response.data);
       if (response.status === 200) {
-        // Ensure we're setting the array of provider names directly
         const proveedoresArray = Array.isArray(response.data) ? response.data : [];
         setProveedores(proveedoresArray);
-      } else {
-        console.error('Error: El formato de los datos no es válido.', response.data);
-        setProveedores([]);
       }
     } catch (error) {
-      console.error('Error al cargar proveedores:', error.message);
+      console.error('Error al cargar proveedores:', error);
       setProveedores([]);
     } finally {
       setIsLoadingProveedores(false);
     }
   };
-
 
   const handleSelectComponent = (e, equipoId) => {
     setSelectedMaintenance((prevState) => ({
@@ -166,7 +194,7 @@ const MaintenanceTable = () => {
       ),
     }));
   };
-  
+
   const handleSetComponentQuantity = (e, equipoId) => {
     setSelectedMaintenance((prevState) => ({
       ...prevState,
@@ -177,7 +205,7 @@ const MaintenanceTable = () => {
       ),
     }));
   };
-  
+
   const handleAddComponentToEquipo = (equipoId) => {
     setSelectedMaintenance((prevState) => ({
       ...prevState,
@@ -189,7 +217,7 @@ const MaintenanceTable = () => {
                 ...equipo.componentes,
                 {
                   id: parseInt(equipo.selectedComponent),
-                  nombre: availableComponents.find((c) => c.id === equipo.selectedComponent)?.nombre || '',
+                  nombre: availableComponents.find((c) => c.id === parseInt(equipo.selectedComponent))?.nombre || '',
                   cantidad: equipo.componentQuantity || 1,
                 },
               ],
@@ -200,7 +228,7 @@ const MaintenanceTable = () => {
       ),
     }));
   };
-  
+
   const handleRemoveComponent = (equipoId, componenteId) => {
     setSelectedMaintenance((prevState) => ({
       ...prevState,
@@ -214,6 +242,7 @@ const MaintenanceTable = () => {
       ),
     }));
   };
+
   const filteredData = data.filter((item) => {
     return (
       Object.entries(filters).every(([key, value]) => {
@@ -238,14 +267,8 @@ const MaintenanceTable = () => {
     setIsLoading(true);
     setSelectedMaintenance(null);
     try {
-      const response = await axios.get(`http://localhost:8000/api/mantenimientoDetalles/${maintenance.id}`);
-      console.log('Maintenance data:', response.data);
-      console.log('Maintenance data:', maintenance.id);
-
+      const response = await api.get(`/mantenimientoDetalles/${maintenance.id}`);
       const maintenanceData = response.data;
-
-
-
       setSelectedMaintenance(maintenanceData);
 
       if (maintenanceData.tipo === 'Externo') {
@@ -257,7 +280,6 @@ const MaintenanceTable = () => {
       console.error('Error:', error);
       let errorMessage = 'Error al cargar los detalles del mantenimiento';
       if (error.response) {
-        console.log('Error response:', error.response);
         errorMessage = `Error ${error.response.status}: ${error.response.data.message || 'Error del servidor'}`;
       }
       setSelectedMaintenance({
@@ -281,26 +303,18 @@ const MaintenanceTable = () => {
 
   const handleSave = async () => {
     try {
-      console.log("Mantenimiento guardado")
-      console.log(selectedMaintenance)
-      // 1. Actualizar la información del mantenimiento
-      await api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`,
-        selectedMaintenance,
-      );
-      console.log(componentChanges);
-      // 2. Procesar los componentes añadidos
-      
-
-      // 4. Recargar los datos actualizados
+      await api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`, selectedMaintenance);
       const response = await api.get('/mantenimientos');
       setData(response.data);
-
-      // Resetear estado de cambios
       setComponentChanges({ added: [], removed: [] });
       setIsEditing(false);
       setOpenDialog(false);
+      setSnackbarMessage('Cambios guardados correctamente');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error al guardar los cambios:', error);
+      setSnackbarMessage('Error al guardar los cambios');
+      setSnackbarOpen(true);
     }
   };
 
@@ -310,7 +324,6 @@ const MaintenanceTable = () => {
       const updatedState = { ...prev, [name]: value };
 
       if (name === 'tipo') {
-        console.log(`Tipo seleccionado: ${value}`);
         if (value === 'Externo') {
           fetchProveedores();
         } else if (value === 'Interno') {
@@ -332,36 +345,6 @@ const MaintenanceTable = () => {
       console.error('Error al cargar componentes:', error);
     }
   };
-
-  const handleAddComponent = () => {
-    if (!selectedComponent) return;
-
-    const componentToAdd = availableComponents.find(c => c.id === parseInt(selectedComponent));
-    if (!componentToAdd) return;
-
-    // Actualiza el estado local del mantenimiento
-    setSelectedMaintenance((prev) => ({
-      ...prev,
-      componentes: [
-        ...(prev.componentes || []),
-        { ...componentToAdd, cantidad: componentQuantity },
-      ],
-    }));
-
-    // Añade al estado de cambios
-    setComponentChanges((prev) => ({
-      ...prev,
-      added: [
-        ...prev.added,
-        { id: componentToAdd.id, cantidad: componentQuantity },
-      ],
-    }));
-
-    setSelectedComponent('');
-    setComponentQuantity(1);
-  };
-
-
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -474,6 +457,9 @@ const MaintenanceTable = () => {
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Tipo</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Inicio</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Fin</TableCell>
+                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Proveedor</TableCell>
+                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Contacto Proveedor</TableCell>
+                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Costo</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Observaciones</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Acciones</TableCell>
               </TableRow>
@@ -497,6 +483,9 @@ const MaintenanceTable = () => {
                   </TableCell>
                   <TableCell>{formatDate(item.fecha_inicio)}</TableCell>
                   <TableCell>{formatDate(item.fecha_fin)}</TableCell>
+                  <TableCell>{item.proveedor || '-'}</TableCell>
+                  <TableCell>{item.contacto_proveedor || '-'}</TableCell>
+                  <TableCell>{item.costo ? `$${item.costo}` : '-'}</TableCell>
                   <TableCell>{item.observaciones}</TableCell>
                   <TableCell>
                     <Tooltip title="Ver detalles">
@@ -558,7 +547,7 @@ const MaintenanceTable = () => {
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
                   {selectedMaintenance && (
-                    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(2, 1fr)' }}>
+                    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(2, 1fr)', p: 3 }}>
                       <TextField
                         label="Código Mantenimiento"
                         value={selectedMaintenance.codigo_mantenimiento || ''}
@@ -579,30 +568,37 @@ const MaintenanceTable = () => {
                           native: true,
                         }}
                       >
+                        <option value="">Seleccione un tipo</option>
                         <option value="Interno">Interno</option>
                         <option value="Externo">Externo</option>
                       </TextField>
 
-
-
-
                       <TextField
                         label="Fecha Inicio"
-                        value={formatDate(selectedMaintenance.fecha_inicio) || ''}
+                        type="date"
+                        value={selectedMaintenance.fecha_inicio?.split('T')[0] || ''}
                         fullWidth
                         disabled={!isEditing}
                         name="fecha_inicio"
                         onChange={handleInputChange}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
                       />
                       <TextField
                         label="Fecha Fin"
-                        value={formatDate(selectedMaintenance.fecha_fin) || ''}
+                        type="date"
+                        value={selectedMaintenance.fecha_fin?.split('T')[0] || ''}
                         fullWidth
                         disabled={!isEditing}
                         name="fecha_fin"
                         onChange={handleInputChange}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
                       />
-                      {selectedMaintenance.tipo == 'Externo' && (
+
+                      {selectedMaintenance.tipo === 'Externo' && (
                         <>
                           {isLoadingProveedores ? (
                             <CircularProgress />
@@ -618,15 +614,20 @@ const MaintenanceTable = () => {
                               SelectProps={{
                                 native: true,
                               }}
+                              sx={{
+                                '& .MuiSelect-select': {
+                                  padding: '16.5px 14px',
+                                  backgroundColor: 'background.paper',
+                                },
+                              }}
                             >
-                              <option value="">Seleccione un proveedor</option>
+                              <option value=""></option>
                               {proveedores.map((prov, index) => (
                                 <option key={index} value={typeof prov === 'string' ? prov : prov.nombre}>
                                   {typeof prov === 'string' ? prov : prov.nombre}
                                 </option>
                               ))}
                             </TextField>
-
                           )}
                           <TextField
                             label="Contacto Proveedor"
@@ -643,6 +644,10 @@ const MaintenanceTable = () => {
                             disabled={!isEditing}
                             name="costo"
                             onChange={handleInputChange}
+                            type="number"
+                            InputProps={{
+                              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                            }}
                           />
                         </>
                       )}
@@ -655,6 +660,7 @@ const MaintenanceTable = () => {
                         disabled={!isEditing}
                         name="observaciones"
                         onChange={handleInputChange}
+                        sx={{ gridColumn: '1 / -1' }}
                       />
                     </Box>
                   )}
@@ -679,7 +685,6 @@ const MaintenanceTable = () => {
                                 {actividad.nombre}
                               </Typography>
                             }
-                            secondary={`ID: ${actividad.id}`}
                           />
                         </ListItem>
                       ))}
@@ -698,7 +703,6 @@ const MaintenanceTable = () => {
                       <List>
                         {selectedMaintenance.equipos.map((equipo) => (
                           <Box key={equipo.id} sx={{ mb: 3 }}>
-                            {/* Encabezado del equipo */}
                             <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
                               Equipo: {equipo.Nombre_Producto}
                             </Typography>
@@ -706,7 +710,6 @@ const MaintenanceTable = () => {
                               Código de Barras: {equipo.Codigo_Barras}
                             </Typography>
 
-                            {/* Opción para agregar componentes al equipo */}
                             {isEditing && (
                               <Box
                                 sx={{
@@ -726,12 +729,18 @@ const MaintenanceTable = () => {
                                   label="Componente"
                                   value={equipo.selectedComponent || ''}
                                   onChange={(e) => handleSelectComponent(e, equipo.id)}
-                                  sx={{ minWidth: 200 }}
+                                  sx={{
+                                    minWidth: 200,
+                                    '& .MuiSelect-select': {
+                                      padding: '16.5px 14px',
+                                      backgroundColor: 'background.paper',
+                                    },
+                                  }}
                                   SelectProps={{
                                     native: true,
                                   }}
                                 >
-                                  <option value="">Seleccione un componente</option>
+                                  <option value=""></option>
                                   {availableComponents.map((comp) => (
                                     <option key={comp.id} value={comp.id}>
                                       {comp.nombre}
@@ -757,7 +766,6 @@ const MaintenanceTable = () => {
                               </Box>
                             )}
 
-                            {/* Lista de componentes del equipo */}
                             {equipo.componentes?.length > 0 ? (
                               <List>
                                 {equipo.componentes.map((componente) => (
@@ -793,16 +801,11 @@ const MaintenanceTable = () => {
                                         </Box>
                                       }
                                       secondary={
-                                        <>
+                                        componente.descripcion && (
                                           <Typography component="span" display="block">
-                                            ID: {componente.id}
+                                            {componente.descripcion}
                                           </Typography>
-                                          {componente.descripcion && (
-                                            <Typography component="span" display="block">
-                                              Descripción: {componente.descripcion}
-                                            </Typography>
-                                          )}
-                                        </>
+                                        )
                                       }
                                     />
                                   </ListItem>
@@ -823,7 +826,6 @@ const MaintenanceTable = () => {
                     )}
                   </Box>
                 </TabPanel>
-
                 <TabPanel value={tabValue} index={3}>
                   {selectedMaintenance?.equipos?.length > 0 ? (
                     <List>
@@ -918,6 +920,20 @@ const MaintenanceTable = () => {
             </Button>
           </DialogActions>
         </Dialog>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}
+          onClose={() => setSnackbarOpen(false)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={() => setSnackbarOpen(false)} 
+            severity="success" 
+            sx={{ width: '100%' }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </ThemeProvider>
   );

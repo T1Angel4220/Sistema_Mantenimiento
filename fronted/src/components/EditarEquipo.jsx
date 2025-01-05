@@ -8,6 +8,7 @@ const endpoint = 'http://localhost:8000/api/equipo';
 
 const EditarEquipo = () => {
     const [formData, setFormData] = useState({
+        Codigo_Barras: '', // Añadido el campo Código de Barras
         Nombre_Producto: '',
         Tipo_Equipo: '',
         Fecha_Adquisicion: '',
@@ -87,6 +88,17 @@ const EditarEquipo = () => {
             <div className="main-editar-equipo-container">
                 <h2>Editar Equipo</h2>
                 <form className="main-editar-equipo-form" onSubmit={handleSubmit}>
+                <div className="form-group">
+                        <label htmlFor="Codigo_Barras">Código de Barras</label>
+                        <input
+                            type="text"
+                            id="Codigo_Barras"
+                            name="Codigo_Barras"
+                            value={formData.Codigo_Barras}
+                            readOnly // Campo no editable
+                        />
+                    </div>
+
                     <div className="form-group">
                         <label htmlFor="Nombre_Producto">Nombre del Producto</label>
                         <input

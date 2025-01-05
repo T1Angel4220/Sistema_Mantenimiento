@@ -41,8 +41,9 @@ class EquipoImportController extends Controller
 
             unset($data[0]); // Remover la cabecera si la hay
 
+
             foreach ($data as $row) {
-                $row = array_filter($row, function($value) {
+                $row = array_filter($row, function ($value) {
                     return !is_null($value) && $value !== '';
                 });
 
@@ -52,27 +53,39 @@ class EquipoImportController extends Controller
 
                 $row = array_values($row); // Re-indexar el array después de filtrar
 
+                $codigoBarras = $row[0] ?? null; // Código de barras (columna 1, índice 0)
+                if ($codigoBarras && Equipo::where('Codigo_Barras', $codigoBarras)->exists()) {
+                    $duplicatedCodes[] = $codigoBarras; // Agregar el código duplicado a la lista
+                    continue; // Omitir esta fila
+                }
+
                 $fechaAdquisicion = null;
-                if (!empty($row[2])) {
+                if (!empty($row[3])) { // Fecha de adquisición (columna 4, índice 3)
                     try {
-                        $fechaAdquisicion = Carbon::createFromFormat('d/m/Y', $row[2])->format('Y-m-d');
+                        $fechaAdquisicion = Carbon::createFromFormat('d/m/Y', $row[3])->format('Y-m-d');
                     } catch (\Exception $e) {
                         $fechaAdquisicion = null;
                     }
                 }
 
                 Equipo::create([
-                    'Nombre_Producto' => $row[0] ?? null,
-                    'Tipo_Equipo' => $row[1] ?? null,
+                    'Codigo_Barras' => $codigoBarras,
+                    'Nombre_Producto' => $row[1] ?? null, // Nombre del producto (columna 2, índice 1)
+                    'Tipo_Equipo' => $row[2] ?? null, // Tipo de equipo (columna 3, índice 2)
                     'Fecha_Adquisicion' => $fechaAdquisicion,
-                    'Ubicacion_Equipo' => $row[3] ?? null,
-                    'Descripcion_Equipo' => $row[4] ?? null,
+                    'Ubicacion_Equipo' => $row[4] ?? null, // Ubicación (columna 5, índice 4)
+                    'Descripcion_Equipo' => $row[5] ?? null, // Descripción (columna 6, índice 5)
                 ]);
+            }
+
+            if (!empty($duplicatedCodes)) {
+                return response()->json([
+                    'message' => 'Equipos insertados con éxito, excepto los códigos duplicados. Actualice los códigos y reintente.',
+                ], 422);
             }
 
             return response()->json(['message' => 'Los datos se insertaron correctamente.'], 200);
         } catch (\Exception $e) {
-            // Cambiar el mensaje de error a uno genérico
             return response()->json(['message' => 'Error: el archivo no cumple con la estructura de la base de datos.'], 500);
         }
     }
