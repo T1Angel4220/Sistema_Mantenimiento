@@ -22,6 +22,7 @@ class Mantenimiento extends Model
         'contacto_proveedor',
         'costo',
         'observaciones',
+        'estado',
     ];
     
     protected $casts = [

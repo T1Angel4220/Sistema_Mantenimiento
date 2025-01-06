@@ -9,6 +9,7 @@ use App\Models\EquipoMantenimiento;
 use App\Models\EquipoComponente;
 use App\Models\Equipo;
 use App\Models\Actividad;
+use Illuminate\Support\Facades\Log;
 class MantenimientoController extends Controller
 {
    
@@ -161,6 +162,7 @@ class MantenimientoController extends Controller
             'contacto_proveedor' => 'nullable|string|max:100',
             'costo' => 'nullable|numeric|min:0',
             'observaciones' => 'nullable|string|max:500',
+            'estado' => 'required|string|in:Terminado,No Terminado',
             'equipos' => 'required|array',
             'equipos.*.id' => 'required|exists:equipos,id',
             'equipos.*.componentes' => 'nullable|array',
@@ -183,7 +185,8 @@ class MantenimientoController extends Controller
             'proveedor' => $validatedData['proveedor'],
             'contacto_proveedor' => $validatedData['contacto_proveedor'],
             'costo' => $validatedData['costo'],
-            'observaciones' => $validatedData['observaciones'] ?? $mantenimiento->observaciones,
+            'observaciones' => $validatedData['observaciones'],
+            'estado' => $validatedData['estado'],
         ]);
     
         // Actualizar los equipos y sus componentes
@@ -259,7 +262,10 @@ class MantenimientoController extends Controller
 public function showMantenimientoDetalles($id)
 {
     // Obtener el mantenimiento con sus datos básicos
-    $mantenimiento = DB::table('mantenimiento')->where('id', $id)->first();
+    $mantenimiento = DB::table('mantenimiento')
+    ->select('mantenimiento.*') // Esto incluirá todas las columnas, incluido 'estado'
+    ->where('id', $id)
+    ->first();
 
     if (!$mantenimiento) {
         return response()->json(['error' => 'Mantenimiento no encontrado'], 404);
@@ -301,7 +307,34 @@ public function showMantenimientoDetalles($id)
     return response()->json($response);
 }
 
-    
+public function updateEstado(Request $request, $id)
+{
+    try {
+        $request->validate([
+            'estado' => 'required|in:Terminado,No Terminado',
+        ]);
+
+        $mantenimiento = Mantenimiento::findOrFail($id);
+        $estadoAnterior = $mantenimiento->estado;
+        $mantenimiento->estado = $request->estado;
+        $mantenimiento->save();
+
+        Log::info("Estado actualizado para mantenimiento ID: $id. Anterior: $estadoAnterior, Nuevo: {$mantenimiento->estado}");
+
+        return response()->json([
+            'message' => 'Estado actualizado correctamente',
+            'estado' => $mantenimiento->estado,
+            'estadoAnterior' => $estadoAnterior
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar estado: ' . $e->getMessage());
+        return response()->json([
+            'message' => 'Error al actualizar el estado',
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+}
     public function destroy($id)
     {
         $mantenimiento = Mantenimiento::findOrFail($id);

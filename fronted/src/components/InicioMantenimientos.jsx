@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
   Table,
   TableBody,
@@ -46,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import axios from 'axios';
 
 const endpoint = 'http://localhost:8000/api';
 
@@ -145,6 +145,7 @@ const MaintenanceTable = () => {
     contacto_proveedor: '',
     costo: '',
     observaciones: '',
+    estado: '',
   });
 
   const [data, setData] = useState([]);
@@ -350,6 +351,30 @@ const MaintenanceTable = () => {
     setTabValue(newValue);
   };
 
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      await api.put(`/mantenimientos/${id}/estado`, { estado: newStatus });
+      setSnackbarMessage('Estado actualizado correctamente');
+      setSnackbarOpen(true);
+      
+      // Actualizar el estado en la tabla
+      setData(prevData => 
+        prevData.map(item => 
+          item.id === id ? { ...item, estado: newStatus } : item
+        )
+      );
+
+      // Si el mantenimiento está seleccionado, actualizar también su estado
+      if (selectedMaintenance && selectedMaintenance.id === id) {
+        setSelectedMaintenance(prev => ({ ...prev, estado: newStatus }));
+      }
+    } catch (error) {
+      console.error('Error al actualizar el estado:', error);
+      setSnackbarMessage('Error al actualizar el estado');
+      setSnackbarOpen(true);
+    }
+  };
+
   useEffect(() => {
     api.get('/mantenimientos')
       .then((response) => {
@@ -461,6 +486,7 @@ const MaintenanceTable = () => {
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Contacto Proveedor</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Costo</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Observaciones</TableCell>
+                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Estado</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
@@ -487,6 +513,18 @@ const MaintenanceTable = () => {
                   <TableCell>{item.contacto_proveedor || '-'}</TableCell>
                   <TableCell>{item.costo ? `$${item.costo}` : '-'}</TableCell>
                   <TableCell>{item.observaciones}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={item.estado}
+                      color={item.estado === 'Terminado' ? 'success' : 'warning'}
+                      size="small"
+                      onClick={() => {
+                        const newStatus = item.estado === 'Terminado' ? 'No Terminado' : 'Terminado';
+                        handleUpdateStatus(item.id, newStatus);
+                      }}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Tooltip title="Ver detalles">
                       <IconButton
@@ -662,6 +700,23 @@ const MaintenanceTable = () => {
                         onChange={handleInputChange}
                         sx={{ gridColumn: '1 / -1' }}
                       />
+                      <TextField
+                        select
+                        label="Estado"
+                        value={selectedMaintenance.estado || 'No Terminado'}
+                        fullWidth
+                        name="estado"
+                        onChange={(e) => {
+                          const newStatus = e.target.value;
+                          handleUpdateStatus(selectedMaintenance.id, newStatus);
+                        }}
+                        SelectProps={{
+                          native: true,
+                        }}
+                      >
+                        <option value="No Terminado">No Terminado</option>
+                        <option value="Terminado">Terminado</option>
+                      </TextField>
                     </Box>
                   )}
                 </TabPanel>
