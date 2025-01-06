@@ -80,9 +80,22 @@ const MostrarEquipos = () => {
             setFile(null);
         } catch (error) {
             if (error.response?.status === 422) {
-                const duplicatedCodes = error.response?.data?.duplicated_codes || [];
-                const errorMessage = `${error.response?.data?.message} Códigos duplicados: ${duplicatedCodes.join(', ')}`;
-                setNotification({ message: errorMessage, type: 'warning' });
+                const errors = error.response?.data?.errors || {};
+                const duplicatedCodes = errors.duplicated_codes || [];
+                const invalidProcesses = errors.invalid_processes || [];
+        
+                let warningMessage = error.response?.data?.message;
+        
+                // Agregar detalles específicos si existen
+                if (duplicatedCodes.length > 0) {
+                    warningMessage += ` Equipos insertados con éxito, excepto los códigos duplicados.`;
+                }
+        
+                if (invalidProcesses.length > 0) {
+                    warningMessage += ` Equipos insertados con éxito, excepto aquellos con Proceso de Compra inválidos`;
+                }
+        
+                setNotification({ message: warningMessage, type: 'warning' });
             } else {
                 const errorMessage = error.response?.data?.message || 'Error desconocido al cargar el archivo.';
                 setNotification({ message: errorMessage, type: 'error' });
@@ -340,4 +353,3 @@ const MostrarEquipos = () => {
 };
 
 export default MostrarEquipos;
-

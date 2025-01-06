@@ -353,24 +353,35 @@ const MaintenanceTable = () => {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      await api.put(`/mantenimientos/${id}/estado`, { estado: newStatus });
-      setSnackbarMessage('Estado actualizado correctamente');
-      setSnackbarOpen(true);
-      
-      // Actualizar el estado en la tabla
-      setData(prevData => 
-        prevData.map(item => 
-          item.id === id ? { ...item, estado: newStatus } : item
-        )
-      );
+      const response = await api.put(`/mantenimientos/${id}/estado`, { estado: newStatus });
+      if (response.data && response.data.estado) {
+        setSnackbarMessage(`Estado actualizado correctamente de ${response.data.estadoAnterior} a ${response.data.estado}`);
+        setSnackbarOpen(true);
+        
+        // Actualizar el estado en la tabla
+        setData(prevData => 
+          prevData.map(item => 
+            item.id === id ? { ...item, estado: response.data.estado } : item
+          )
+        );
 
-      // Si el mantenimiento está seleccionado, actualizar también su estado
-      if (selectedMaintenance && selectedMaintenance.id === id) {
-        setSelectedMaintenance(prev => ({ ...prev, estado: newStatus }));
+        // Si el mantenimiento está seleccionado, actualizar también su estado
+        if (selectedMaintenance && selectedMaintenance.id === id) {
+          setSelectedMaintenance(prev => ({ ...prev, estado: response.data.estado }));
+        }
+      } else {
+        throw new Error('Respuesta inválida del servidor');
       }
     } catch (error) {
       console.error('Error al actualizar el estado:', error);
-      setSnackbarMessage('Error al actualizar el estado');
+      let errorMessage = 'Error al actualizar el estado';
+      if (error.response && error.response.data) {
+        errorMessage += ': ' + (error.response.data.error || error.response.data.message);
+        console.error('Traza del error:', error.response.data.trace);
+      } else if (error.message) {
+        errorMessage += ': ' + error.message;
+      }
+      setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
     }
   };
@@ -519,7 +530,7 @@ const MaintenanceTable = () => {
                       color={item.estado === 'Terminado' ? 'success' : 'warning'}
                       size="small"
                       onClick={() => {
-                        const newStatus = item.estado === 'Terminado' ? 'No Terminado' : 'Terminado';
+                        const newStatus = item.estado === 'Terminado' ? 'No terminado' : 'Terminado';
                         handleUpdateStatus(item.id, newStatus);
                       }}
                       sx={{ cursor: 'pointer' }}
@@ -703,8 +714,9 @@ const MaintenanceTable = () => {
                       <TextField
                         select
                         label="Estado"
-                        value={selectedMaintenance.estado || 'No Terminado'}
+                        value={selectedMaintenance.estado || 'No terminado'}
                         fullWidth
+                        disabled={!isEditing}
                         name="estado"
                         onChange={(e) => {
                           const newStatus = e.target.value;
@@ -714,7 +726,7 @@ const MaintenanceTable = () => {
                           native: true,
                         }}
                       >
-                        <option value="No Terminado">No Terminado</option>
+                        <option value="No terminado">No Terminado</option>
                         <option value="Terminado">Terminado</option>
                       </TextField>
                     </Box>
@@ -983,7 +995,7 @@ const MaintenanceTable = () => {
         >
           <Alert 
             onClose={() => setSnackbarOpen(false)} 
-            severity="success" 
+            severity={snackbarMessage.startsWith('Error') ? 'error' : 'success'} 
             sx={{ width: '100%' }}
           >
             {snackbarMessage}

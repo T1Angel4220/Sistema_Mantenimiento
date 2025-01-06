@@ -162,7 +162,7 @@ class MantenimientoController extends Controller
             'contacto_proveedor' => 'nullable|string|max:100',
             'costo' => 'nullable|numeric|min:0',
             'observaciones' => 'nullable|string|max:500',
-            'estado' => 'required|string|in:Terminado,No Terminado',
+            'estado' => 'required|string|in:Terminado,No terminado',
             'equipos' => 'required|array',
             'equipos.*.id' => 'required|exists:equipos,id',
             'equipos.*.componentes' => 'nullable|array',
@@ -311,7 +311,7 @@ public function updateEstado(Request $request, $id)
 {
     try {
         $request->validate([
-            'estado' => 'required|in:Terminado,No Terminado',
+            'estado' => 'required|in:Terminado,No terminado',
         ]);
 
         $mantenimiento = Mantenimiento::findOrFail($id);

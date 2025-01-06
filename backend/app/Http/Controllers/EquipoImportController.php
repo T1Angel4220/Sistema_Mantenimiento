@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Csv as CsvReader;
 use App\Models\Equipo;
+use App\Models\ProcesoCompra; // Modelo relacionado con procesos_compra
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -41,6 +42,8 @@ class EquipoImportController extends Controller
 
             unset($data[0]); // Remover la cabecera si la hay
 
+            $duplicatedCodes = [];
+            $invalidProcesses = [];
 
             foreach ($data as $row) {
                 $row = array_filter($row, function ($value) {
@@ -68,6 +71,12 @@ class EquipoImportController extends Controller
                     }
                 }
 
+                $procesoCompraId = $row[6] ?? null; // Proceso de compra (columna 7, índice 6)
+                if ($procesoCompraId && !ProcesoCompra::where('id', $procesoCompraId)->exists()) {
+                    $invalidProcesses[] = $procesoCompraId; // Agregar el proceso de compra inválido
+                    continue; // Omitir filas con procesos de compra no válidos
+                }
+
                 Equipo::create([
                     'Codigo_Barras' => $codigoBarras,
                     'Nombre_Producto' => $row[1] ?? null, // Nombre del producto (columna 2, índice 1)
@@ -75,16 +84,33 @@ class EquipoImportController extends Controller
                     'Fecha_Adquisicion' => $fechaAdquisicion,
                     'Ubicacion_Equipo' => $row[4] ?? null, // Ubicación (columna 5, índice 4)
                     'Descripcion_Equipo' => $row[5] ?? null, // Descripción (columna 6, índice 5)
+                    'proceso_compra_id' => $procesoCompraId,
                 ]);
             }
 
-            if (!empty($duplicatedCodes)) {
+            $message = 'Los datos se insertaron correctamente.';
+            $responseType = 'success';
+
+            if (!empty($duplicatedCodes) || !empty($invalidProcesses)) {
+                $errorDetails = [];
+            
+                if (!empty($duplicatedCodes)) {
+                    $errorDetails['duplicated_codes'] = $duplicatedCodes;
+                }
+            
+                if (!empty($invalidProcesses)) {
+                    $errorDetails['invalid_processes'] = $invalidProcesses;
+                }
+            
                 return response()->json([
-                    'message' => 'Equipos insertados con éxito, excepto los códigos duplicados. Actualice los códigos y reintente.',
+                    'message' => 'Advertencia: ',
+                    'errors' => $errorDetails,
                 ], 422);
             }
+            
 
-            return response()->json(['message' => 'Los datos se insertaron correctamente.'], 200);
+
+            return response()->json(['message' => $message], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error: el archivo no cumple con la estructura de la base de datos.'], 500);
         }
