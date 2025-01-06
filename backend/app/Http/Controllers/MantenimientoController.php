@@ -14,9 +14,22 @@ class MantenimientoController extends Controller
    
     public function index()
     {
-        $mantenimientos = Mantenimiento::all();
-        return $mantenimientos;
+        $mantenimientos = DB::table('mantenimiento')
+            ->leftJoin('equipo_mantenimiento', 'mantenimiento.id', '=', 'equipo_mantenimiento.mantenimiento_id')
+            ->leftJoin('equipos', 'equipo_mantenimiento.equipo_id', '=', 'equipos.id')
+            ->select(
+                'mantenimiento.*',
+                'equipos.Nombre_Producto as nombre_equipo',
+                'equipos.Codigo_Barras as codigo_barras',
+                'equipos.proceso_compra_id',
+                'equipos.Tipo_Equipo as tipo_equipo'
+            )
+            ->get();
+    
+        return response()->json($mantenimientos);
     }
+    
+    
 
     
     public function create()
@@ -340,5 +353,6 @@ public function showMantenimientoDetalles($id)
 
         return response()->json(['message' => 'Componentes agregados correctamente'], 200);
     }
+    
     
 }

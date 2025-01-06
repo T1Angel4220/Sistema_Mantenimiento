@@ -10,4 +10,7 @@ const Card = ({ title, children, footer, className = '', ...props }) => {
   );
 };
 
+
+
+
 export default Card;

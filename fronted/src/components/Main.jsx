@@ -1,62 +1,107 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Home, ShoppingCart, Box, PenTool, FileText, LogOut } from 'lucide-react';
+import { Home, ShoppingCart, Box, PenTool, FileText, LogOut, Search } from 'lucide-react';
 import './main.css';
 
 const Main = () => {
   const navigate = useNavigate();
-  const [equipos, setEquipos] = useState([]);
-  const [filteredEquipos, setFilteredEquipos] = useState([]);
-  const [filters, setFilters] = useState({});
+  const [mantenimientos, setMantenimientos] = useState([]);
+  const [filteredMantenimientos, setFilteredMantenimientos] = useState([]);
+  const [ultimosRegistros, setUltimosRegistros] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const itemsPerPage = 9;
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [codigoFilter, setCodigoFilter] = useState('');
+  const [fechaInicioFilter, setFechaInicioFilter] = useState('');
+  const [fechaFinFilter, setFechaFinFilter] = useState('');
+  const [tipoEquipoFilter, setTipoEquipoFilter] = useState('');
+  const [tipoMantenimientoFilter, setTipoMantenimientoFilter] = useState('');
+  const [procesoCompraFilter, setProcesoCompraFilter] = useState('');
+  const [estadoFilter, setEstadoFilter] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
       navigate('/');
     } else {
-      getEquipos();
+      getMantenimientos();
     }
   }, [navigate]);
 
-  const getEquipos = async () => {
+  const getMantenimientos = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/equipos');
-      const equipos = response.data;
-      setEquipos(equipos);
-      setFilteredEquipos(equipos);
+      const response = await axios.get('http://localhost:8000/api/mantenimientos');
+      const mantenimientosData = response.data;
+      
+      setMantenimientos(mantenimientosData);
+      setFilteredMantenimientos(mantenimientosData);
+      
+      const ultimos = [...mantenimientosData]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 5);
+      setUltimosRegistros(ultimos);
     } catch (error) {
-      console.error('Error al obtener los equipos:', error);
+      console.error('Error al obtener los mantenimientos:', error);
     }
   };
 
-  const handleFilterChange = (type, value) => {
-    const newFilters = { ...filters, [type]: value };
-    setFilters(newFilters);
+  useEffect(() => {
+    let filtered = [...mantenimientos];
 
-    let filtered = [...equipos];
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.codigo_mantenimiento?.toLowerCase().includes(search) ||
+        item.nombre_equipo?.toLowerCase().includes(search) ||
+        item.codigo_barras?.toLowerCase().includes(search)
+      );
+    }
 
-    if (newFilters.Tipo_Equipo) {
-      filtered = filtered.filter((equipo) => equipo.Tipo_Equipo === newFilters.Tipo_Equipo);
+    if (codigoFilter) {
+      filtered = filtered.filter(item =>
+        item.codigo_mantenimiento?.toLowerCase().includes(codigoFilter.toLowerCase())
+      );
     }
-    if (newFilters.Ubicacion_Equipo) {
-      filtered = filtered.filter((equipo) => equipo.Ubicacion_Equipo === newFilters.Ubicacion_Equipo);
+
+    if (fechaInicioFilter) {
+      filtered = filtered.filter(item =>
+        new Date(item.fecha_inicio) >= new Date(fechaInicioFilter)
+      );
     }
-    if (newFilters.Estado_Equipo) {
-      filtered = filtered.filter((equipo) => equipo.Estado_Equipo === newFilters.Estado_Equipo);
+
+    if (fechaFinFilter) {
+      filtered = filtered.filter(item =>
+        new Date(item.fecha_fin) <= new Date(fechaFinFilter)
+      );
     }
-    if (newFilters.Orden_Fecha) {
-      filtered = filtered.sort((a, b) => {
-        const fechaA = new Date(a.Fecha_Adquisicion);
-        const fechaB = new Date(b.Fecha_Adquisicion);
-        return newFilters.Orden_Fecha === "Reciente" ? fechaB - fechaA : fechaA - fechaB;
-      });
+
+    if (tipoEquipoFilter) {
+      filtered = filtered.filter(item =>
+        item.tipo_equipo === tipoEquipoFilter
+      );
     }
-    setFilteredEquipos(filtered);
-  };
+
+    if (tipoMantenimientoFilter) {
+      filtered = filtered.filter(item => item.tipo === tipoMantenimientoFilter);
+    }
+
+    if (procesoCompraFilter) {
+      filtered = filtered.filter(item =>
+        item.proceso_compra_id?.toLowerCase().includes(procesoCompraFilter.toLowerCase())
+      );
+    }
+
+    if (estadoFilter) {
+      filtered = filtered.filter(item => item.estado === estadoFilter);
+    }
+
+    setFilteredMantenimientos(filtered);
+    setCurrentPage(1);
+  }, [searchTerm, codigoFilter, fechaInicioFilter, fechaFinFilter, tipoEquipoFilter, tipoMantenimientoFilter, procesoCompraFilter, estadoFilter, mantenimientos]);
 
   const handleLogout = () => {
     setShowLogoutModal(true);
@@ -71,15 +116,8 @@ const Main = () => {
     setShowLogoutModal(false);
   };
 
-  const totalPages = Math.ceil(filteredEquipos.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-    }
-  };
-
-  const displayedEquipos = filteredEquipos.slice(
+  const totalPages = Math.ceil(filteredMantenimientos.length / itemsPerPage);
+  const displayedMantenimientos = filteredMantenimientos.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -129,189 +167,242 @@ const Main = () => {
         </div>
       </aside>
 
-      <div className="flex-1">
-        <div className="main-content">
-          <div className="main-header">
-            <h1 className="main-header-title">Bienvenido al Sistema de Gestión de Mantenimientos</h1>
-          </div>
+      <div className="flex-1 p-8">
+        <h1 className="text-3xl font-bold mb-8 text-center bg-[#1a374d] text-white py-4 rounded-lg">
+          Bienvenido al Sistema de Gestión de Mantenimientos
+        </h1>
 
-          {/* Sección de "Últimos Registros" */}
-          <div className="main-cards-horizontal">
-            <h2 className="main-card-title">Últimos Registros</h2>
-            <div className="main-horizontal-container">
-              {equipos.length > 0 ? (
-                equipos
-                  .sort((a, b) => b.id - a.id)
-                  .slice(0, 5)
-                  .map((equipo, index) => (
-                    <div className="main-horizontal-card" key={index}>
-                      <strong>{equipo.Nombre_Producto}</strong>
-                      <br />
-                      <span>Registrado el: {new Date(equipo.created_at).toLocaleDateString()}</span>
-                    </div>
-                  ))
-              ) : (
-                <p className="main-card-text">No hay equipos registrados.</p>
-              )}
+        {/* Últimos Registros */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Últimos Registros</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {ultimosRegistros.map((registro, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg shadow-md">
+                <h3 className="font-semibold text-lg mb-2">{registro.codigo_mantenimiento}</h3>
+                <p className="text-sm text-gray-600">
+                  Equipo: {registro.nombre_equipo || 'No asignado'}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Registrado el: {new Date(registro.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Filtros */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Buscar</label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Buscar..."
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
           </div>
 
-          {/* Filtros */}
-          <div className="filter-container">
-            <h3 className="main-card-title">Filtrado : </h3>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Código Mantenimiento</label>
+            <input
+              type="text"
+              placeholder="Código..."
+              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={codigoFilter}
+              onChange={(e) => setCodigoFilter(e.target.value)}
+            />
+          </div>
 
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Fecha Inicio</label>
+            <input
+              type="date"
+              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={fechaInicioFilter}
+              onChange={(e) => setFechaInicioFilter(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Fecha Fin</label>
+            <input
+              type="date"
+              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={fechaFinFilter}
+              onChange={(e) => setFechaFinFilter(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Tipo de Equipo</label>
             <select
-              onChange={(e) => handleFilterChange('Tipo_Equipo', e.target.value)}
-              className="filter-select"
+              value={tipoEquipoFilter}
+              onChange={(e) => setTipoEquipoFilter(e.target.value)}
+              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Filtrar por Tipo</option>
+              <option value="">Todos</option>
               <option value="Informático">Informático</option>
               <option value="Electrónicos y Eléctricos">Electrónicos y Eléctricos</option>
               <option value="Industriales">Industriales</option>
               <option value="Audiovisuales">Audiovisuales</option>
             </select>
+          </div>
 
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Tipo de Mantenimiento</label>
             <select
-              onChange={(e) => handleFilterChange('Ubicacion_Equipo', e.target.value)}
-              className="filter-select"
+              value={tipoMantenimientoFilter}
+              onChange={(e) => setTipoMantenimientoFilter(e.target.value)}
+              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Filtrar por Ubicación</option>
-              <option value="Departamento de TI">Departamento de TI</option>
-              <option value="Laboratorio de Redes">Laboratorio de Redes</option>
-              <option value="Sala de reuniones">Sala de reuniones</option>
-              <option value="Laboratorio CTT">Laboratorio CTT</option>
-            </select>
-
-            <select
-              onChange={(e) => handleFilterChange('Estado_Equipo', e.target.value)}
-              className="filter-select"
-            >
-              <option value="">Filtrar por Estado</option>
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-              <option value="En reparación">En reparación</option>
-            </select>
-
-            <select
-              onChange={(e) => handleFilterChange('Orden_Fecha', e.target.value)}
-              className="filter-select"
-            >
-              <option value="">Ordenar por Fecha</option>
-              <option value="Reciente">Más reciente</option>
-              <option value="Antigua">Más antigua</option>
+              <option value="">Todos</option>
+              <option value="Interno">Interno</option>
+              <option value="Externo">Externo</option>
             </select>
           </div>
 
-          {/* Tabla */}
-          <div className="main-table-container">
-            <table className="main-table">
-              <thead>
-                <tr>
-                  <th className="main-th">Nombre del Equipo</th>
-                  <th className="main-th">Tipo</th>
-                  <th className="main-th">Ubicación</th>
-                  <th className="main-th">Estado</th>
-                  <th className="main-th">Fecha de Registro</th>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Proceso de Compra</label>
+            <input
+              type="text"
+              placeholder="Proceso de compra..."
+              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={procesoCompraFilter}
+              onChange={(e) => setProcesoCompraFilter(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Estado del Mantenimiento</label>
+            <select
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todos</option>
+              <option value="Terminado">Terminado</option>
+              <option value="No terminado">No terminado</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Tabla */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <table className="w-full">
+          <thead className="bg-[#2f3b52]">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Código Mantenimiento
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Nombre del Equipo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Código de Barras
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Tipo de Equipo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Fecha de Inicio
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Fecha de Fin
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Tipo de Mantenimiento
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Proceso de Compra
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Estado del Mantenimiento
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {displayedMantenimientos.map((item, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {item.codigo_mantenimiento}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {item.nombre_equipo || 'No asignado'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {item.codigo_barras || 'No asignado'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {item.tipo_equipo}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(item.fecha_inicio).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(item.fecha_fin).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      item.tipo === 'Interno' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                    }`}>
+                      {item.tipo}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {item.proceso_compra_id || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      item.estado === 'Terminado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {item.estado}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {displayedEquipos.length > 0 ? (
-                  displayedEquipos.map((equipo) => (
-                    <tr key={equipo.id}>
-                      <td className="main-td">{equipo.Nombre_Producto}</td>
-                      <td className="main-td">{equipo.Tipo_Equipo}</td>
-                      <td className="main-td">{equipo.Ubicacion_Equipo}</td>
-                      <td className="main-td">{equipo.Estado_Equipo}</td>
-                      <td className="main-td">{equipo.Fecha_Adquisicion}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="main-td">No hay equipos registrados.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-          {/* Paginación */}
-          <div className="pagination">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              &lt; Anterior
-            </button>
-            {totalPages <= 26 ? (
-              [...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index + 1}
-                  onClick={() => handlePageChange(index + 1)}
-                  className={currentPage === index + 1 ? 'active' : ''}
-                >
-                  {index + 1}
-                </button>
-              ))
-            ) : (
-              <>
-                {[...Array(23)].map((_, index) => (
-                  <button
-                    key={index + 1}
-                    onClick={() => handlePageChange(index + 1)}
-                    className={currentPage === index + 1 ? 'active' : ''}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-                <div style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => {
-                      const extraPages = document.getElementById('extra-pages');
-                      extraPages.classList.toggle('hidden');
-                    }}
-                  >
-                    ...
-                  </button>
-                  <div id="extra-pages" className="extra-pages-menu hidden">
-                    {[...Array(totalPages - 23)].map((_, index) => {
-                      const pageNumber = index + 24;
-                      return (
-                        <button
-                          key={pageNumber}
-                          onClick={() => {
-                            handlePageChange(pageNumber);
-                            document.getElementById('extra-pages').classList.add('hidden');
-                          }}
-                          className={currentPage === pageNumber ? 'active' : ''}
-                        >
-                          {pageNumber}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Siguiente &gt;
-            </button>
-          </div>
+        {/* Paginación */}
+        <div className="mt-4 flex justify-center gap-2">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border rounded-md disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border rounded-md disabled:opacity-50"
+          >
+            Siguiente
+          </button>
         </div>
       </div>
 
       {/* Modal de confirmación */}
       {showLogoutModal && (
-        <div className="main-modal-overlay">
-          <div className="main-modal-content">
-            <h3>¿Está seguro de que desea cerrar sesión?</h3>
-            <div className="main-modal-buttons">
-              <button className="main-confirm-button" onClick={confirmLogout}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">¿Está seguro de que desea cerrar sesión?</h3>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                onClick={confirmLogout}
+              >
                 Sí
               </button>
-              <button className="main-cancel-button" onClick={cancelLogout}>
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                onClick={cancelLogout}
+              >
                 No
               </button>
             </div>
