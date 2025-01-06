@@ -196,6 +196,27 @@ const MaintenanceTable = () => {
     }));
   };
 
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
+
+  const handleConfirmChange = (newStatus) => {
+    setPendingStatus(newStatus);
+    setConfirmDialogOpen(true);
+  };
+  
+  const confirmStatusChange = async () => {
+    if (pendingStatus) {
+      await handleUpdateStatus(selectedMaintenance.id, pendingStatus);
+      setPendingStatus(null);
+    }
+    setConfirmDialogOpen(false);
+  };
+  
+  const cancelStatusChange = () => {
+    setPendingStatus(null);
+    setConfirmDialogOpen(false);
+  };
+  
   const handleSetComponentQuantity = (e, equipoId) => {
     setSelectedMaintenance((prevState) => ({
       ...prevState,
@@ -343,7 +364,7 @@ const MaintenanceTable = () => {
       const response = await api.get('/componentes');
       setAvailableComponents(response.data);
     } catch (error) {
-      console.error('Error al cargar componentes:', error);
+      console.error('Error al cargar los componentes disponibles:', error);
     }
   };
 
@@ -398,12 +419,15 @@ const MaintenanceTable = () => {
     fetchAvailableComponents();
   }, []);
 
+
   useEffect(() => {
     if (selectedMaintenance?.tipo === 'Externo') {
       fetchProveedores();
     }
   }, [selectedMaintenance?.tipo]);
-
+  useEffect(() => {
+    fetchAvailableComponents();
+  }, []);
   useEffect(() => {
     if (!openDialog) {
       setComponentChanges({ added: [], removed: [] });
@@ -529,10 +553,7 @@ const MaintenanceTable = () => {
                       label={item.estado}
                       color={item.estado === 'Terminado' ? 'success' : 'warning'}
                       size="small"
-                      onClick={() => {
-                        const newStatus = item.estado === 'Terminado' ? 'No terminado' : 'Terminado';
-                        handleUpdateStatus(item.id, newStatus);
-                      }}
+
                       sx={{ cursor: 'pointer' }}
                     />
                   </TableCell>
@@ -610,7 +631,7 @@ const MaintenanceTable = () => {
                         label="Tipo"
                         value={selectedMaintenance?.tipo || ''}
                         fullWidth
-                        disabled={!isEditing}
+                        disabled={selectedMaintenance?.estado === "Terminado" || !isEditing}
                         name="tipo"
                         onChange={handleInputChange}
                         SelectProps={{
@@ -711,23 +732,47 @@ const MaintenanceTable = () => {
                         onChange={handleInputChange}
                         sx={{ gridColumn: '1 / -1' }}
                       />
-                      <TextField
-                        select
-                        label="Estado"
-                        value={selectedMaintenance.estado || 'No terminado'}
-                        fullWidth
-                        disabled={!isEditing}
-                        name="estado"
-                        onChange={(e) => {
-                          const newStatus = e.target.value;
-                          handleUpdateStatus(selectedMaintenance.id, newStatus);
-                        }}
-                        SelectProps={{
-                          native: true,
-                        }}
-                      >
+<TextField
+  select
+  label="Estado"
+  value={selectedMaintenance.estado || 'No terminado'}
+  fullWidth
+  disabled={selectedMaintenance.estado === 'Terminado'}
+  name="estado"
+  onChange={(e) => handleConfirmChange(e.target.value)}
+
+  SelectProps={{
+    native: true,
+  }}
+>
+
+
                         <option value="No terminado">No Terminado</option>
                         <option value="Terminado">Terminado</option>
+                        <Dialog
+  open={confirmDialogOpen}
+  onClose={cancelStatusChange}
+>
+  <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
+  <DialogContent>
+    <Typography>
+      ¿Está seguro de marcar como <b>{pendingStatus}</b> el mantenimiento?
+    </Typography>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={cancelStatusChange} color="primary">
+      Cancelar
+    </Button>
+    <Button
+      onClick={confirmStatusChange}
+      color="secondary"
+      variant="contained"
+    >
+      Confirmar
+    </Button>
+  </DialogActions>
+</Dialog>
+
                       </TextField>
                     </Box>
                   )}
@@ -959,6 +1004,7 @@ const MaintenanceTable = () => {
                 Guardar
               </Button>
             ) : (
+              selectedMaintenance?.estado !== "Terminado" && (
               <Button
                 onClick={handleEdit}
                 startIcon={<EditIcon />}
@@ -968,6 +1014,7 @@ const MaintenanceTable = () => {
               >
                 Editar
               </Button>
+              )
             )}
             <Button
               onClick={handleCloseDialog}
