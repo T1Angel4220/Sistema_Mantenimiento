@@ -12,7 +12,12 @@ const Main = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const itemsPerPage = 9;
-
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const [year, month, day] = dateString.split('T')[0].split('-');
+    return `${day}/${month}/${year}`; // Formato dd/MM/yyyy
+  };
+  
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [codigoFilter, setCodigoFilter] = useState('');
@@ -36,11 +41,27 @@ const Main = () => {
     try {
       const response = await axios.get('http://localhost:8000/api/mantenimientos');
       const mantenimientosData = response.data;
-      
-      setMantenimientos(mantenimientosData);
-      setFilteredMantenimientos(mantenimientosData);
-      
-      const ultimos = [...mantenimientosData]
+  
+      // Agrupar los mantenimientos por ID, consolidando equipos
+      const groupedData = mantenimientosData.reduce((acc, curr) => {
+        const existing = acc.find(item => item.id === curr.id);
+        const equipos = Array.isArray(curr.equipos) ? curr.equipos : [];
+        if (existing) {
+          existing.equipos = [...existing.equipos, ...equipos];
+        } else {
+          acc.push({
+            ...curr,
+            equipos, // Inicializar equipos como array si no existe
+          });
+        }
+        return acc;
+      }, []);
+  
+      setMantenimientos(groupedData);
+      setFilteredMantenimientos(groupedData);
+  
+      // Obtener los últimos 5 registros después de agrupar
+      const ultimos = [...groupedData]
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 5);
       setUltimosRegistros(ultimos);
@@ -48,7 +69,7 @@ const Main = () => {
       console.error('Error al obtener los mantenimientos:', error);
     }
   };
-
+  
   useEffect(() => {
     let filtered = [...mantenimientos];
 
@@ -340,10 +361,10 @@ const Main = () => {
                     {item.tipo_equipo}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(item.fecha_inicio).toLocaleDateString()}
+                  {formatDate(item.fecha_inicio)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(item.fecha_fin).toLocaleDateString()}
+                  {formatDate(item.fecha_fin)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

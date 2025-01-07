@@ -226,6 +226,10 @@ const MaintenanceTable = () => {
     if (pendingStatus) {
       await handleUpdateStatus(selectedMaintenance.id, pendingStatus);
       setPendingStatus(null);
+
+      if (pendingStatus === "Terminado") {
+        setOpenDialog(false);
+      }
     }
     setConfirmDialogOpen(false);
   };
@@ -469,14 +473,34 @@ const MaintenanceTable = () => {
   useEffect(() => {
     api.get('/mantenimientos')
       .then((response) => {
-        setData(response.data);
+        const groupedData = response.data.reduce((acc, curr) => {
+          // Asegúrate de que curr.equipos siempre sea un array
+          const equipos = Array.isArray(curr.equipos) ? curr.equipos : [];
+          
+          // Buscar si ya existe el mantenimiento en el acumulador
+          const existing = acc.find(item => item.id === curr.id);
+          console.log('Datos de la API:', response.data); // Agrega esto
+
+          if (existing) {
+            // Si existe, agrega los equipos
+            existing.equipos = [...existing.equipos, ...equipos];
+          } else {
+            // Si no existe, inicializa con los equipos
+            acc.push({
+              ...curr,
+              equipos,
+            });
+          }
+          return acc;
+        }, []);
+        setData(groupedData);
       })
       .catch((error) => {
         console.error('Error al obtener los datos:', error);
       });
-    fetchProveedores();
-    fetchAvailableComponents();
   }, []);
+  
+  
 
 
   useEffect(() => {
@@ -494,8 +518,8 @@ const MaintenanceTable = () => {
   }, [openDialog]);
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return format(date, 'dd/MM/yyyy');
+    const [year, month, day] = dateString.split('T')[0].split('-');
+    return `${day}/${month}/${year}`; // Formato dd/MM/yyyy
   };
 
   return (
