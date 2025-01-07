@@ -211,12 +211,13 @@ class MantenimientoController extends Controller
             }
         }
     
-        // Actualizar las actividades
+        // Eliminar las actividades anteriores asociadas con el mantenimiento
+        $mantenimiento->actividades()->detach();
+    
+        // Agregar las nuevas actividades
         foreach ($validatedData['actividades'] as $actividadData) {
-            $actividad = Actividad::findOrFail($actividadData['id']);
-            $actividad->update([
-                'nombre' => $actividadData['nombre'],
-            ]);
+            // Asocia las nuevas actividades al mantenimiento
+            $mantenimiento->actividades()->attach($actividadData['id']);
         }
     
         // Devuelve una respuesta con el mantenimiento actualizado
@@ -225,6 +226,7 @@ class MantenimientoController extends Controller
             'mantenimiento' => $mantenimiento->load('equipos.componentes', 'actividades'),
         ], 200);
     }
+    
    
     public function update(Request $request, $id)
 {
@@ -263,24 +265,24 @@ public function showMantenimientoDetalles($id)
 {
     // Obtener el mantenimiento con sus datos básicos
     $mantenimiento = DB::table('mantenimiento')
-    ->select('mantenimiento.*') // Esto incluirá todas las columnas, incluido 'estado'
-    ->where('id', $id)
-    ->first();
+        ->select('mantenimiento.*') // Esto incluirá todas las columnas, incluido 'estado'
+        ->where('id', $id)
+        ->first();
 
     if (!$mantenimiento) {
         return response()->json(['error' => 'Mantenimiento no encontrado'], 404);
     }
 
-    // Obtener los equipos asociados al mantenimiento
+    // Obtener los equipos asociados al mantenimiento desde la tabla equipo_mantenimiento
     $equipos = DB::table('equipos')
-        ->join('equipo_componentes', 'equipos.id', '=', 'equipo_componentes.equipo_mantenimiento_id')
-        ->where('equipo_componentes.mantenimiento_id', $id)
+        ->join('equipo_mantenimiento', 'equipos.id', '=', 'equipo_mantenimiento.equipo_id')
+        ->where('equipo_mantenimiento.mantenimiento_id', $id)
         ->select('equipos.*')
-        ->distinct()
         ->get();
 
     // Para cada equipo, obtener sus componentes
     $equiposConComponentes = $equipos->map(function ($equipo) use ($id) {
+        // Buscar los componentes del equipo en la tabla equipo_componentes
         $componentes = DB::table('componentes')
             ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
             ->where('equipo_componentes.equipo_mantenimiento_id', $equipo->id)
@@ -288,7 +290,8 @@ public function showMantenimientoDetalles($id)
             ->select('componentes.*', 'equipo_componentes.cantidad')
             ->get();
 
-        $equipo->componentes = $componentes;
+        // Asignar los componentes al equipo (si no hay, será un array vacío)
+        $equipo->componentes = $componentes->isEmpty() ? [] : $componentes;
         return $equipo;
     });
 
@@ -306,6 +309,7 @@ public function showMantenimientoDetalles($id)
 
     return response()->json($response);
 }
+
 
 public function updateEstado(Request $request, $id)
 {

@@ -162,9 +162,27 @@ const MaintenanceTable = () => {
   const [componentChanges, setComponentChanges] = useState({ added: [], removed: [] });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-
+  const [availableActivities, setAvailableActivities] = useState([]);
   const navigate = useNavigate();
-
+  const fetchActividades = async () => {
+    try {
+      const response = await api.get('/actividades');
+      if (response.status === 200) {
+        const actividadesArray = Array.isArray(response.data) ? response.data : [];
+        setAvailableActivities( actividadesArray);
+      }
+    } catch (error) {
+      console.error('Error al cargar actividades:', error);
+      setAvailableActivities(  []);
+    } finally {
+      
+    }
+  };
+  
+  // Usar el hook useEffect para cargar las actividades al montar el componente
+  useEffect(() => {
+    fetchActividades();
+  }, []);
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
@@ -203,7 +221,7 @@ const MaintenanceTable = () => {
     setPendingStatus(newStatus);
     setConfirmDialogOpen(true);
   };
-  
+
   const confirmStatusChange = async () => {
     if (pendingStatus) {
       await handleUpdateStatus(selectedMaintenance.id, pendingStatus);
@@ -211,12 +229,12 @@ const MaintenanceTable = () => {
     }
     setConfirmDialogOpen(false);
   };
-  
+
   const cancelStatusChange = () => {
     setPendingStatus(null);
     setConfirmDialogOpen(false);
   };
-  
+
   const handleSetComponentQuantity = (e, equipoId) => {
     setSelectedMaintenance((prevState) => ({
       ...prevState,
@@ -234,18 +252,18 @@ const MaintenanceTable = () => {
       equipos: prevState.equipos.map((equipo) =>
         equipo.id === equipoId
           ? {
-              ...equipo,
-              componentes: [
-                ...equipo.componentes,
-                {
-                  id: parseInt(equipo.selectedComponent),
-                  nombre: availableComponents.find((c) => c.id === parseInt(equipo.selectedComponent))?.nombre || '',
-                  cantidad: equipo.componentQuantity || 1,
-                },
-              ],
-              selectedComponent: '',
-              componentQuantity: 1,
-            }
+            ...equipo,
+            componentes: [
+              ...equipo.componentes,
+              {
+                id: parseInt(equipo.selectedComponent),
+                nombre: availableComponents.find((c) => c.id === parseInt(equipo.selectedComponent))?.nombre || '',
+                cantidad: equipo.componentQuantity || 1,
+              },
+            ],
+            selectedComponent: '',
+            componentQuantity: 1,
+          }
           : equipo
       ),
     }));
@@ -257,9 +275,9 @@ const MaintenanceTable = () => {
       equipos: prevState.equipos.map((equipo) =>
         equipo.id === equipoId
           ? {
-              ...equipo,
-              componentes: equipo.componentes.filter((comp) => comp.id !== componenteId),
-            }
+            ...equipo,
+            componentes: equipo.componentes.filter((comp) => comp.id !== componenteId),
+          }
           : equipo
       ),
     }));
@@ -324,7 +342,21 @@ const MaintenanceTable = () => {
   };
 
   const handleSave = async () => {
+    // Verificar si hay actividades y equipos
+    if (selectedMaintenance.actividades.length === 0) {
+      setSnackbarMessage('No se puede guardar el mantenimiento sin actividades');
+      setSnackbarOpen(true);
+      return; // Detiene la ejecución si no hay actividades
+    }
+  
+    if (selectedMaintenance.equipos.length === 0) {
+      setSnackbarMessage('No se puede guardar el mantenimiento sin equipos');
+      setSnackbarOpen(true);
+      return; // Detiene la ejecución si no hay equipos
+    }
+  
     try {
+      // Guardar los cambios en el mantenimiento
       await api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`, selectedMaintenance);
       const response = await api.get('/mantenimientos');
       setData(response.data);
@@ -339,6 +371,7 @@ const MaintenanceTable = () => {
       setSnackbarOpen(true);
     }
   };
+  
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -371,6 +404,32 @@ const MaintenanceTable = () => {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
+  const handleSelectActivity = (actividadId) => {
+    console.log(actividadId);
+    console.log(availableActivities);
+    const selectedActivity = availableActivities.find((actividad) => actividad.id == actividadId);
+    console.log(selectedActivity);
+    
+    // Verifica si la actividad ya está en el array de actividades
+    if (selectedActivity && !selectedMaintenance.actividades.some((actividad) => actividad.id === selectedActivity.id)) {
+      setSelectedMaintenance({
+        ...selectedMaintenance,
+        actividades: [...selectedMaintenance.actividades, selectedActivity],
+      });
+    } else {
+      // Si la actividad ya está, no hacer nada
+    }
+  };
+  
+  // Función para eliminar una actividad de selectedMaintenance
+  const handleDeleteActividad = (id) => {
+    setSelectedMaintenance({
+      ...selectedMaintenance,
+      actividades: selectedMaintenance.actividades.filter(
+        (actividad) => actividad.id !== id
+      ),
+    });
+  };
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
@@ -378,10 +437,10 @@ const MaintenanceTable = () => {
       if (response.data && response.data.estado) {
         setSnackbarMessage(`Estado actualizado correctamente de ${response.data.estadoAnterior} a ${response.data.estado}`);
         setSnackbarOpen(true);
-        
+
         // Actualizar el estado en la tabla
-        setData(prevData => 
-          prevData.map(item => 
+        setData(prevData =>
+          prevData.map(item =>
             item.id === id ? { ...item, estado: response.data.estado } : item
           )
         );
@@ -732,52 +791,112 @@ const MaintenanceTable = () => {
                         onChange={handleInputChange}
                         sx={{ gridColumn: '1 / -1' }}
                       />
-<TextField
-  select
-  label="Estado"
-  value={selectedMaintenance.estado || 'No terminado'}
-  fullWidth
-  disabled={selectedMaintenance.estado === 'Terminado'}
-  name="estado"
-  onChange={(e) => handleConfirmChange(e.target.value)}
+                      <TextField
+                        select
+                        label="Estado"
+                        value={selectedMaintenance.estado || 'No terminado'}
+                        fullWidth
+                        disabled={selectedMaintenance.estado === 'Terminado'}
+                        name="estado"
+                        onChange={(e) => handleConfirmChange(e.target.value)}
 
-  SelectProps={{
-    native: true,
-  }}
->
+                        SelectProps={{
+                          native: true,
+                        }}
+                      >
 
 
                         <option value="No terminado">No Terminado</option>
                         <option value="Terminado">Terminado</option>
                         <Dialog
-  open={confirmDialogOpen}
-  onClose={cancelStatusChange}
->
-  <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
-  <DialogContent>
-    <Typography>
-      ¿Está seguro de marcar como <b>{pendingStatus}</b> el mantenimiento?
-    </Typography>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={cancelStatusChange} color="primary">
-      Cancelar
-    </Button>
-    <Button
-      onClick={confirmStatusChange}
-      color="secondary"
-      variant="contained"
-    >
-      Confirmar
-    </Button>
-  </DialogActions>
-</Dialog>
+                          open={confirmDialogOpen}
+                          onClose={cancelStatusChange}
+                        >
+                          <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
+                          <DialogContent>
+                            <Typography>
+                              ¿Está seguro de marcar como <b>{pendingStatus}</b> el mantenimiento?
+                            </Typography>
+                          </DialogContent>
+                          <DialogActions>
+                            <Button onClick={cancelStatusChange} color="primary">
+                              Cancelar
+                            </Button>
+                            <Button
+                              onClick={confirmStatusChange}
+                              color="secondary"
+                              variant="contained"
+                            >
+                              Confirmar
+                            </Button>
+                          </DialogActions>
+                        </Dialog>
 
                       </TextField>
                     </Box>
                   )}
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
+                  {isEditing ? (
+                    <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                      <Typography variant="h6" sx={{ mb: 2 }}>
+                        Actividades disponibles:
+                      </Typography>
+                      <TextField
+                        select
+                        label="Seleccionar Actividad"
+                        onChange={(e) => handleSelectActivity(e.target.value)}
+                        fullWidth
+                        sx={{
+                          minWidth: 200,
+                          '& .MuiSelect-select': {
+                            padding: '16.5px 14px',
+                            backgroundColor: 'background.paper',
+                          },
+                        }}
+                        SelectProps={{
+                          native: true,
+                        }}
+                      >
+                        <option value="">Seleccione una actividad</option>
+                        {availableActivities.map((actividad) => (
+                          <option key={actividad.id} value={actividad.id}>
+                            {actividad.nombre}
+                          </option>
+                        ))}
+                      </TextField>
+                      <Typography variant="h6" sx={{ mb: 2 }}>
+                        Actividades seleccionadas:
+                      </Typography>
+                      <List>
+                        {selectedMaintenance.actividades.map((actividad) => (
+                          <ListItem
+                            key={actividad.id}
+                            sx={{
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              borderRadius: 1,
+                              mb: 1,
+                              backgroundColor: 'background.paper',
+                            }}
+                          >
+                            <ListItemText
+                              primary={<Typography variant="subtitle1" fontWeight="bold">{actividad.nombre}</Typography>}
+                            />
+                            <Button
+                              variant="contained"
+                              color="error"
+                              onClick={() => handleDeleteActividad(actividad.id)}
+                              startIcon={<DeleteIcon />}
+                            >
+                              Eliminar
+                            </Button>
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  ) : (
+                    <TabPanel value={tabValue} index={1}>
                   {selectedMaintenance?.actividades?.length > 0 ? (
                     <List>
                       {selectedMaintenance.actividades.map((actividad) => (
@@ -807,6 +926,8 @@ const MaintenanceTable = () => {
                         No hay actividades registradas
                       </Typography>
                     </Box>
+                  )}
+                </TabPanel>
                   )}
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
@@ -1005,15 +1126,15 @@ const MaintenanceTable = () => {
               </Button>
             ) : (
               selectedMaintenance?.estado !== "Terminado" && (
-              <Button
-                onClick={handleEdit}
-                startIcon={<EditIcon />}
-                variant="contained"
-                color="primary"
-                sx={{ color: 'primary.contrastText' }}
-              >
-                Editar
-              </Button>
+                <Button
+                  onClick={handleEdit}
+                  startIcon={<EditIcon />}
+                  variant="contained"
+                  color="primary"
+                  sx={{ color: 'primary.contrastText' }}
+                >
+                  Editar
+                </Button>
               )
             )}
             <Button
@@ -1040,9 +1161,9 @@ const MaintenanceTable = () => {
           onClose={() => setSnackbarOpen(false)}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <Alert 
-            onClose={() => setSnackbarOpen(false)} 
-            severity={snackbarMessage.startsWith('Error') ? 'error' : 'success'} 
+          <Alert
+            onClose={() => setSnackbarOpen(false)}
+            severity={snackbarMessage.startsWith('Error') ? 'error' : 'success'}
             sx={{ width: '100%' }}
           >
             {snackbarMessage}
