@@ -659,8 +659,12 @@ const MaintenanceTable = () => {
                       <TableCell>
                         <Chip
                           label={item.tipo}
-                          color={item.tipo === 'Interno' ? 'success' : 'error'}
+                          color={item.tipo === 'Interno' ? 'secondary' : 'error'}
                           size="small"
+                          sx={{
+                            backgroundColor: item.tipo === 'Interno' ? '#9c27b0' : undefined,
+                            color: item.tipo === 'Interno' ? 'white' : undefined,
+                          }}
                         />
                       </TableCell>
                       <TableCell>{formatDate(item.fecha_inicio)}</TableCell>
