@@ -98,7 +98,7 @@ const EditarEquipo = () => {
             )}
 
             <div className="main-editar-equipo-container">
-                <h2>Editar Equipo</h2>
+                <h2>Editar Activo</h2>
                 <form className="main-editar-equipo-form" onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="Codigo_Barras">Código de Barras</label>
@@ -124,7 +124,7 @@ const EditarEquipo = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="Tipo_Equipo">Tipo de Equipo</label>
+                        <label htmlFor="Tipo_Equipo">Tipo de Activo</label>
                         <select
                             id="Tipo_Equipo"
                             name="Tipo_Equipo"
@@ -156,7 +156,7 @@ const EditarEquipo = () => {
                     {error && <p className="editar-equipo-error">{error}</p>}
 
                     <div className="form-group">
-                        <label htmlFor="Ubicacion_Equipo">Ubicación del Equipo</label>
+                        <label htmlFor="Ubicacion_Equipo">Ubicación del Activo</label>
                         <select
                             id="Ubicacion_Equipo"
                             name="Ubicacion_Equipo"
@@ -174,7 +174,7 @@ const EditarEquipo = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="Descripcion_Equipo">Descripción del Equipo</label>
+                        <label htmlFor="Descripcion_Equipo">Descripción del Activo</label>
                         <textarea
                             id="Descripcion_Equipo"
                             name="Descripcion_Equipo"
@@ -204,7 +204,7 @@ const EditarEquipo = () => {
                     </div>
 
                     <div className="main-editar-equipo-buttons">
-                        <a href="/equipos" className="main-editar-equipo-btn-regresar">Regresar a la Lista de Equipos</a>
+                        <a href="/equipos" className="main-editar-equipo-btn-regresar">Regresar a la Lista de Activos</a>
                         <button type="submit" className="main-editar-equipo-btn" disabled={!!error}>
                             Guardar Cambios
                         </button>

@@ -320,13 +320,13 @@ const Main = () => {
                   Código Mantenimiento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Nombre del Equipo
+                  Nombre del Activo
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Código de Barras
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Tipo de Equipo
+                  Tipo de Activo
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Fecha de Inicio

@@ -116,7 +116,7 @@ const CrearEquipos = () => {
                     />
                 )}
 
-                <h2 className="crear-equipos-title">Crear Nuevo Equipo</h2>
+                <h2 className="crear-equipos-title">Crear Nuevo Activo</h2>
                 <form className="crear-equipos-form" onSubmit={handleSubmit}>
                     <div className="crear-equipos-form-group">
                         <label htmlFor="Nombre_Producto" className="crear-equipos-label">Nombre del Producto</label>
@@ -145,7 +145,7 @@ const CrearEquipos = () => {
                     </div>
 
                     <div className="crear-equipos-form-group">
-                        <label htmlFor="Tipo_Equipo" className="crear-equipos-label">Tipo de Equipo</label>
+                        <label htmlFor="Tipo_Equipo" className="crear-equipos-label">Tipo de Activo</label>
                         <select
                             id="Tipo_Equipo"
                             name="Tipo_Equipo"
@@ -179,7 +179,7 @@ const CrearEquipos = () => {
                     {error && <p className="crear-equipos-error">{error}</p>}
 
                     <div className="crear-equipos-form-group">
-                        <label htmlFor="Ubicacion_Equipo" className="crear-equipos-label">Ubicación del Equipo</label>
+                        <label htmlFor="Ubicacion_Equipo" className="crear-equipos-label">Ubicación del Activo</label>
                         <select
                             id="Ubicacion_Equipo"
                             name="Ubicacion_Equipo"
@@ -198,7 +198,7 @@ const CrearEquipos = () => {
                     </div>
 
                     <div className="crear-equipos-form-group">
-                        <label htmlFor="Descripcion_Equipo" className="crear-equipos-label">Descripción del Equipo</label>
+                        <label htmlFor="Descripcion_Equipo" className="crear-equipos-label">Descripción del Activo</label>
                         <textarea
                             id="Descripcion_Equipo"
                             name="Descripcion_Equipo"
@@ -231,7 +231,7 @@ const CrearEquipos = () => {
                         </select>
                     </div>
 
-                    <button type="submit" className="crear-equipos-submit-btn" disabled={!!error}>Crear Equipo</button>
+                    <button type="submit" className="crear-equipos-submit-btn" disabled={!!error}>Crear Activo</button>
                     <button type="button" className="crear-equipos-cancel-btn" onClick={() => navigate('/equipos')}>Regresar</button>
                 </form>
             </div>
