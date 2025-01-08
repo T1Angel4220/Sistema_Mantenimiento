@@ -179,11 +179,13 @@ const MaintenanceTable = () => {
       const response = await api.get('/actividades');
       if (response.status === 200) {
         const actividadesArray = Array.isArray(response.data) ? response.data : [];
-        setAvailableActivities(actividadesArray);
+        setAvailableActivities( actividadesArray);
       }
     } catch (error) {
       console.error('Error al cargar actividades:', error);
-      setAvailableActivities([]);
+      setAvailableActivities(  []);
+    } finally {
+      
     }
   };
   
@@ -415,15 +417,21 @@ const MaintenanceTable = () => {
   };
 
   const handleSelectActivity = (actividadId) => {
+    console.log(actividadId);
+    console.log(availableActivities);
     const selectedActivity = availableActivities.find((actividad) => actividad.id == actividadId);
+    console.log(selectedActivity);
     
+    // Verifica si la actividad ya está en el array de actividades
     if (selectedActivity && !selectedMaintenance.actividades.some((actividad) => actividad.id === selectedActivity.id)) {
       setSelectedMaintenance({
         ...selectedMaintenance,
         actividades: [...selectedMaintenance.actividades, selectedActivity],
       });
-    }
-  };
+    } else {
+      // Si la actividad ya está, no hacer nada
+    }
+  };
   
   const handleDeleteActividad = (id) => {
     setSelectedMaintenance({
@@ -858,6 +866,31 @@ const MaintenanceTable = () => {
                           >
                             <option value="No terminado">No Terminado</option>
                             <option value="Terminado">Terminado</option>
+
+
+                            <Dialog
+                          open={confirmDialogOpen}
+                          onClose={cancelStatusChange}
+                        >
+                          <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
+                          <DialogContent>
+                            <Typography>
+                              ¿Está seguro de marcar como <b>{pendingStatus}</b> el mantenimiento?
+                            </Typography>
+                          </DialogContent>
+                          <DialogActions>
+                            <Button onClick={cancelStatusChange} color="primary">
+                              Cancelar
+                            </Button>
+                            <Button
+                              onClick={confirmStatusChange}
+                              color="secondary"
+                              variant="contained"
+                            >
+                              Confirmar
+                            </Button>
+                          </DialogActions>
+                        </Dialog>
                           </TextField>
                         </Box>
                       )}
@@ -922,9 +955,10 @@ const MaintenanceTable = () => {
                           </List>
                         </Box>
                       ) : (
-                        <List>
-                          {selectedMaintenance?.actividades?.length > 0 ? (
-                            selectedMaintenance.actividades.map((actividad) => (
+                        <TabPanel value={tabValue} index={1}>
+                        {selectedMaintenance?.actividades?.length > 0 ? (
+                          <List>
+                            {selectedMaintenance.actividades.map((actividad) => (
                               <ListItem
                                 key={actividad.id}
                                 sx={{
@@ -943,16 +977,17 @@ const MaintenanceTable = () => {
                                   }
                                 />
                               </ListItem>
-                            ))
-                          ) : (
-                            <Box sx={{ p: 4, textAlign: 'center' }}>
-                              <Typography color="text.secondary">
-                                No hay actividades registradas
-                              </Typography>
-                            </Box>
-                          )}
-                        </List>
-                      )}
+                            ))}
+                          </List>
+                        ) : (
+                          <Box sx={{ p: 4, textAlign: 'center' }}>
+                            <Typography color="text.secondary">
+                              No hay actividades registradas
+                            </Typography>
+                          </Box>
+                        )}
+                      </TabPanel>
+                        )}
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
