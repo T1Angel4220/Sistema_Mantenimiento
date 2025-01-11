@@ -22,7 +22,6 @@ return new class extends Migration
 
             // Campo para la relación con procesos_compra
             $table->string('proceso_compra_id');
-            $table->foreign('proceso_compra_id')->references('id')->on('procesos_compra')->onDelete('cascade');
 
             $table->timestamps();
         });

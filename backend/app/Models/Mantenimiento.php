@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Equipo;
 use App\Models\Actividad;
-
+use App\Models\Observacion;
 class Mantenimiento extends Model
 {
     use HasFactory;
@@ -21,7 +21,6 @@ class Mantenimiento extends Model
         'proveedor',
         'contacto_proveedor',
         'costo',
-        'observaciones',
         'estado',
     ];
     
@@ -32,14 +31,20 @@ class Mantenimiento extends Model
     ];
     
 
-    public function actividades()
-    {
-        return $this->belongsToMany(Actividad::class, 'mantenimiento_actividad');
-    }
-
     public function equipos()
     {
-        return $this->belongsToMany(Equipo::class, 'equipo_mantenimiento');
+        return $this->belongsToMany(Equipo::class, 'equipo_mantenimiento', 'mantenimiento_id', 'equipo_id');
     }
+    
+    public function actividades()
+    {
+        return $this->hasMany(Actividad::class, 'codigo_mantenimiento');
+    }
+    
+    public function observaciones()
+    {
+        return $this->hasMany(Observacion::class, 'codigo_mantenimiento');
+    }
+
     
 }

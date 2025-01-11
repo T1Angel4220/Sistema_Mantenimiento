@@ -21,7 +21,6 @@ return new class extends Migration
             $table->enum('proveedor', ['ACME Maintenance', 'TechSupport S.A.', 'ServiMaq Ltda.', 'Otro'])->nullable();
             $table->string('contacto_proveedor', 255)->nullable();
             $table->decimal('costo', 10, 2)->nullable();
-            $table->text('observaciones')->nullable();
             $table->timestamps(0);
         });
     }

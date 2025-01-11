@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Mantenimiento;
 use App\Models\Componente;
 use App\Models\ProcesoCompra;
+use App\Models\Observacion;
 
 class Equipo extends Model
 {
@@ -32,20 +33,18 @@ class Equipo extends Model
      */
     public function mantenimientos()
     {
-        return $this->belongsToMany(Mantenimiento::class, 'equipo_mantenimiento', 'mantenimiento_id', 'equipo_id')
-            ->withTimestamps();
+        return $this->belongsToMany(Mantenimiento::class, 'equipo_mantenimiento', 'equipo_id', 'mantenimiento_id');
     }
-
-    /**
-     * Relación muchos a muchos con componentes.
-     */
-    public function componentes()
+    
+    public function actividades()
     {
-        return $this->belongsToMany(Componente::class, 'equipo_componentes', 'componente_id', 'equipo_mantenimiento_id');
+        return $this->hasMany(Actividad::class);
     }
-
-    /**
-     * Relación uno a muchos (inversa) con procesos de compra.
-     */
+    
+    public function observaciones()
+    {
+        return $this->hasMany(Observacion::class);
+    }
+    
 
 }

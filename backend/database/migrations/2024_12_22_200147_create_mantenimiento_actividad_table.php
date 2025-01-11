@@ -12,9 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('mantenimiento_actividad', function (Blueprint $table) {
-            $table->id(); // 'id' column as primary key
-            $table->foreignId('mantenimiento_id')->constrained('mantenimiento')->onDelete('cascade'); // Foreign key for 'mantenimiento' table
-            $table->foreignId('actividad_id')->constrained('actividades')->onDelete('cascade'); // Foreign key for 'actividades' table
+            $table->id(); 
+            $table->unsignedBigInteger('mantenimiento_id'); // Define la columna
+            $table->unsignedBigInteger('actividad_id');
+            $table->unsignedBigInteger('equipo_id'); // Define la columna
+            $table->foreign('mantenimiento_id')->references('id')->on('mantenimiento')->onDelete('cascade'); // Foreign key for 'mantenimiento' table
+            $table->foreign('actividad_id')->references('id')->on('actividades')->onDelete('cascade'); // Foreign key for 'actividades' table
+            $table->foreign('equipo_id')->references('id')->on('equipos')->onDelete('cascade'); 
             $table->timestamps(); // Created at and updated at timestamps
         });
     }

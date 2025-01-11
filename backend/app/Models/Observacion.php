@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Mantenimiento;
 
-class Actividad extends Model
+class Observacion extends Model
 {
     use HasFactory;
-    protected $table = 'actividades';
+
     protected $fillable = [
-        'nombre',
+        'mantenimiento_id',
+        'equipo_id',
+        'observacion',
     ];
+
     public function mantenimiento()
 {
     return $this->belongsTo(Mantenimiento::class, 'mantenimiento_id');
