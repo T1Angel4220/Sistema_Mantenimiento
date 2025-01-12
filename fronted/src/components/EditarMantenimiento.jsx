@@ -102,35 +102,39 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
         <Typography variant="h6" gutterBottom>
           Edición de Mantenimiento
         </Typography>
+        <div className="h-8"></div>
 
+        <Grid item xs={6}>
+          <TextField
+            label="Codigo mantenimento"
+            value={
+              mantenimiento.codigo_mantenimiento || ''
+            }
+            fullWidth
+            disabled
+          />
+        </Grid>
+        <div className="h-2"></div>
 
+        <Grid item xs={6}>
+          <TextField
+            label="Tipo"
+            value={mantenimiento.tipo || ''}
+            fullWidth
+            disabled
+          />
+
+        </Grid>
+        <div className="h-2"></div>
         <Grid container spacing={2}>
           {mantenimiento.tipo === 'Interno' ? (
             <>
-              {/* Solo fechas para mantenimiento interno */}
 
             </>
           ) : (
             <>
               {/* Toda la información para mantenimiento externo */}
-              <Grid item xs={6}>
-                <TextField
-                  label="Codigo mantenimento"
-                  value={
-                    mantenimiento.codigo_mantenimiento || ''
-                  }
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Tipo"
-                  value={mantenimiento.tipo || ''}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
+
               <Grid item xs={6}>
                 <TextField
                   label="Proveedor"
@@ -183,7 +187,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                 Fecha Final
               </Typography>
               <DatePicker
-                selected={  mantenimiento.fecha_fin || fechaFin} // Valor inicial del DatePicker
+                selected={mantenimiento.fecha_fin || fechaFin} // Valor inicial del DatePicker
                 onChange={(date) => {
                   setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
                 }}
