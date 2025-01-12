@@ -42,7 +42,7 @@ class Equipo extends Model
     
     public function actividades()
     {
-        return $this->belongsMany(Actividad::class);
+        return $this->belongsToMany(Actividad::class,'mantenimiento_actividad', 'equipo_id', 'actividad_id')->withPivot('mantenimiento_id');
     }
     
     public function observaciones()

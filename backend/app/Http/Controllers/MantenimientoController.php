@@ -15,14 +15,7 @@ use App\Models\ObservacionMantenimiento;
 class MantenimientoController extends Controller
 {
    
-    public function index()
-    {
-        $mantenimientos = DB::table('mantenimiento')
-            ->select('mantenimiento.*')
-            ->get();
-
-return response()->json($mantenimientos);
-    }
+    
     
     
 
@@ -143,6 +136,66 @@ return response()->json($mantenimientos);
         // Si se requiere un formulario de edición, puedes devolver una vista
         // return view('mantenimiento.edit', compact('id'));
     }
+    public function index(){
+        // Obtener todos los mantenimientos con sus datos básicos, ordenados por updated_at en orden descendente
+        $mantenimientos = DB::table('mantenimiento')
+            ->select('mantenimiento.*')
+            ->orderBy('updated_at', 'desc') // Ordena en orden descendente por updated_at
+            ->get();
+    
+        // Si no hay mantenimientos, devolver error
+        if ($mantenimientos->isEmpty()) {
+            return response()->json(['error' => 'No se encontraron mantenimientos'], 404);
+        }
+    
+        // Para cada mantenimiento, obtener los equipos asociados
+        $mantenimientosConEquipos = $mantenimientos->map(function ($mantenimiento) {
+            // Obtener los equipos asociados al mantenimiento desde la tabla equipo_mantenimiento
+            $equipos = DB::table('equipos')
+                ->join('equipo_mantenimiento', 'equipos.id', '=', 'equipo_mantenimiento.equipo_id')
+                ->where('equipo_mantenimiento.mantenimiento_id', $mantenimiento->id)
+                ->select('equipos.*')
+                ->get();
+    
+            // Para cada equipo, obtener sus componentes y actividades sin duplicados
+            $equiposConComponentesYActividades = $equipos->map(function ($equipo) use ($mantenimiento) {
+                // Obtener los componentes asociados al equipo
+                $componentes = DB::table('componentes')
+                    ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
+                    ->where('equipo_componentes.equipo_mantenimiento_id', $equipo->id)
+                    ->where('equipo_componentes.mantenimiento_id', $mantenimiento->id)
+                    ->select('componentes.id', 'componentes.nombre', 'componentes.descripcion', 'equipo_componentes.cantidad')
+                    ->distinct() // Aseguramos que los componentes no se repitan
+                    ->get();
+    
+                // Asignar los componentes al equipo
+                $equipo->componentes = $componentes;
+    
+                // Obtener las actividades únicas asociadas al mantenimiento
+                $actividades = DB::table('actividades')
+                    ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
+                    ->where('mantenimiento_actividad.mantenimiento_id', $mantenimiento->id)
+                    ->where('mantenimiento_actividad.equipo_id', $equipo->id) // Aseguramos que las actividades sean específicas por equipo
+                    ->select('actividades.id', 'actividades.nombre')
+                    ->distinct() // Aseguramos que las actividades no se repitan
+                    ->get();
+    
+                // Asignar las actividades al equipo
+                $equipo->actividades = $actividades;
+    
+                return $equipo;
+            });
+    
+            // Asignar los equipos al mantenimiento
+            $mantenimiento->equipos = $equiposConComponentesYActividades;
+    
+            return $mantenimiento;
+        });
+    
+        // Devolver los mantenimientos con los equipos y actividades
+        return response()->json($mantenimientosConEquipos);
+    }
+    
     public function updateDetalles(Request $request, $id)
     {
         // Validación de los datos de entrada
@@ -259,7 +312,7 @@ public function showMantenimientoDetalles($id)
 {
     // Obtener el mantenimiento con sus datos básicos
     $mantenimiento = DB::table('mantenimiento')
-        ->select('mantenimiento.*') // Esto incluirá todas las columnas, incluido 'estado'
+        ->select('mantenimiento.*')
         ->where('id', $id)
         ->first();
 
@@ -274,46 +327,57 @@ public function showMantenimientoDetalles($id)
         ->select('equipos.*')
         ->get();
 
-    // Para cada equipo, obtener sus componentes
-    $equiposConComponentes = $equipos->map(function ($equipo) use ($id) {
-        // Buscar los componentes del equipo en la tabla equipo_componentes
+    // Para cada equipo, obtener sus componentes sin duplicados
+    $equiposConComponentesYActividades = $equipos->map(function ($equipo) use ($id) {
+        // Obtener los componentes asociados al equipo
         $componentes = DB::table('componentes')
             ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
             ->where('equipo_componentes.equipo_mantenimiento_id', $equipo->id)
             ->where('equipo_componentes.mantenimiento_id', $id)
-            ->select('componentes.*', 'equipo_componentes.cantidad')
+            ->select('componentes.id', 'componentes.nombre', 'componentes.descripcion', 'equipo_componentes.cantidad')
+            ->distinct() // Aseguramos que los componentes no se repitan
             ->get();
 
-        // Asignar los componentes al equipo (si no hay, será un array vacío)
-        $equipo->componentes = $componentes->isEmpty() ? [] : $componentes;
+        // Asignar los componentes al equipo
+        $equipo->componentes = $componentes;
+
+        // Obtener las actividades únicas asociadas al mantenimiento
+        $actividades = DB::table('actividades')
+            ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
+            ->where('mantenimiento_actividad.mantenimiento_id', $id)
+            ->where('mantenimiento_actividad.equipo_id', $equipo->id) // Aseguramos que las actividades sean específicas por equipo
+            ->select('actividades.id', 'actividades.nombre')
+            ->distinct() // Aseguramos que las actividades no se repitan
+            ->get();
+
+        // Asignar las actividades al equipo
+        $equipo->actividades = $actividades;
+
         return $equipo;
     });
 
-    // Obtener las actividades asociadas al mantenimiento
-    $actividades = DB::table('actividades')
+    // Obtener todas las actividades del mantenimiento (sin asociarlas a un equipo)
+    $actividadesGenerales = DB::table('actividades')
         ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
         ->where('mantenimiento_actividad.mantenimiento_id', $id)
-        ->select('actividades.*')
+        ->select('actividades.id', 'actividades.nombre')
+        ->distinct()
         ->get();
 
     // Combinar los datos del mantenimiento, equipos y actividades en un solo array
     $response = (array) $mantenimiento;
-    $response['equipos'] = $equiposConComponentes;
-    $response['actividades'] = $actividades;
+    $response['equipos'] = $equiposConComponentesYActividades;
+    $response['actividades_generales'] = $actividadesGenerales;
 
     return response()->json($response);
 }
 
+
 public function guardarMantenimiento(Request $request)
 {
     $validatedData = $request->validate([
+        'id' => 'required|integer',
         'codigo_mantenimiento' => 'required|string|max:50',
-        'tipo' => 'required|string|max:50',
-        'fecha_inicio' => 'required|date',
-        'fecha_fin' => 'required|date',
-        'proveedor' => 'nullable|string|max:100',
-        'contacto_proveedor' => 'nullable|string|max:100',
-        'costo' => 'nullable|numeric',
         'equipos' => 'required|array',
         'equipos.*.id' => 'required|integer',
         'equipos.*.actividades' => 'nullable|array',
@@ -322,70 +386,79 @@ public function guardarMantenimiento(Request $request)
         'equipos.*.componentes' => 'nullable|array',
         'equipos.*.componentes.*.id' => 'required_if:equipos.*.componentes,!=,[]|integer',
         'equipos.*.componentes.*.nombre' => 'required_if:equipos.*.componentes,!=,[]|string|max:100',
+        'equipos.*.componentes.*.cantidad' => 'required_if:equipos.*.componentes,!=,[]|integer',
         'equipos.*.observacion' => 'nullable|string',
     ]);
-    
 
     try {
         DB::beginTransaction();
 
-        // Crear el mantenimiento
-        $mantenimiento = Mantenimiento::create([
-            'codigo_mantenimiento' => $validatedData['codigo_mantenimiento'],
-            'tipo' => $validatedData['tipo'],
-            'fecha_inicio' => $validatedData['fecha_inicio'],
-            'fecha_fin' => $validatedData['fecha_fin'],
-            'proveedor' => $validatedData['proveedor'],
-            'contacto_proveedor' => $validatedData['contacto_proveedor'],
-            'costo' => $validatedData['costo'],
-        ]);
+        // Encontrar el mantenimiento a actualizar
+        $mantenimiento = Mantenimiento::findOrFail($validatedData['id']);
+
+        // Eliminar los registros de las tablas intermedias directamente
+        DB::table('mantenimiento_actividad')->where('mantenimiento_id', $mantenimiento->id)->delete();
+        DB::table('equipo_componentes')->where('mantenimiento_id', $mantenimiento->id)->delete();
+        DB::table('equipo_mantenimiento')->where('mantenimiento_id', $mantenimiento->id)->delete();
 
         // Asociar los equipos al mantenimiento
         foreach ($validatedData['equipos'] as $equipoData) {
-            $equipo = Equipo::findOrFail($equipoData['id']);
+            $equipo = Equipo::findOrFail($equipoData['id']); // Obtener el equipo actual
 
-            // Relación en la tabla intermedia equipo_mantenimiento
-            $mantenimiento->equipos()->attach($equipo->id, [
+            // Asociar el equipo al mantenimiento
+            DB::table('equipo_mantenimiento')->insert([
+                'equipo_id' => $equipo->id,
+                'mantenimiento_id' => $mantenimiento->id,
                 'observacion' => $equipoData['observacion'] ?? null,
             ]);
 
-            // Asociar las actividades al equipo (mantenimiento_actividad)
-            foreach ($equipoData['actividades'] as $actividadData) {
-                $actividad = Actividad::firstOrCreate(
-                    ['id' => $actividadData['id']],
-                    ['nombre' => $actividadData['nombre']]
-                );
-                $mantenimiento->actividades()->attach($actividad->id, [
-                    'equipo_id' => $equipo->id,
-                ]);
+            // Asociar actividades con el equipo y mantenimiento
+            if (isset($equipoData['actividades']) && is_array($equipoData['actividades'])) {
+                foreach ($equipoData['actividades'] as $actividadData) {
+                    DB::table('mantenimiento_actividad')->insert([
+                        'mantenimiento_id' => $mantenimiento->id,
+                        'actividad_id' => $actividadData['id'],
+                        'equipo_id' => $equipo->id,
+                    ]);
+                }
             }
 
-            // Asociar los componentes al equipo (equipo_componentes)
-            foreach ($equipoData['componentes'] as $componenteData) {
-                $componente = Componente::firstOrCreate(
-                    ['id' => $componenteData['id']],
-                    ['nombre' => $componenteData['nombre']]
-                );
-                $equipo->componentes()->attach($componenteData['id'], [
-                    'mantenimiento_id' => $mantenimiento->id
-                ]);
+            // Asociar componentes con el equipo y mantenimiento
+            if (isset($equipoData['componentes']) && is_array($equipoData['componentes'])) {
+                foreach ($equipoData['componentes'] as $componenteData) {
+                    $componente = Componente::firstOrCreate(
+                        ['id' => $componenteData['id']],
+                        ['nombre' => $componenteData['nombre']]
+                    );
+                    // Asociar el componente con el equipo
+                    DB::table('equipo_componentes')->insert([
+                        'equipo_mantenimiento_id' => $equipo->id,  // Corregido para usar 'equipo_mantenimiento_id'
+                        'componente_id' => $componente->id,
+                        'mantenimiento_id' => $mantenimiento->id,
+                        'cantidad' => $componenteData['cantidad'] ?? 1,
+                    ]);
+                }
             }
         }
 
         DB::commit();
 
         return response()->json([
-            'message' => 'Mantenimiento creado exitosamente.',
+            'message' => 'Relaciones de mantenimiento actualizadas exitosamente.',
             'data' => $mantenimiento,
-        ], 201);
+        ], 200);
     } catch (\Exception $e) {
         DB::rollBack();
         return response()->json([
-            'message' => 'Ocurrió un error al crear el mantenimiento.',
+            'message' => 'Ocurrió un error al actualizar las relaciones de mantenimiento.',
             'error' => $e->getMessage(),
         ], 500);
     }
 }
+
+
+
+
 
 public function obtenerMantenimientoConDetalles($id)
 {

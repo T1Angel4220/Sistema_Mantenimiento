@@ -152,6 +152,8 @@ const MaintenanceTable = () => {
 
   const [data, setData] = useState([]);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
+  const [equipoSeleccionado, setSelectedEquip] = useState(null);
+
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -173,19 +175,21 @@ const MaintenanceTable = () => {
       const response = await api.get('/actividades');
       if (response.status === 200) {
         const actividadesArray = Array.isArray(response.data) ? response.data : [];
-        setAvailableActivities( actividadesArray);
+        setAvailableActivities(actividadesArray);
       }
     } catch (error) {
       console.error('Error al cargar actividades:', error);
-      setAvailableActivities(  []);
+      setAvailableActivities([]);
     } finally {
-      
+
     }
   };
   const handleOpenModal = () => {
     setOpen(true);
   };
-
+  const handleSeleccionarEquipo = (equipo) => {
+    setSelectedEquip(equipo);
+  };
   const handleCloseModal = () => {
     setOpen(false);
   };
@@ -358,13 +362,13 @@ const MaintenanceTable = () => {
       setSnackbarOpen(true);
       return; // Detiene la ejecución si no hay actividades
     }
-  
+
     if (selectedMaintenance.equipos.length === 0) {
       setSnackbarMessage('No se puede guardar el mantenimiento sin equipos');
       setSnackbarOpen(true);
       return; // Detiene la ejecución si no hay equipos
     }
-  
+
     try {
       // Guardar los cambios en el mantenimiento
       await api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`, selectedMaintenance);
@@ -381,7 +385,7 @@ const MaintenanceTable = () => {
       setSnackbarOpen(true);
     }
   };
-  
+
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -414,12 +418,30 @@ const MaintenanceTable = () => {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
+  const guardarEditar = (event, newValue) => {
+    console.log(selectedMaintenance)
+    try {
+      api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`, 
+        selectedMaintenance)
+        .then(response => {
+          console.log('Mantenimiento actualizado exitosamente:', response.data);
+        })
+        .catch(error => {
+          console.error('Error al actualizar mantenimiento:', error);
+        });
+
+
+    } catch (error) {
+      console.error('Error al guardar los cambios:', error);
+    }
+  };
+
   const handleSelectActivity = (actividadId) => {
     console.log(actividadId);
     console.log(availableActivities);
     const selectedActivity = availableActivities.find((actividad) => actividad.id == actividadId);
     console.log(selectedActivity);
-    
+
     // Verifica si la actividad ya está en el array de actividades
     if (selectedActivity && !selectedMaintenance.actividades.some((actividad) => actividad.id === selectedActivity.id)) {
       setSelectedMaintenance({
@@ -430,7 +452,7 @@ const MaintenanceTable = () => {
       // Si la actividad ya está, no hacer nada
     }
   };
-  
+
   // Función para eliminar una actividad de selectedMaintenance
   const handleDeleteActividad = (id) => {
     setSelectedMaintenance({
@@ -480,7 +502,9 @@ const MaintenanceTable = () => {
     api.get('/mantenimientos')
       .then((response) => {
         setData(response.data);
+        console.log(response.data)
       })
+     
       .catch((error) => {
         console.error('Error al obtener los datos:', error);
       });
@@ -502,7 +526,27 @@ const MaintenanceTable = () => {
       setComponentChanges({ added: [], removed: [] });
     }
   }, [openDialog]);
+  const handleSaveEditionEquip = (actividades, componentes, observacion) => {
+    setSelectedMaintenance((prev) => {
+      const nuevosEquipos = prev.equipos.map((equipo) => {
+        // Identificar el equipo seleccionado y actualizar sus arrays
+        if (equipo.id == equipoSeleccionado.id) {
+          return {
+            ...equipo,
+            actividades: actividades
+            ,
+            componentes: componentes
+            ,
+            observacion: observacion
+          };
+        }
+        return equipo; // Retornar el resto de los equipos sin modificaciones
+      });
 
+      // Devolver el nuevo estado con los equipos actualizados
+      return { ...prev, equipos: nuevosEquipos };
+    });
+  };
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return format(date, 'dd/MM/yyyy');
@@ -905,37 +949,37 @@ const MaintenanceTable = () => {
                     </Box>
                   ) : (
                     <TabPanel value={tabValue} index={1}>
-                  {selectedMaintenance?.actividades?.length > 0 ? (
-                    <List>
-                      {selectedMaintenance.actividades.map((actividad) => (
-                        <ListItem
-                          key={actividad.id}
-                          sx={{
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            borderRadius: 1,
-                            mb: 1,
-                            backgroundColor: 'background.paper'
-                          }}
-                        >
-                          <ListItemText
-                            primary={
-                              <Typography variant="subtitle1" fontWeight="bold">
-                                {actividad.nombre}
-                              </Typography>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  ) : (
-                    <Box sx={{ p: 4, textAlign: 'center' }}>
-                      <Typography color="text.secondary">
-                        No hay actividades registradas
-                      </Typography>
-                    </Box>
-                  )}
-                </TabPanel>
+                      {selectedMaintenance?.actividades?.length > 0 ? (
+                        <List>
+                          {selectedMaintenance.actividades.map((actividad) => (
+                            <ListItem
+                              key={actividad.id}
+                              sx={{
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 1,
+                                mb: 1,
+                                backgroundColor: 'background.paper'
+                              }}
+                            >
+                              <ListItemText
+                                primary={
+                                  <Typography variant="subtitle1" fontWeight="bold">
+                                    {actividad.nombre}
+                                  </Typography>
+                                }
+                              />
+                            </ListItem>
+                          ))}
+                        </List>
+                      ) : (
+                        <Box sx={{ p: 4, textAlign: 'center' }}>
+                          <Typography color="text.secondary">
+                            No hay actividades registradas
+                          </Typography>
+                        </Box>
+                      )}
+                    </TabPanel>
                   )}
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
@@ -1122,7 +1166,7 @@ const MaintenanceTable = () => {
               </>
             )}
           </DialogContent>
-        
+
           <DialogActions sx={{ p: 2, gap: 1 }}>
             {isEditing ? (
               <Button
@@ -1165,10 +1209,13 @@ const MaintenanceTable = () => {
           </DialogActions>
         </Dialog>
         <ModalEdicionMantenimiento
-        mantenimiento={selectedMaintenance}
-        open={open}
-        onClose={handleCloseModal}
-      />
+          mantenimiento={selectedMaintenance}
+          open={open}
+          onClose={handleCloseModal}
+          guardar={handleSaveEditionEquip}
+          seleccionarEquipo={handleSeleccionarEquipo}
+          guardarEditar={guardarEditar}
+        />
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={3000}

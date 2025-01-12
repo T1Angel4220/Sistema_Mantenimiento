@@ -67,10 +67,9 @@ Route::get('/proceso-compra', [ProcesoCompraController::class, 'index']);
 
 Route::controller(MantenimientoController::class)->group(function () {
     Route::get('/mantenimientos', 'index');
-    Route::post('/mantenimientosDetalles', 'guardarMantenimiento');
-    Route::get('/mantenimientos/{id}', 'obtenerMantenimientoConDetalles');
+    Route::put('/mantenimientosDetalles/{id}', 'guardarMantenimiento');
+    Route::get('/mantenimientos/{id}', 'showMantenimientoDetalles');
     Route::put('/mantenimientos/{id}', 'update');
-    Route::put('/mantenimientosDetalles/{id}', 'updateDetalles');
 
     Route::delete('/mantenimientos/{id}', 'destroy');
     Route::get('/mantenimientos_idMax', 'obtenerIdMaximo');
