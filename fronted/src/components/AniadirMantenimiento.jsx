@@ -69,21 +69,21 @@ export default function AssetMaintenanceForm() {
 
   const [openConfirmCancelDialog, setOpenConfirmCancelDialog] = useState(false);
 
-    const handleConfirmSave = async (e) => {
-      setOpenConfirmDialog(false)
-      handleSaveMaintenance(e);
-      
+  const handleConfirmSave = async (e) => {
+    setOpenConfirmDialog(false)
+    handleSaveMaintenance(e);
+
   };
   const cancelar = (e) => {
     setOpenConfirmCancelDialog(false);
     navigate("/InicioMantenimientos")
-};
-const seguirMantenimiento = (e) => {
-  setOpenConfirmCancelDialog(false);
-};
+  };
+  const seguirMantenimiento = (e) => {
+    setOpenConfirmCancelDialog(false);
+  };
   const handleClickGuardar = (e) => {
     e.preventDefault();
-    let faltanActividadesComponentes=false;
+    let faltanActividadesComponentes = false;
     if (mantenimiento.equipos.length == 0) {
       setEquipo(true);
       setTimeout(() => {
@@ -94,12 +94,12 @@ const seguirMantenimiento = (e) => {
     mantenimiento.equipos.forEach(equipo => {
       // Verifica si el equipo no tiene componentes ni actividades
       if (equipo.componentes.length === 0 && equipo.actividades.length === 0) {
-        faltanActividadesComponentes=true;
-       ;
+        faltanActividadesComponentes = true;
+        ;
         return; // Termina la ejecución de la función
       }
     });
-    if(faltanActividadesComponentes){
+    if (faltanActividadesComponentes) {
       setActividades(true);
       setTimeout(() => {
         setActividades(false);
@@ -107,10 +107,10 @@ const seguirMantenimiento = (e) => {
       return;
     }
     setOpenConfirmDialog(true);
-};
+  };
   const handleConfirmCancel = () => {
     setOpenConfirmDialog(false);
-};
+  };
   const handleToggleTable = () => {
     setShowTable(!showTable);
     setRegistro(true);
@@ -137,28 +137,29 @@ const seguirMantenimiento = (e) => {
   }
   const handleSaveEditionEquip = (actividades, componentes, observacion) => {
     console.log(equipoSeleccionado);
-    console.log(mantenimiento);
-    
     setMantenimiento((prev) => {
-        const nuevosEquipos = prev.equipos.map((equipo) => {
-            // Identificar el equipo seleccionado y actualizar sus arrays
-            if (equipo.id === equipoSeleccionado.id) {
-                return {
-                    ...equipo,
-                    actividades: actividades 
-                       ,
-                    componentes: componentes 
-                       ,
-                    observacion: observacion
-                };
-            }
-            return equipo; // Retornar el resto de los equipos sin modificaciones
-        });
+      const nuevosEquipos = prev.equipos.map((equipo) => {
+        // Identificar el equipo seleccionado y actualizar sus arrays
+        if (equipo.id == equipoSeleccionado.id) {
+          return {
+            ...equipo,
+            actividades: actividades,
+            componentes: componentes,
+            observacion: observacion
+          };
+        }
+        return equipo; // Retornar el resto de los equipos sin modificaciones
+      });
 
-        // Devolver el nuevo estado con los equipos actualizados
-        return { ...prev, equipos: nuevosEquipos };
+      // Devolver el nuevo estado con los equipos actualizados
+      return { ...prev, equipos: nuevosEquipos };
     });
-};
+
+    // Confirmar el nuevo estado después de la actualización
+    setTimeout(() => {
+      console.log("Estado actualizado de mantenimiento:", mantenimiento);
+    }, 0);
+  };
 
 
   const openBuscarEquipo = () => {
@@ -316,7 +317,7 @@ const seguirMantenimiento = (e) => {
         setSubmit(false);
         navigate("/InicioMantenimientos")
       }, 1800);
-     
+
     } catch (error) {
       console.error("Error al crear el mantenimiento:", error);
     }
@@ -791,7 +792,10 @@ const seguirMantenimiento = (e) => {
                             onPageChange={handleChangePage}
                             onRowsPerPageChange={handleChangeRowsPerPage}
                           />
-                          <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado} actividadesSe={equipoSeleccionado==null?[]:equipoSeleccionado.actividades} componentesSe={equipoSeleccionado==null?[]:equipoSeleccionado.componentes} guardarActivComp={handleSaveEditionEquip} />
+                          <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado || {}}
+                            actividadesSe={equipoSeleccionado!=null ? equipoSeleccionado.actividades : []}
+                            componentesSe={equipoSeleccionado!=null ? equipoSeleccionado.componentes : []} 
+                            guardarActivComp={handleSaveEditionEquip} />
 
                         </>
                       )}

@@ -47,6 +47,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import axios from 'axios';
+import ModalEdicionMantenimiento from './EditarMantenimiento';
 
 const endpoint = 'http://localhost:8000/api';
 
@@ -164,6 +165,8 @@ const MaintenanceTable = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [availableActivities, setAvailableActivities] = useState([]);
+  const [open, setOpen] = useState(true);
+
   const navigate = useNavigate();
   const fetchActividades = async () => {
     try {
@@ -179,7 +182,13 @@ const MaintenanceTable = () => {
       
     }
   };
-  
+  const handleOpenModal = () => {
+    setOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpen(false);
+  };
   // Usar el hook useEffect para cargar las actividades al montar el componente
   useEffect(() => {
     fetchActividades();
@@ -311,12 +320,12 @@ const MaintenanceTable = () => {
       const response = await api.get(`/mantenimientoDetalles/${maintenance.id}`);
       const maintenanceData = response.data;
       setSelectedMaintenance(maintenanceData);
-
+      handleOpenModal();
       if (maintenanceData.tipo === 'Externo') {
         await fetchProveedores();
       }
 
-      setOpenDialog(true);
+      setOpenDialog(false);
     } catch (error) {
       console.error('Error:', error);
       let errorMessage = 'Error al cargar los detalles del mantenimiento';
@@ -1113,6 +1122,7 @@ const MaintenanceTable = () => {
               </>
             )}
           </DialogContent>
+        
           <DialogActions sx={{ p: 2, gap: 1 }}>
             {isEditing ? (
               <Button
@@ -1154,6 +1164,11 @@ const MaintenanceTable = () => {
             </Button>
           </DialogActions>
         </Dialog>
+        <ModalEdicionMantenimiento
+        mantenimiento={selectedMaintenance}
+        open={open}
+        onClose={handleCloseModal}
+      />
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={3000}
