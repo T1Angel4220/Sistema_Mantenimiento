@@ -146,11 +146,9 @@ const seguirMantenimiento = (e) => {
                 return {
                     ...equipo,
                     actividades: actividades 
-                        ? [...(equipo.actividades || []), ...actividades]
-                        : equipo.actividades || [],
+                       ,
                     componentes: componentes 
-                        ? [...(equipo.componentes || []), ...componentes]
-                        : equipo.componentes || [],
+                       ,
                     observacion: observacion
                 };
             }
@@ -793,7 +791,7 @@ const seguirMantenimiento = (e) => {
                             onPageChange={handleChangePage}
                             onRowsPerPageChange={handleChangeRowsPerPage}
                           />
-                          <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado} actividadesSe={equipoSeleccionado==null?[]:equipoSeleccionado.actividades} componentes={equipoSeleccionado==null?[]:equipoSeleccionado.componentes} guardarActivComp={handleSaveEditionEquip} />
+                          <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado} actividadesSe={equipoSeleccionado==null?[]:equipoSeleccionado.actividades} componentesSe={equipoSeleccionado==null?[]:equipoSeleccionado.componentes} guardarActivComp={handleSaveEditionEquip} />
 
                         </>
                       )}

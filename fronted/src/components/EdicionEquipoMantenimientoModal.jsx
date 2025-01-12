@@ -4,7 +4,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import { useEffect } from 'react';
-
+import axios from 'axios';
 const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe, guardarActivComp }) => {
     const [tabIndex, setTabIndex] = useState(0);
     const [observacion, setObservacion] = useState('');
@@ -309,16 +309,14 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {componentesSeleccionados
-                                                .slice(pageComponentes * rowsPerPage, pageComponentes * rowsPerPage + rowsPerPage)
-                                                .map((componente) => (
+                                            {componentesSeleccionados.map((componente) => (
                                                     <TableRow key={componente.id}>
                                                         <TableCell>{componente.id}</TableCell>
                                                         <TableCell>{componente.nombre}</TableCell>
                                                         <TableCell>
                                                             <Button
                                                                 color="secondary"
-                                                                onClick={() => handleEliminar('actividad', actividad)}
+                                                                onClick={() => handleEliminar('componente', componente)}
                                                                 sx={{
                                                                     backgroundColor: 'red',
                                                                     color: 'white',
