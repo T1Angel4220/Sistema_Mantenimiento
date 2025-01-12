@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('mantenimiento_id');
             $table->unsignedBigInteger('equipo_id');
+            $table->text('observacion')->nullable(); // Agregar la columna observacion
+
             $table->timestamps();
 
             $table->foreign('mantenimiento_id')->references('id')->on('mantenimiento')->onDelete('cascade');

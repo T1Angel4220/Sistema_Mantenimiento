@@ -67,8 +67,8 @@ Route::get('/proceso-compra', [ProcesoCompraController::class, 'index']);
 
 Route::controller(MantenimientoController::class)->group(function () {
     Route::get('/mantenimientos', 'index');
-    Route::post('/mantenimientos', 'store');
-    Route::get('/mantenimientos/{id}', 'show');
+    Route::post('/mantenimientosDetalles', 'guardarMantenimiento');
+    Route::get('/mantenimientos/{id}', 'obtenerMantenimientoConDetalles');
     Route::put('/mantenimientos/{id}', 'update');
     Route::put('/mantenimientosDetalles/{id}', 'updateDetalles');
 
@@ -90,6 +90,8 @@ Route::controller(EquipoController::class)->group(function () {
     Route::put('/equipo/{id}', 'update');
     Route::delete('/equipo/{id}', 'destroy');
     Route::post('/equipoDisponibles', 'obtenerEquiposDisponibles');
+    Route::post('/equiposDisponiblesFiltros', 'equiposDisponiblesFiltros');
+
     Route::get('/equiposComponentes/{id}', 'obtenerComponentesDeEquipo');
 });
 

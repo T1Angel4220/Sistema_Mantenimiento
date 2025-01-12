@@ -5,11 +5,30 @@ import DatePicker from 'react-datepicker';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Home, ShoppingCart, Box, PenTool, FileText, LogOut } from 'lucide-react';
-
+import EquiposModal from './BuscarEquipos';
+import EdicionEquipo from './EdicionEquipoMantenimientoModal';
 import 'react-datepicker/dist/react-datepicker.css';
-
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
+  Typography,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from '@mui/material';
 export default function AssetMaintenanceForm() {
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectedActivities, setSelectedActivities] = useState([]);
@@ -37,6 +56,131 @@ export default function AssetMaintenanceForm() {
   const [actividades, setActividades] = useState(false);
   const [providers, setProviders] = useState([]);
   const [equipmentOptions, setEquipmentOptions] = useState({});
+  const [mantenimiento, setMantenimiento] = useState({ "equipos": [] });
+  const [showTable, setShowTable] = useState(false);
+  const [page, setPage] = useState(0); // Página actual
+  const [rowsPerPage, setRowsPerPage] = useState(8); // Equipos por página
+  const [openModal, setOpenModal] = useState(false);
+  const [confirmacionEquipo, setConfirmacionEquipo] = useState(false);
+  const [equipoBorrar, setEquipoBorrar] = useState(null);
+  const [mantenimientoInfo, setMantenimientoInfo] = useState(false);
+  const [registro, setRegistro] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+
+  const [openConfirmCancelDialog, setOpenConfirmCancelDialog] = useState(false);
+
+    const handleConfirmSave = async (e) => {
+      setOpenConfirmDialog(false)
+      handleSaveMaintenance(e);
+      
+  };
+  const cancelar = (e) => {
+    setOpenConfirmCancelDialog(false);
+    navigate("/InicioMantenimientos")
+};
+const seguirMantenimiento = (e) => {
+  setOpenConfirmCancelDialog(false);
+};
+  const handleClickGuardar = (e) => {
+    e.preventDefault();
+    let faltanActividadesComponentes=false;
+    if (mantenimiento.equipos.length == 0) {
+      setEquipo(true);
+      setTimeout(() => {
+        setEquipo(false);
+      }, 1800);
+      return;
+    }
+    mantenimiento.equipos.forEach(equipo => {
+      // Verifica si el equipo no tiene componentes ni actividades
+      if (equipo.componentes.length === 0 && equipo.actividades.length === 0) {
+        faltanActividadesComponentes=true;
+       ;
+        return; // Termina la ejecución de la función
+      }
+    });
+    if(faltanActividadesComponentes){
+      setActividades(true);
+      setTimeout(() => {
+        setActividades(false);
+      }, 1800)
+      return;
+    }
+    setOpenConfirmDialog(true);
+};
+  const handleConfirmCancel = () => {
+    setOpenConfirmDialog(false);
+};
+  const handleToggleTable = () => {
+    setShowTable(!showTable);
+    setRegistro(true);
+  };
+  const borrarEquipo = (equipoBo) => {
+    setConfirmacionEquipo(true);
+    setEquipoBorrar(equipoBo)
+
+  };
+  const handleCancelDeleteEquip = () => {
+    setConfirmacionEquipo(false);
+    console.log("La eliminación del equipo fue cancelada.");
+  };
+  const handleDeleteEquipo = () => {
+    setMantenimiento((prev) => {
+      const nuevosEquipos = prev.equipos.filter(
+        (equipo) => equipo.id !== equipoBorrar.id
+      );
+
+      return { ...prev, equipos: nuevosEquipos };
+    });
+
+    setConfirmacionEquipo(false);
+  }
+  const handleSaveEditionEquip = (actividades, componentes, observacion) => {
+    console.log(equipoSeleccionado);
+    console.log(mantenimiento);
+    
+    setMantenimiento((prev) => {
+        const nuevosEquipos = prev.equipos.map((equipo) => {
+            // Identificar el equipo seleccionado y actualizar sus arrays
+            if (equipo.id === equipoSeleccionado.id) {
+                return {
+                    ...equipo,
+                    actividades: actividades 
+                        ? [...(equipo.actividades || []), ...actividades]
+                        : equipo.actividades || [],
+                    componentes: componentes 
+                        ? [...(equipo.componentes || []), ...componentes]
+                        : equipo.componentes || [],
+                    observacion: observacion
+                };
+            }
+            return equipo; // Retornar el resto de los equipos sin modificaciones
+        });
+
+        // Devolver el nuevo estado con los equipos actualizados
+        return { ...prev, equipos: nuevosEquipos };
+    });
+};
+
+
+  const openBuscarEquipo = () => {
+    setOpenModal(true);
+
+  };
+  const cerrarBuscarEquipo = () => {
+    setOpenModal(false);
+
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
 
   const navItems = [
     { icon: Home, label: 'Inicio', route: '/Main' },
@@ -94,6 +238,26 @@ export default function AssetMaintenanceForm() {
       setAssets([]);
   }, [startDate, endDate]);
 
+  useEffect(() => {
+    const isValid =
+      maintenanceType &&
+      startDate &&
+      endDate &&
+      new Date(startDate) < new Date(endDate) &&
+      (maintenanceType === "Interno" ||
+        (maintenanceType === "Externo" &&
+          provider &&
+          contact &&
+          cost));
+
+    if (isValid) {
+      setMantenimientoInfo(true);
+    } else {
+      setMantenimientoInfo(false);
+    }
+  }, [maintenanceType, startDate, endDate, provider, contact, cost]);
+
+
   const handleComponentChangeSelection = (option) => {
     setSelectedOption(option);
     if (option === "No") {
@@ -121,56 +285,16 @@ export default function AssetMaintenanceForm() {
       return updated;
     });
   };
-
-  const handleSubmit = async (e) => {
+  const handleCancelMaintenance = async (e) => {
     e.preventDefault();
-    if (!startDate || !endDate || new Date(startDate) >= new Date(endDate)) {
-      setDateError(true);
-      setTimeout(() => {
-        setDateError(false);
-      }, 1800);
-      return;
-    }
-    if (selectedActivities.length == 0) {
-      setActividades(true);
-      setTimeout(() => {
-        setActividades(false);
-      }, 1800);
-      return;
-    }
-    if (selectedEquipments.length == 0) {
-      setEquipo(true);
-      setTimeout(() => {
-        setEquipo(false);
-      }, 1800);
-      return;
-    }
+    setOpenConfirmCancelDialog(true)
+  }
+  const handleSaveMaintenance = async (e) => {
+    e.preventDefault();
 
-    const equiposSinSeleccion = selectedEquipments.filter(
-      (equipment) => !equipmentOptions[equipment.id]
-    );
 
-    if (equiposSinSeleccion.length > 0) {
-      alert(
-        "Por favor, seleccione si se añadieron o cambiaron componentes (Sí o No) para todos los equipos seleccionados."
-      );
-      return;
-    }
-
-    const equiposConComponentesInvalidos = Object.keys(equipmentOptions).filter(
-      (equipmentId) =>
-        equipmentOptions[equipmentId] === "No" &&
-        equipmentComponents[equipmentId]?.length > 0
-    );
-
-    if (equiposConComponentesInvalidos.length > 0) {
-      alert(
-        "No puede marcar 'No' en equipos que tienen componentes añadidos."
-      );
-      return;
-    }
-
-    const mantenimientoData = {
+    const mantenimientoGu = {
+      ...mantenimiento,
       codigo_mantenimiento: `MANT_${idMaximo}`,
       tipo: maintenanceType,
       fecha_inicio: startDate || null,
@@ -178,29 +302,13 @@ export default function AssetMaintenanceForm() {
       proveedor: maintenanceType === "Externo" ? provider : null,
       contacto_proveedor: maintenanceType === "Externo" ? contact : null,
       costo: maintenanceType === "Externo" ? parseFloat(cost) : null,
-      observaciones: observations || null,
-      actividades: selectedActivities.map((item) => item.id) || [],
-      equipos: selectedEquipments.map((equipment) => (
-        equipment.id
-      )),
     };
-
+    console.log(mantenimiento)
+    console.log(mantenimientoGu)
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/componentesEquipos",
-        selectedComponents,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    } catch (error) {
-      console.error("Error al insertar los componentes:", error);
-    }
-
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/api/mantenimientos",
-        mantenimientoData,
+        "http://localhost:8000/api/mantenimientosDetalles",
+        mantenimientoGu,
         {
           headers: { "Content-Type": "application/json" },
         }
@@ -208,7 +316,7 @@ export default function AssetMaintenanceForm() {
       setSubmit(true);
       setTimeout(() => {
         setSubmit(false);
-        navigate("/InicioMantenimientos");
+        navigate("/InicioMantenimientos")
       }, 1800);
      
     } catch (error) {
@@ -279,7 +387,15 @@ export default function AssetMaintenanceForm() {
   const handleRemoveEquipment = (id) => {
     setSelectedEquipments(selectedEquipments.filter(equipment => equipment.id !== id));
   };
+  const handleOpenModal = (equipo) => {
+    setEquipoSeleccionado(equipo);
+    setModalOpen(true);
+  };
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setEquipoSeleccionado(null);
+  };
   const handleRemoveActivity = (activity) => {
     setSelectedActivities(selectedActivities.filter((a) => a !== activity));
   };
@@ -287,11 +403,25 @@ export default function AssetMaintenanceForm() {
   const handleSelectAsset = (e) => {
     setSelectedAsset(e.target.value);
   };
+  const handleAddEquipos = (equipos) => {
+    setMantenimiento((prevState) => ({
+      ...prevState,
+      equipos: [
+        ...prevState.equipos,
+        ...equipos.map((equipo) => ({
+          ...equipo, // Mantener las propiedades actuales del equipo
+          actividades: [], // Inicializar el array de actividades
+          componentes: [], // Inicializar el array de componentes
+        })),
+      ],
+    }));
+    console.log(mantenimiento);
+  };
 
   const handleAddComponent = (e, idEquipo) => {
     const componente = components.find((item) => item.nombre === e.target.value);
-    const selected = { equipo_mantenimiento_id: idEquipo, componente_id: componente.id, mantenimiento_id: parseInt(idMaximo)}
-   
+    const selected = { equipo_mantenimiento_id: idEquipo, componente_id: componente.id, mantenimiento_id: parseInt(idMaximo) }
+
     if (selected && !selectedComponents.includes(selected)) {
       setSelectedComponents([...selectedComponents, selected]);
     }
@@ -328,7 +458,7 @@ export default function AssetMaintenanceForm() {
           })}
         </nav>
         <div className="p-4">
-          <button 
+          <button
             className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
             onClick={() => navigate('/InicioMantenimientos')}
           >
@@ -359,7 +489,7 @@ export default function AssetMaintenanceForm() {
           {actividades && (
             <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
               <div className="bg-red-500 text-white p-6 rounded-lg shadow-xl">
-                <h1 className="text-xl font-bold">No ha registrado actividades</h1>
+                <h1 className="text-xl font-bold">Hay equipos que no tienen actividades, ni componentes registrados</h1>
               </div>
             </div>
           )}
@@ -395,8 +525,10 @@ export default function AssetMaintenanceForm() {
                         setSelectedActivities([]);
                         setSelectedComponents([]);
                         setObservations('');
+
                       }}
                       className="mr-2 accent-black"
+                      disabled={registro}
                     />
                     Interno
                   </label>
@@ -416,6 +548,7 @@ export default function AssetMaintenanceForm() {
                         setCost('');
                       }}
                       className="mr-2 accent-black"
+                      disabled={registro}
                     />
                     Externo
                   </label>
@@ -426,7 +559,7 @@ export default function AssetMaintenanceForm() {
                 Codigo de Mantenimiento: MANT_{idMaximo}
               </label>
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleClickGuardar}>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label>Fecha de Inicio:</label>
@@ -440,12 +573,14 @@ export default function AssetMaintenanceForm() {
                       locale={es}
                       dateFormat="dd/MM/yyyy"
                       minDate={today}
+                      disabled={registro}
                       customInput={
                         <button
                           type="button"
                           className="border border-black p-2 flex items-center text-black w-64">
                           <Calendar className="mr-2 h-4 w-4 text-black" />
                           {startDate ? format(startDate, 'dd/MM/yyyy') : 'dd/mm/aaaa'}
+
                         </button>
                       }
                     />
@@ -464,15 +599,18 @@ export default function AssetMaintenanceForm() {
                         setEndDate(date);
                         setSelectedEquipments([]);
                       }}
+                      disabled={registro}
                       locale={es}
                       dateFormat="dd/MM/yyyy"
                       minDate={startDate}
+
                       customInput={
                         <button
                           type="button"
                           className="border border-black p-2 flex items-center text-black w-64">
                           <Calendar className="mr-2 h-4 w-4 text-black" />
                           {endDate ? format(endDate, 'dd/MM/yyyy') : 'dd/mm/aaaa'}
+
                         </button>
                       }
                     />
@@ -489,6 +627,7 @@ export default function AssetMaintenanceForm() {
                         value={provider}
                         onChange={(e) => setProvider(e.target.value)}
                         required
+                        disabled={registro}
                       >
                         <option value="" disabled>Seleccione un proveedor</option>
                         {providers.map((providerOption, index) => (
@@ -508,6 +647,8 @@ export default function AssetMaintenanceForm() {
                         className="border-2 border-black p-2 w-full"
                         value={contact}
                         onChange={(e) => setContact(e.target.value)}
+                        disabled={registro}
+
                       />
                     </div>
 
@@ -522,224 +663,248 @@ export default function AssetMaintenanceForm() {
                         max="100000"
                         value={cost}
                         onChange={(e) => setCost(e.target.value)}
+                        disabled={registro}
                       />
                     </div>
                   </div>
                 )}
+                <div>
+                  {/* Botón para mostrar/ocultar la tabla */}
 
-                <div className="mt-8">
-                  <div className="space-y-6">
-                    <div className="space-y-4">
-                      <h2 className="font-medium">Seleccione los equipos que tendrá el mantenimiento:</h2>
-                      <select
-                        onChange={handleAddEquipment}
-                        className="border border-gray-300 p-2 w-full rounded"
-                        defaultValue=""
-                        disabled={!(startDate && endDate && new Date(startDate) < new Date(endDate) && assets.length != 0)}
-                      >
-                        {assets.length === 0 ? (
-                          <option value="" disabled>No hay equipos disponibles en el rango de fechas establecidos</option>
-                        ) : (
-                          <option value="" disabled>Seleccione un equipo</option>
-                        )}
-                        {assets.map((asset) => (
-                          <option key={asset.id} value={asset.id}>
-                            {asset.Codigo_Barras} - {asset.Nombre_Producto}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
 
-                    <div className="mt-6">
-                      <h3 className="font-bold text-lg mb-4">Equipos seleccionados:</h3>
-                      {selectedEquipments.length > 0 ? (
-                        <div className="grid gap-6 md:grid-cols-2">
-                          {selectedEquipments.map((equipment) => (
-                            <div
-                              key={equipment.id}
-                              className="border border-gray-300 rounded-lg p-4 bg-white shadow-lg"
-                            >
-                              <div className="flex justify-between items-center mb-4">
-                                <span className="font-semibold text-gray-700">
-                                  {equipment.Codigo_Barras} - {equipment.Nombre_Producto}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveEquipment(equipment.id)}
-                                  className="text-red-600 hover:text-red-800 font-medium"
-                                >
-                                  Eliminar
-                                </button>
-                              </div>
 
-                              <div className="mt-4">
-                                <h4 className="font-medium text-gray-800 mb-2">
-                                  ¿Se añadieron o cambiaron componentes?
-                                </h4>
-                                <div className="flex gap-4">
-                                  <button
-                                    type="button"
-                                    className={`px-4 py-2 rounded border transition-all ${
-                                      equipmentOptions[equipment.id] === "Sí"
-                                        ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                                        : "bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-600"
-                                    }`}
-                                    onClick={() => handleEquipmentOptionChange(equipment.id, "Sí")}
-                                  >
-                                    Sí
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={`px-4 py-2 rounded border transition-all ${
-                                      equipmentOptions[equipment.id] === "No"
-                                        ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                                        : "bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-600"
-                                    }`}
-                                    onClick={() => handleEquipmentOptionChange(equipment.id, "No")}
-                                  >
-                                    No
-                                  </button>
-                                </div>
-                              </div>
+                  {/* Tabla de equipos visible solo si showTable es true */}
+                  {showTable && (
 
-                              {equipmentOptions[equipment.id] === "Sí" && (
-                                <div className="mt-6">
-                                  <h5 className="font-medium text-gray-800 mb-2">Gestionar Componentes</h5>
-                                  <select
-                                    className="border border-gray-300 p-2 w-full rounded bg-white"
-                                    defaultValue=""
-                                    onChange={(e) => handleAddComponent(e, equipment.id)}
-                                  >
-                                    <option value="" disabled>
-                                      Seleccione un componente
-                                    </option>
-                                    {components.map((component) => (
-                                      <option
-                                        key={component.id}
-                                        value={component.nombre}
-                                      >
-                                        {component.nombre}
-                                      </option>
-                                    ))}
-                                  </select>
-
-                                  {selectedComponents && selectedComponents
-                                    .filter((comp) => comp.equipo_mantenimiento_id === equipment.id)
-                                    .length > 0 && (
-                                      <div className="mt-4">
-                                        <h6 className="font-medium text-gray-700 mb-2">Componentes:</h6>
-                                        <ul className="space-y-2 max-h-48 overflow-y-auto">
-                                          {selectedComponents
-                                            .filter((comp) => comp.equipo_mantenimiento_id === equipment.id)
-                                            .map((comp, index) => {
-                                              const component = components.find((item) => item.id === comp.componente_id);
-                                              return (
-                                                <li
-                                                  key={index}
-                                                  className="flex justify-between items-center bg-gray-100 p-2 rounded"
-                                                >
-                                                  <span>{component ? component.nombre : "Componente desconocido"}</span>
-                                                  <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                      e.preventDefault();
-                                                      setSelectedComponents((prev) =>
-                                                        prev.filter(
-                                                          (item) =>
-                                                            !(
-                                                              item.equipo_mantenimiento_id === equipment.id &&
-                                                              item.componente_id === comp.componente_id
-                                                            )
-                                                        )
-                                                      );
-                                                    }}
-                                                    className="text-red-600 hover:text-red-800 font-medium"
-                                                  >
-                                                    Eliminar
-                                                  </button>
-                                                </li>
-                                              );
-                                            })}
-                                        </ul>
-                                      </div>
-                                    )}
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                    <div>
+                      <div className="h-8"></div>
+                      <Button variant="contained" color="primary" onClick={openBuscarEquipo}>
+                        Añadir equipo
+                      </Button>
+                      <div className="h-8"></div>
+                      <EquiposModal open={openModal} onClose={cerrarBuscarEquipo} onAddEquipo={handleAddEquipos} equiposSe={mantenimiento.equipos} fechaInicio={startDate} fechaFin={endDate} />
+                      {/* Si no hay equipos, mostrar mensaje */}
+                      {mantenimiento.equipos.length === 0 ? (
+                        <div>
+                          <Table>
+                            <TableHead>
+                              <TableRow sx={{ backgroundColor: 'primary.main' }}>
+                                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Nombre Producto</TableCell>
+                                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Código Barras</TableCell>
+                                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Tipo Equipo</TableCell>
+                                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Adquisición</TableCell>
+                                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Ubicación</TableCell>
+                                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Proceso Compra ID</TableCell>
+                                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Acciones</TableCell>
+                              </TableRow>
+                            </TableHead>
+                          </Table>
+                          <Typography
+                            variant="h6"
+                            color="textSecondary"
+                            align="center"
+                          >
+                            No ha registrado ningún equipo.
+                          </Typography>
                         </div>
                       ) : (
-                        <p className="text-gray-500">No se han seleccionado equipos.</p>
+                        <>
+                          <TableContainer component={Paper} elevation={3}>
+                            <Table>
+                              <TableHead>
+                                <TableRow sx={{ backgroundColor: 'primary.main' }}>
+                                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Nombre Producto</TableCell>
+                                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Código Barras</TableCell>
+                                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Tipo Equipo</TableCell>
+                                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Adquisición</TableCell>
+                                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Ubicación</TableCell>
+                                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Proceso Compra ID</TableCell>
+                                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Acciones</TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {mantenimiento.equipos
+                                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                  .map((equipo, index) => (
+                                    <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'action.hover' } }}>
+                                      <TableCell>{equipo.Nombre_Producto}</TableCell>
+                                      <TableCell>{equipo.Codigo_Barras}</TableCell>
+                                      <TableCell>{equipo.Tipo_Equipo}</TableCell>
+                                      <TableCell>{equipo.Fecha_Adquisicion}</TableCell>
+                                      <TableCell>{equipo.Ubicacion_Equipo}</TableCell>
+                                      <TableCell>{equipo.proceso_compra_id}</TableCell>
+                                      <TableCell>
+                                        <Button
+                                          variant="contained"
+                                          onClick={() => handleOpenModal(equipo)}
+                                          style={{ marginRight: '10px' }}
+                                          size="small"
+                                        >
+                                          Editar
+                                        </Button>
+                                        <Button
+                                          variant="contained"
+                                          onClick={() => borrarEquipo(equipo)}
+                                          color="error"
+                                          size="small"
+                                        >
+                                          Borrar
+                                        </Button>
+
+                                      </TableCell>
+                                    </TableRow>
+
+
+
+                                  ))}
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
+                          {confirmacionEquipo == true && (
+                            <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50">
+                              <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                                <h3 className="text-lg font-semibold mb-4">
+                                  ¿Está seguro de que desea eliminar el equipo ?
+                                </h3>
+                                <div className="flex justify-between">
+                                  <button
+                                    onClick={handleDeleteEquipo}
+                                    className="px-4 py-2 bg-red-500 text-white rounded"
+                                  >
+                                    Confirmar
+                                  </button>
+                                  <button
+                                    onClick={handleCancelDeleteEquip}
+                                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          {/* Paginación */}
+                          <TablePagination
+                            rowsPerPageOptions={[8]}
+                            component="div"
+                            count={mantenimiento.equipos.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                          />
+                          <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado} actividadesSe={equipoSeleccionado==null?[]:equipoSeleccionado.actividades} componentes={equipoSeleccionado==null?[]:equipoSeleccionado.componentes} guardarActivComp={handleSaveEditionEquip} />
+
+                        </>
                       )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8 mt-8">
-                  <div className="space-y-4">
-                    <p className="font-medium">Seleccione las actividades realizadas:</p>
-                    <select
-                      onChange={handleAddActivity}
-                      className="border-2 border-black p-2 w-full"
-                      defaultValue=""
-                    >
-                      <option value="" disabled>
-                        Seleccione una actividad
-                      </option>
-                      {activities.map((activity) => (
-                        <option
-                          key={activity.id}
-                          value={activity.nombre}>
-                          {activity.nombre}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="border border-gray-300 rounded-lg p-4 max-h-[300px] overflow-y-auto">
-                      {selectedActivities.map((activity) => (
-                        <div
-                          key={activity.id}
-                          className="flex justify-between items-center p-2 mb-2 border border-green-500 rounded"
+                      <div className="flex space-x-4">
+                        <button
+                          type="submit"
+                          className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-700"
                         >
-                          <span>{activity.nombre}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveActivity(activity)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      ))}
+                          Guardar
+                        </button>
+                      </div>
+
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <label htmlFor="observations">Observaciones:</label>
-                    <textarea
-                      onChange={(e) => setObservations(e.target.value)}
-                      id="observations"
-                      className="w-full min-h-[300px] border-2 border-black p-2 rounded-lg"
-                      maxLength="150"
-                    />
-                  </div>
+                  )}
                 </div>
+                <div className="h-8"></div>
+                <div className="flex justify-end space-x-4">
+                  <div className="h-8"></div> {/* Espaciador vacío para mover los botones hacia abajo */}
+                  {showTable ? (
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                    >
+                      Guardar
+                    </button>
+                  ) : (
+                    <Tooltip
+                      title={
+                        !mantenimientoInfo
+                          ? "Complete la información del mantenimiento correctamente"
+                          : ""
+                      }
+                    >
+                      <span>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleToggleTable}
+                          style={{ textTransform: "none" }}
+                          disabled={!mantenimientoInfo}
+                        >
+                          Registro de equipos
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  )}
 
-                <div className="flex justify-center gap-4 mt-8">
                   <button
-                    type="submit"
-                    className="px-8 py-2 bg-black text-white hover:bg-gray-700 rounded-md transition-colors"
-                  >
-                    Guardar
-                  </button>
-                  <button
-                    type="button"
-                    className="px-8 py-2 border border-black text-black hover:bg-gray-200 rounded-md transition-colors"
-                    onClick={() => navigate('/InicioMantenimientos')}
+                    onClick={handleCancelMaintenance}
+                    className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-700"
                   >
                     Cancelar
                   </button>
                 </div>
+                <Dialog open={openConfirmDialog} onClose={handleConfirmCancel}>
+                  <DialogTitle>Confirmación</DialogTitle>
+                  <DialogContent>
+                    <h1>¿Esta seguro de guardar el matenimiento?</h1>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleConfirmCancel} color="secondary"
+                      sx={{
+                        backgroundColor: 'red',
+                        color: 'white',
+                        '&:hover': {
+                          backgroundColor: 'darkred'
+                        }
+                      }}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={handleConfirmSave} color="primary"
+                      sx={{
+                        backgroundColor: 'blue',
+                        color: 'white',
+                        '&:hover': {
+                          backgroundColor: 'darkred'
+                        }
+                      }}>
+                      Confirmar
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+                <Dialog open={openConfirmCancelDialog} onClose={handleConfirmCancel}>
+                  <DialogTitle>Confirmación</DialogTitle>
+                  <DialogContent>
+                    <h1>¿Esta seguro de cancelar la creacion del mantenimiento?</h1>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={seguirMantenimiento} color="secondary"
+                      sx={{
+                        backgroundColor: 'red',
+                        color: 'white',
+                        '&:hover': {
+                          backgroundColor: 'darkred'
+                        }
+                      }}>
+                      Seguir con el registro
+                    </Button>
+                    <Button onClick={cancelar} color="primary"
+                      sx={{
+                        backgroundColor: 'blue',
+                        color: 'white',
+                        '&:hover': {
+                          backgroundColor: 'darkred'
+                        }
+                      }}>
+                      Cancelar el registro
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </form>
             </div>
           </div>

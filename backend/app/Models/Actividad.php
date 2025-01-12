@@ -15,12 +15,12 @@ class Actividad extends Model
     ];
     public function mantenimiento()
 {
-    return $this->belongsTo(Mantenimiento::class, 'mantenimiento_id');
+    return $this->belongsToMany(Mantenimiento::class, 'mantenimiento_id');
 }
 
 public function equipo()
 {
-    return $this->belongsTo(Equipo::class);
+    return $this->belongsToMany(Equipo::class);
 }
 
 }

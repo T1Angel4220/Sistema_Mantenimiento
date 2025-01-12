@@ -38,13 +38,9 @@ class Mantenimiento extends Model
     
     public function actividades()
     {
-        return $this->hasMany(Actividad::class, 'codigo_mantenimiento');
+        return $this->belongsToMany(Actividad::class, 'mantenimiento_actividad');
     }
     
-    public function observaciones()
-    {
-        return $this->hasMany(Observacion::class, 'codigo_mantenimiento');
-    }
 
     
 }

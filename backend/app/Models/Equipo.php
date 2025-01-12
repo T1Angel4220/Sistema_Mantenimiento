@@ -35,15 +35,19 @@ class Equipo extends Model
     {
         return $this->belongsToMany(Mantenimiento::class, 'equipo_mantenimiento', 'equipo_id', 'mantenimiento_id');
     }
+    public function componentes()
+    {
+        return $this->belongsToMany(Componente::class,'equipo_componentes', 'equipo_mantenimiento_id', 'componente_id')->withPivot('mantenimiento_id');
+    }
     
     public function actividades()
     {
-        return $this->hasMany(Actividad::class);
+        return $this->belongsMany(Actividad::class);
     }
     
     public function observaciones()
     {
-        return $this->hasMany(Observacion::class);
+        return $this->belongsMany(Observacion::class);
     }
     
 

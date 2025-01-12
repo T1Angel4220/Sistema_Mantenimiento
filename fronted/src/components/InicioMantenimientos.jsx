@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   Table,
   TableBody,
@@ -579,7 +580,6 @@ const MaintenanceTable = () => {
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Proveedor</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Contacto Proveedor</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Costo</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Observaciones</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Estado</TableCell>
                 <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Acciones</TableCell>
               </TableRow>
@@ -606,7 +606,6 @@ const MaintenanceTable = () => {
                   <TableCell>{item.proveedor || '-'}</TableCell>
                   <TableCell>{item.contacto_proveedor || '-'}</TableCell>
                   <TableCell>{item.costo ? `$${item.costo}` : '-'}</TableCell>
-                  <TableCell>{item.observaciones}</TableCell>
                   <TableCell>
                     <Chip
                       label={item.estado}
