@@ -229,7 +229,9 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                 <DatePicker
                   label="Fecha Final"
                   value={mantenimiento.fecha_fin || ''}
-                  onChange={handleFechaFinChange}
+                  onChange={(date) => {
+                    setFechaFin(date);
+                  }}
                   locale={es}
                   dateFormat="dd/MM/yyyy"
                   customInput={
@@ -237,7 +239,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                       type="button"
                       className="border border-black p-2 flex items-center text-black w-64">
                       <Calendar className="mr-2 h-4 w-4 text-black" />
-                      {startDate ? format(startDate, 'dd/MM/yyyy') : 'dd/mm/aaaa'}
+                      {mantenimiento.fecha_inicio ? format(mantenimiento.fecha_inicio, 'dd/MM/yyyy') : 'dd/mm/aaaa'}
 
                     </button>
                   }
