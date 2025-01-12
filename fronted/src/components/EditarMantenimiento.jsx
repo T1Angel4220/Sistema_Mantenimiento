@@ -110,6 +110,24 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
               {/* Solo fechas para mantenimiento interno */}
               <Grid item xs={6}>
                 <TextField
+                  label="Codigo mantenimento"
+                  value={
+                    mantenimiento.codigo_mantenimiento || ''
+                  }
+                  fullWidth
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Tipo"
+                  value={mantenimiento.tipo || ''}
+                  fullWidth
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
                   label="Fecha de Inicio"
                   value={mantenimiento.fecha_inicio || ''}
                   fullWidth
@@ -159,7 +177,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label="Código de Barras"
+                  label="Tipo"
                   value={mantenimiento.tipo || ''}
                   fullWidth
                   disabled
