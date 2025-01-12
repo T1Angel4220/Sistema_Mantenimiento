@@ -324,7 +324,7 @@ public function showMantenimientoDetalles($id)
     $equipos = DB::table('equipos')
         ->join('equipo_mantenimiento', 'equipos.id', '=', 'equipo_mantenimiento.equipo_id')
         ->where('equipo_mantenimiento.mantenimiento_id', $id)
-        ->select('equipos.*')
+        ->select('equipos.*', 'equipo_mantenimiento.observacion') // Aseguramos que la observación se incluya
         ->get();
 
     // Para cada equipo, obtener sus componentes sin duplicados
@@ -353,6 +353,9 @@ public function showMantenimientoDetalles($id)
         // Asignar las actividades al equipo
         $equipo->actividades = $actividades;
 
+        // Asegurar que la observación esté disponible (si no existe, asignar una cadena vacía)
+        $equipo->observacion = $equipo->observacion ?? '';
+
         return $equipo;
     });
 
@@ -378,6 +381,7 @@ public function guardarMantenimiento(Request $request)
     $validatedData = $request->validate([
         'id' => 'required|integer',
         'codigo_mantenimiento' => 'required|string|max:50',
+        'fecha_fin' => 'required|date', // Validar la nueva fecha de fin
         'equipos' => 'required|array',
         'equipos.*.id' => 'required|integer',
         'equipos.*.actividades' => 'nullable|array',
@@ -395,6 +399,10 @@ public function guardarMantenimiento(Request $request)
 
         // Encontrar el mantenimiento a actualizar
         $mantenimiento = Mantenimiento::findOrFail($validatedData['id']);
+
+        // Actualizar la fecha de fin
+        $mantenimiento->fecha_fin = $validatedData['fecha_fin'];
+        $mantenimiento->save();
 
         // Eliminar los registros de las tablas intermedias directamente
         DB::table('mantenimiento_actividad')->where('mantenimiento_id', $mantenimiento->id)->delete();
@@ -432,7 +440,7 @@ public function guardarMantenimiento(Request $request)
                     );
                     // Asociar el componente con el equipo
                     DB::table('equipo_componentes')->insert([
-                        'equipo_mantenimiento_id' => $equipo->id,  // Corregido para usar 'equipo_mantenimiento_id'
+                        'equipo_mantenimiento_id' => $equipo->id, // Corregido para usar 'equipo_mantenimiento_id'
                         'componente_id' => $componente->id,
                         'mantenimiento_id' => $mantenimiento->id,
                         'cantidad' => $componenteData['cantidad'] ?? 1,
@@ -444,13 +452,13 @@ public function guardarMantenimiento(Request $request)
         DB::commit();
 
         return response()->json([
-            'message' => 'Relaciones de mantenimiento actualizadas exitosamente.',
+            'message' => 'Mantenimiento actualizado exitosamente, incluyendo la nueva fecha de fin.',
             'data' => $mantenimiento,
         ], 200);
     } catch (\Exception $e) {
         DB::rollBack();
         return response()->json([
-            'message' => 'Ocurrió un error al actualizar las relaciones de mantenimiento.',
+            'message' => 'Ocurrió un error al actualizar el mantenimiento.',
             'error' => $e->getMessage(),
         ], 500);
     }

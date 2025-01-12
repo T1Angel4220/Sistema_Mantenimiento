@@ -15,6 +15,11 @@ import {
   TablePagination,
   TextField
 } from "@mui/material";
+import { es } from 'date-fns/locale';
+
+import { Calendar, Home, ShoppingCart, PenTool, FileText, LogOut } from 'lucide-react';
+import { format } from 'date-fns';
+
 import DatePicker from 'react-datepicker';
 import EdicionEquipo from './EdicionEquipoMantenimientoModal';
 
@@ -40,6 +45,10 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
     setMantenimiento(mantenimiento);
   }, [mantenimiento]);
 
+  useEffect(() => {
+    setFechaFin(mantenimiento?.fecha_fin);
+  }, []);
+
   const [fechaFin, setFechaFin] = useState(null);
   const handleCloseModal = () => {
     setModalOpen(false);
@@ -60,14 +69,12 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
 
   const handleSaveEditionEquip = (actividades, componentes, observacion) => {
 
-    guardar(actividades, componentes, observacion);
+    guardar(actividades, componentes, observacion, fechaFin);
   };
 
   if (mantenimiento == null)
     return
-  const handleFechaFinChange = (newValue) => {
-    setFechaFin(newValue);
-  };
+
 
   const handleSave = () => {
     guardarEditar()
@@ -110,12 +117,31 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                 />
               </Grid>
               <Grid item xs={6}>
+                <div className="mr-4 -mt-4">
+                  <Typography variant="h10" gutterBottom>
+                    Fecha Final
+                  </Typography>
+                </div>
+
+
                 <DatePicker
-                  label="Fecha Final"
-                  value={mantenimiento.fecha_fin || ''}
-                  onChange={handleFechaFinChange}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
+                  selected={fechaFin || mantenimiento.fecha_fin} // Valor inicial del DatePicker
+                  onChange={(date) => {
+                    setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
+                  }}
+                  locale={es}
+                  dateFormat="dd/MM/yyyy"
+                  minDate={mantenimiento.fecha_inicio}
+                  customInput={
+                    <button
+                      type="button"
+                      className="border border-black p-2 flex items-center text-black w-64">
+                      <Calendar className="mr-2 h-4 w-4 text-black" />
+                      {fechaFin ? format(fechaFin, 'dd/MM/yyyy') : format(mantenimiento.fecha_fin, 'dd/MM/yyyy')}
+                    </button>
+                  }
                 />
+
               </Grid>
             </>
           ) : (
@@ -204,7 +230,17 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                   label="Fecha Final"
                   value={mantenimiento.fecha_fin || ''}
                   onChange={handleFechaFinChange}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
+                  locale={es}
+                  dateFormat="dd/MM/yyyy"
+                  customInput={
+                    <button
+                      type="button"
+                      className="border border-black p-2 flex items-center text-black w-64">
+                      <Calendar className="mr-2 h-4 w-4 text-black" />
+                      {startDate ? format(startDate, 'dd/MM/yyyy') : 'dd/mm/aaaa'}
+
+                    </button>
+                  }
                 />
               </Grid>
               <Grid item xs={6}>

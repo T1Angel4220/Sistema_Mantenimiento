@@ -60,8 +60,8 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
         setActividadesSeleccionadas(actividadesSe);
         // Extraer todas las actividades de los equipos seleccionados
         setComponentesSeleccionados(componentesSe);
-        // Actualizar las actividades seleccionadas
-       
+
+        setObservacion(equipo==null?"":equipo.observacion);
     }, [actividadesSe, componentesSe]); 
 
     const handleAgregarActividad = () => {

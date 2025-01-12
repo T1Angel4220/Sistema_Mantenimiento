@@ -135,31 +135,36 @@ export default function AssetMaintenanceForm() {
 
     setConfirmacionEquipo(false);
   }
-  const handleSaveEditionEquip = (actividades, componentes, observacion) => {
+  const handleSaveEditionEquip = (actividades, componentes, observacion, fechaFin) => { 
     console.log(equipoSeleccionado);
     setMantenimiento((prev) => {
-      const nuevosEquipos = prev.equipos.map((equipo) => {
-        // Identificar el equipo seleccionado y actualizar sus arrays
-        if (equipo.id == equipoSeleccionado.id) {
-          return {
-            ...equipo,
-            actividades: actividades,
-            componentes: componentes,
-            observacion: observacion
-          };
-        }
-        return equipo; // Retornar el resto de los equipos sin modificaciones
-      });
+        const nuevosEquipos = prev.equipos.map((equipo) => {
+            // Identificar el equipo seleccionado y actualizar sus arrays
+            if (equipo.id == equipoSeleccionado.id) {
+                return {
+                    ...equipo,
+                    actividades: actividades,
+                    componentes: componentes,
+                    observacion: observacion
+                };
+            }
+            return equipo; // Retornar el resto de los equipos sin modificaciones
+        });
 
-      // Devolver el nuevo estado con los equipos actualizados
-      return { ...prev, equipos: nuevosEquipos };
+        // Devolver el nuevo estado con los equipos actualizados y cambiar la fecha de fin
+        return { 
+            ...prev, 
+            equipos: nuevosEquipos, 
+            fecha_fin: fechaFin 
+        };
     });
 
     // Confirmar el nuevo estado después de la actualización
     setTimeout(() => {
-      console.log("Estado actualizado de mantenimiento:", mantenimiento);
+        console.log("Estado actualizado de mantenimiento:", mantenimiento);
     }, 0);
-  };
+};
+
 
 
   const openBuscarEquipo = () => {
