@@ -108,59 +108,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
           {mantenimiento.tipo === 'Interno' ? (
             <>
               {/* Solo fechas para mantenimiento interno */}
-              <Grid item xs={6}>
-                <TextField
-                  label="Codigo mantenimento"
-                  value={
-                    mantenimiento.codigo_mantenimiento || ''
-                  }
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Tipo"
-                  value={mantenimiento.tipo || ''}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Fecha de Inicio"
-                  value={mantenimiento.fecha_inicio || ''}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <div className="mr-4 -mt-4">
-                  <Typography variant="h10" gutterBottom>
-                    Fecha Final
-                  </Typography>
-                </div>
 
-
-                <DatePicker
-                  selected={fechaFin || mantenimiento.fecha_fin} // Valor inicial del DatePicker
-                  onChange={(date) => {
-                    setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
-                  }}
-                  locale={es}
-                  dateFormat="dd/MM/yyyy"
-                  minDate={mantenimiento.fecha_inicio}
-                  customInput={
-                    <button
-                      type="button"
-                      className="border border-black p-2 flex items-center text-black w-64">
-                      <Calendar className="mr-2 h-4 w-4 text-black" />
-                      {fechaFin ? format(fechaFin, 'dd/MM/yyyy') : format(mantenimiento.fecha_fin, 'dd/MM/yyyy')}
-                    </button>
-                  }
-                />
-
-              </Grid>
             </>
           ) : (
             <>
@@ -209,47 +157,55 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                   disabled
                 />
               </Grid>
-              
-              
-              <Grid item xs={6}>
-                <TextField
-                  label="Fecha de Inicio"
-                  value={mantenimiento.fecha_inicio || ''}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-              <div >
-                  <Typography variant="h10" gutterBottom>
-                    Fecha Final
-                  </Typography>
-                </div>
-                <DatePicker
-                  selected={mantenimiento.fecha_fin || fechaFin } // Valor inicial del DatePicker
-                  onChange={(date) => {
-                    setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
-                  }}
-                  locale={es}
-                  dateFormat="dd/MM/yyyy"
-                  minDate={mantenimiento.fecha_inicio}
-                  customInput={
-                    <button
-                      type="button"
-                      className="border border-black p-2 flex items-center text-black w-64">
-                      <Calendar className="mr-2 h-4 w-4 text-black" />
-                      {fechaFin ? format(fechaFin, 'dd/MM/yyyy') : format(mantenimiento.fecha_fin, 'dd/MM/yyyy')}
-                    </button>
-                  }
-                />
-              </Grid>
-             
+
+
+
+
             </>
           )}
         </Grid>
+        <div className="h-8"></div>
+        <Grid container spacing={2} alignItems="center">
+          {/* Fecha de Inicio */}
+          <Grid item xs={6}>
+            <TextField
+              label="Fecha de Inicio"
+              value={mantenimiento.fecha_inicio || ''}
+              fullWidth
+              disabled
+            />
+          </Grid>
+
+          {/* Fecha Final */}
+          <Grid item xs={6} className="mb-8">
+            <div>
+              <Typography variant="h10" gutterBottom className="mb-4">
+                Fecha Final
+              </Typography>
+              <DatePicker
+                selected={fechaFin || mantenimiento.fecha_fin} // Valor inicial del DatePicker
+                onChange={(date) => {
+                  setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
+                }}
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                minDate={mantenimiento.fecha_inicio}
+                customInput={
+                  <button
+                    type="button"
+                    className="border border-black p-2 flex items-center text-black w-80 ">
+                    <Calendar className="mr-2 h-4 w-4 text-black" />
+                    {fechaFin ? format(fechaFin, 'dd/MM/yyyy') : format(mantenimiento.fecha_fin, 'dd/MM/yyyy')}
+                  </button>
+                }
+              />
+            </div>
+          </Grid>
+        </Grid>
+
+
 
         <div className="h-8"></div>
-
         <TableContainer component={Paper} elevation={3}>
           <Table>
             <TableHead>
