@@ -149,9 +149,9 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
               {/* Toda la información para mantenimiento externo */}
               <Grid item xs={6}>
                 <TextField
-                  label="Nombre del Producto"
+                  label="Codigo mantenimento"
                   value={
-                    mantenimiento.equipos?.[0]?.Nombre_Producto || ''
+                    mantenimiento.codigo_mantenimiento || ''
                   }
                   fullWidth
                   disabled
@@ -160,24 +160,24 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
               <Grid item xs={6}>
                 <TextField
                   label="Código de Barras"
-                  value={mantenimiento.equipos?.[0]?.Codigo_Barras || ''}
+                  value={mantenimiento.tipo || ''}
                   fullWidth
                   disabled
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label="Tipo de Equipo"
-                  value={mantenimiento.equipos?.[0]?.Tipo_Equipo || ''}
+                  label="Proveedor"
+                  value={mantenimiento.proveedor || ''}
                   fullWidth
                   disabled
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label="Fecha de Adquisición"
+                  label="Contacto Proveedor"
                   value={
-                    mantenimiento.equipos?.[0]?.Fecha_Adquisicion || ''
+                    mantenimiento.contacto_proveedor || ''
                   }
                   fullWidth
                   disabled
@@ -185,38 +185,14 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label="Ubicación del Equipo"
-                  value={mantenimiento.equipos?.[0]?.Ubicacion_Equipo || ''}
+                  label="Costo"
+                  value={mantenimiento.costo || ''}
                   fullWidth
                   disabled
                 />
               </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Descripción del Equipo"
-                  value={
-                    mantenimiento.equipos?.[0]?.Descripcion_Equipo || ''
-                  }
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Proceso de Compra"
-                  value={mantenimiento.equipos?.[0]?.proceso_compra_id || ''}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Código de Mantenimiento"
-                  value={mantenimiento.codigo_mantenimiento || ''}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
+              
+              
               <Grid item xs={6}>
                 <TextField
                   label="Fecha de Inicio"
@@ -226,49 +202,30 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                 />
               </Grid>
               <Grid item xs={6}>
+              <div >
+                  <Typography variant="h10" gutterBottom>
+                    Fecha Final
+                  </Typography>
+                </div>
                 <DatePicker
-                  label="Fecha Final"
-                  value={mantenimiento.fecha_fin || ''}
+                  selected={fechaFin || mantenimiento.fecha_fin} // Valor inicial del DatePicker
                   onChange={(date) => {
-                    setFechaFin(date);
+                    setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
                   }}
                   locale={es}
                   dateFormat="dd/MM/yyyy"
+                  minDate={mantenimiento.fecha_inicio}
                   customInput={
                     <button
                       type="button"
                       className="border border-black p-2 flex items-center text-black w-64">
                       <Calendar className="mr-2 h-4 w-4 text-black" />
-                      {mantenimiento.fecha_inicio ? format(mantenimiento.fecha_inicio, 'dd/MM/yyyy') : 'dd/mm/aaaa'}
-
+                      {fechaFin ? format(fechaFin, 'dd/MM/yyyy') : format(mantenimiento.fecha_fin, 'dd/MM/yyyy')}
                     </button>
                   }
                 />
               </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Proveedor"
-                  value={mantenimiento.proveedor || 'N/A'}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Contacto del Proveedor"
-                  value={mantenimiento.contacto_proveedor || 'N/A'}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Costo"
-                  value={mantenimiento.costo || 'N/A'}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
+             
             </>
           )}
         </Grid>
