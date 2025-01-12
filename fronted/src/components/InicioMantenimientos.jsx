@@ -371,7 +371,7 @@ const MaintenanceTable = () => {
 
     try {
       // Guardar los cambios en el mantenimiento
-      await api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`, selectedMaintenance);
+      await api.put(`/mantenimientosDetalles`, selectedMaintenance);
       const response = await api.get('/mantenimientos');
       setData(response.data);
       setComponentChanges({ added: [], removed: [] });
@@ -421,7 +421,7 @@ const MaintenanceTable = () => {
   const guardarEditar = (event, newValue) => {
     console.log(selectedMaintenance)
     try {
-      api.put(`/mantenimientosDetalles/${selectedMaintenance.id}`, 
+      api.put(`/mantenimientosDetalles`, 
         selectedMaintenance)
         .then(response => {
           console.log('Mantenimiento actualizado exitosamente:', response.data);

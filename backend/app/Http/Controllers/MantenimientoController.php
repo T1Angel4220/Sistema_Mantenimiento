@@ -12,6 +12,7 @@ use App\Models\Actividad;
 use Illuminate\Support\Facades\Log;
 use App\Models\Componente;
 use App\Models\ObservacionMantenimiento;
+use Carbon\Carbon;
 class MantenimientoController extends Controller
 {
    
@@ -400,7 +401,6 @@ public function guardarMantenimiento(Request $request)
         // Encontrar el mantenimiento a actualizar
         $mantenimiento = Mantenimiento::findOrFail($validatedData['id']);
 
-        // Actualizar la fecha de fin
         $mantenimiento->fecha_fin = $validatedData['fecha_fin'];
         $mantenimiento->save();
 
