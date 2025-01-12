@@ -246,7 +246,7 @@ const MaintenanceTable = () => {
 
   const cancelStatusChange = () => {
     setPendingStatus(null);
-    setConfirmDialogOpen(false);
+    setConfirmDialogOpen(false)
   };
 
   const handleSetComponentQuantity = (e, equipoId) => {
