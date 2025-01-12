@@ -208,7 +208,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
                   </Typography>
                 </div>
                 <DatePicker
-                  selected={fechaFin || mantenimiento.fecha_fin} // Valor inicial del DatePicker
+                  selected={mantenimiento.fecha_fin || fechaFin } // Valor inicial del DatePicker
                   onChange={(date) => {
                     setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
                   }}
