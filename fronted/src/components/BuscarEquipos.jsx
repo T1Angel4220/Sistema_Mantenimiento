@@ -61,7 +61,6 @@ const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fecha
             setFilteredData(response.data);
           } catch (err) {
             console.error("Error al obtener los equipos:", err);
-            setError("Error al obtener los equipos disponibles");
           } finally {
            
           }
