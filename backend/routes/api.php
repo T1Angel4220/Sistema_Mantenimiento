@@ -39,6 +39,42 @@ Route::get('/mantenimiento-equipos/{id}', function ($id) {
         ->get();
 });
 
+Route::get('/historial-equipo/{id}', function ($id) {
+    return DB::table('equipo_mantenimiento')
+        ->join('mantenimiento', 'equipo_mantenimiento.mantenimiento_id', '=', 'mantenimiento.id')
+        ->where('equipo_mantenimiento.equipo_id', $id)
+        ->select(
+            'mantenimiento.id',
+            'mantenimiento.codigo_mantenimiento',
+            'mantenimiento.tipo',
+            'mantenimiento.fecha_inicio',
+            'mantenimiento.fecha_fin',
+            'mantenimiento.estado',
+            'mantenimiento.proveedor',
+            'mantenimiento.contacto_proveedor',
+            'mantenimiento.costo'
+        )
+        ->get();
+});
+
+
+Route::get('/historial-componentes/{equipoId}', function ($equipoId) {
+    $componentes = DB::table('equipo_componentes as ec')
+        ->leftJoin('equipo_mantenimiento as em', 'ec.equipo_mantenimiento_id', '=', 'em.id')
+        ->leftJoin('componentes as c', 'ec.componente_id', '=', 'c.id')
+        ->where('em.equipo_id', $equipoId)
+        ->orWhereNull('em.equipo_id') // Incluye registros sin relación en equipo_mantenimiento
+        ->select(
+            'ec.id as equipo_componente_id',
+            'ec.cantidad',
+            'ec.mantenimiento_id',
+            'em.equipo_id',
+            'c.nombre as componente_nombre'
+        )
+        ->get();
+
+    return response()->json($componentes);
+});
 Route::controller(ActividadController::class)->group(function () {
     Route::get('/actividades', 'index');
     Route::post('/actividades', 'store');
