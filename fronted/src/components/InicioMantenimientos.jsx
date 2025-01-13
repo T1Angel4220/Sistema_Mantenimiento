@@ -522,6 +522,21 @@ const MaintenanceTable = () => {
     return `${day}/${month}/${year}`;
   };
 
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+
+  const handleCancel = () => {
+    setCancelDialogOpen(true);
+  };
+
+  const handleConfirmCancel = () => {
+    setCancelDialogOpen(false);
+    handleCloseDialog();
+  };
+
+  const handleCloseCancelDialog = () => {
+    setCancelDialogOpen(false);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -921,7 +936,7 @@ const MaintenanceTable = () => {
                               native: true,
                             }}
                           >
-                            <option value="">Seleccione una actividad</option>
+                            <option value=""></option>
                             {availableActivities.map((actividad) => (
                               <option key={actividad.id} value={actividad.id}>
                                 {actividad.nombre}
@@ -1201,7 +1216,7 @@ const MaintenanceTable = () => {
                   )
                 )}
                 <Button
-                  onClick={handleCloseDialog}
+                  onClick={handleCancel}
                   variant="outlined"
                   color="primary"
                   sx={{
@@ -1215,6 +1230,23 @@ const MaintenanceTable = () => {
                   }}
                 >
                   Cerrar
+                </Button>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              open={cancelDialogOpen}
+              onClose={handleCloseCancelDialog}
+            >
+              <DialogTitle>Confirmar</DialogTitle>
+              <DialogContent>
+                <Typography>¿Está seguro de salir?</Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseCancelDialog} color="primary">
+                  No
+                </Button>
+                <Button onClick={handleConfirmCancel} color="secondary" variant="contained">
+                  Sí
                 </Button>
               </DialogActions>
             </Dialog>

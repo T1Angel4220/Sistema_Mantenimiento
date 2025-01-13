@@ -234,10 +234,10 @@ const MostrarEquipos = () => {
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Código de Barras</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre del Producto</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tipo de Equipo</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tipo de Activo</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Fecha de Adquisición</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Ubicación del Equipo</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Descripción del Equipo</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Ubicación del Activo</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Descripción del Activo</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Proceso de Compra</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
                                 </tr>

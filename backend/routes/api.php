@@ -13,6 +13,7 @@ use App\Http\Controllers\ActivoController;
 use App\Http\Controllers\ComponenteController;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\EquipoComponenteController;
+use App\Http\Controllers\ReporteController;
 use Illuminate\Support\Facades\DB;
 
 Route::get('/mantenimientos/{id}', [MantenimientoController::class, 'show']);
@@ -103,3 +104,5 @@ Route::prefix('equipo-componentes')->group(function () {
 Route::get('/procesos-compra', [ProcesoCompraController::class, 'index']);
 Route::post('/equipo', [EquipoController::class, 'store']);
 Route::put('mantenimientos/{id}/estado', [MantenimientoController::class, 'updateEstado']);
+
+Route::post('/reportes', [ReporteController::class, 'generarReporte']);
