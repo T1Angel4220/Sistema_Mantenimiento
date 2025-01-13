@@ -230,6 +230,19 @@ const MaintenanceTable = () => {
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState(null);
+  const handleAddEquipos = (equipos) => {
+    setSelectedMaintenance((prevState) => ({
+      ...prevState,
+      equipos: [
+        ...prevState.equipos,
+        ...equipos.map((equipo) => ({
+          ...equipo, // Mantener las propiedades actuales del equipo
+          actividades: [], // Inicializar el array de actividades
+          componentes: [], // Inicializar el array de componentes
+        })),
+      ],
+    }));
+  };
 
   const handleConfirmChange = (newStatus) => {
     setPendingStatus(newStatus);
@@ -246,7 +259,7 @@ const MaintenanceTable = () => {
 
   const cancelStatusChange = () => {
     setPendingStatus(null);
-    setConfirmDialogOpen(false)
+    setConfirmDialogOpen(false);
   };
 
   const handleSetComponentQuantity = (e, equipoId) => {
@@ -1215,6 +1228,7 @@ const MaintenanceTable = () => {
           guardar={handleSaveEditionEquip}
           seleccionarEquipo={handleSeleccionarEquipo}
           guardarEditar={guardarEditar}
+          handleAniadirEquipos={handleAddEquipos}
         />
         <Snackbar
           open={snackbarOpen}

@@ -16,6 +16,7 @@ import {
   TextField
 } from "@mui/material";
 import { es } from 'date-fns/locale';
+import EquiposModal from './BuscarEquipos';
 
 import { Calendar, Home, ShoppingCart, PenTool, FileText, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
@@ -23,8 +24,10 @@ import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import EdicionEquipo from './EdicionEquipoMantenimientoModal';
 
-const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, seleccionarEquipo, guardarEditar }) => {
+const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
   const [modalOpen, setModalOpen] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+  
   const [mantenimientoSe, setMantenimiento] = useState(false);
   const [page, setPage] = useState(0); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(8); // Equipos por página
@@ -34,6 +37,17 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
   });
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+  };
+  const openBuscarEquipo = () => {
+    setOpenModal(true);
+
+  };
+  const cerrarBuscarEquipo = () => {
+    setOpenModal(false);
+
+  };
+  const handleAddEquipos = (equipos) => {
+    handleAniadirEquipos(equipos)
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -206,9 +220,11 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
             </div>
           </Grid>
         </Grid>
-
-
-
+        <div className="h-8"></div>
+        <Button variant="contained" color="primary" onClick={openBuscarEquipo}>
+          Añadir equipo
+        </Button>
+        <EquiposModal open={openModal} onClose={cerrarBuscarEquipo} onAddEquipo={handleAddEquipos} equiposSe={mantenimiento.equipos} fechaInicio={mantenimiento.fecha_inicio} fechaFin={mantenimiento.fecha_fin} />
         <div className="h-8"></div>
         <TableContainer component={Paper} elevation={3}>
           <Table>
