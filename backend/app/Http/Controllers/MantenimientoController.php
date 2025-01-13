@@ -71,53 +71,78 @@ class MantenimientoController extends Controller
 
    
     public function store(Request $request)
-    {
-        try {
-            // Validar los datos del request
-            $validated = $request->validate([
-                'codigo_mantenimiento' => 'required|max:20|unique:mantenimiento,codigo_mantenimiento',
-                'tipo' => 'required|in:Interno,Externo',
-                'fecha_inicio' => 'nullable|date',
-                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-                'proveedor' => 'nullable|string|max:255|required_if:tipo,Externo',
-                'contacto_proveedor' => 'nullable|string|max:255|required_if:tipo,Externo',
-                'costo' => 'nullable|numeric|min:0|required_if:tipo,Externo',
-                'observaciones' => 'nullable|string',
-                'actividades' => 'nullable|array',
-                'equipos' => 'nullable|array',
-            ]);
-    
-            // Crear el mantenimiento
-            $mantenimiento = Mantenimiento::create([
-                'codigo_mantenimiento' => $validated['codigo_mantenimiento'],
-                'tipo' => $validated['tipo'],
-                'fecha_inicio' => $validated['fecha_inicio'],
-                'fecha_fin' => $validated['fecha_fin'],
-                'proveedor' => $validated['proveedor'] ?? null,
-                'contacto_proveedor' => $validated['contacto_proveedor'] ?? null,
-                'costo' => $validated['costo'] ?? null,
-                'observaciones' => $validated['observaciones'] ?? null,
-            ]);
+{
+    // Validar los datos del request
+    $data = $request->validate([
+        'codigo_mantenimiento' => 'required|string|max:255',
+        'tipo' => 'required|string|max:255',
+        'fecha_inicio' => 'required|date',
+        'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+        'proveedor' => 'nullable|string|max:255',
+        'contacto_proveedor' => 'nullable|string|max:255',
+        'costo' => 'nullable|numeric',
+        'equipos' => 'required|array',
+        'equipos.*.id' => 'required|integer|exists:equipos,id',
+        'equipos.*.actividades' => 'array',
+        'equipos.*.actividades.*.id' => 'integer|exists:actividades,id',
+        'equipos.*.componentes' => 'array',
+        'equipos.*.componentes.*.id' => 'integer|exists:componentes,id',
+    ]);
 
-            if (!empty($validated['equipos'])) {
-                $mantenimiento->equipos()->sync($validated['equipos']);
+    // Crear el mantenimiento
+    $mantenimientoId = DB::table('mantenimiento')->insertGetId([
+        'codigo_mantenimiento' => $data['codigo_mantenimiento'],
+        'tipo' => $data['tipo'],
+        'fecha_inicio' => $data['fecha_inicio'],
+        'fecha_fin' => $data['fecha_fin'],
+        'proveedor' => $data['proveedor'],
+        'contacto_proveedor' => $data['contacto_proveedor'],
+        'costo' => $data['costo'],
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Asociar equipos, actividades y componentes al mantenimiento
+    foreach ($data['equipos'] as $equipo) {
+        // Asociar equipo al mantenimiento
+        DB::table('equipo_mantenimiento')->insert([
+            'mantenimiento_id' => $mantenimientoId,
+            'equipo_id' => $equipo['id'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Asociar actividades al mantenimiento y equipo
+        if (!empty($equipo['actividades'])) {
+            foreach ($equipo['actividades'] as $actividad) {
+                DB::table('mantenimiento_actividad')->insert([
+                    'mantenimiento_id' => $mantenimientoId,
+                    'equipo_id' => $equipo['id'],
+                    'actividad_id' => $actividad['id'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
-            // Sincronizar las actividades (si existen)
-            if (!empty($validated['actividades'])) {
-                $mantenimiento->actividades()->sync($validated['actividades']);
+        }
+
+        // Asociar componentes al equipo y mantenimiento
+        if (!empty($equipo['componentes'])) {
+            foreach ($equipo['componentes'] as $componente) {
+                DB::table('equipo_componentes')->insert([
+                    'mantenimiento_id' => $mantenimientoId,
+                    'equipo_id' => $equipo['id'],
+                    'componente_id' => $componente['id'],
+                    'cantidad' => $componente['cantidad'] ?? 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
-    
-            return response()->json($mantenimiento, 201);
-        } catch (\Exception $e) {
-            \Log::error('Error al crear mantenimiento: ' . $e->getMessage());
-            
-            return response()->json([
-                'error' => 'Error al crear mantenimiento.',
-                'details' => $e->getMessage(),
-            ], 500);
         }
     }
-    
+
+    return response()->json(['success' => 'Mantenimiento creado exitosamente', 'mantenimiento_id' => $mantenimientoId], 201);
+}
+
     public function obtenerIdMaximo()
     {
         $idMaximo = Mantenimiento::max('id');
