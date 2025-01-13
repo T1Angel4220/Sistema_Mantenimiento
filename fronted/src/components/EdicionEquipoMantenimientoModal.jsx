@@ -19,23 +19,25 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const [actividades, setActividades] = useState([]);
     const [componentes, setComponentes] = useState([]);
+    const [ActividadOComponente, setActividadOComp] = useState(false);
+
     useEffect(() => {
         const fetchData = async () => {
-          try {
-            const [activitiesResponse, componentsResponse] = await Promise.all([
-              axios.get('http://localhost:8000/api/actividades'),
-              axios.get('http://localhost:8000/api/componentes'),
-            ]);
-    
-            setActividades(activitiesResponse.data);
-            setComponentes(componentsResponse.data);
-          } catch (error) {
-            console.error('Error al cargar los datos:', error);
-          }
+            try {
+                const [activitiesResponse, componentsResponse] = await Promise.all([
+                    axios.get('http://localhost:8000/api/actividades'),
+                    axios.get('http://localhost:8000/api/componentes'),
+                ]);
+
+                setActividades(activitiesResponse.data);
+                setComponentes(componentsResponse.data);
+            } catch (error) {
+                console.error('Error al cargar los datos:', error);
+            }
         };
-    
+
         fetchData();
-      }, []);
+    }, []);
 
     const handleTabChange = (event, newValue) => {
         setTabIndex(newValue);
@@ -44,11 +46,18 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
         setOpenConfirmDialog(false)
         guardarActivComp(actividadesSeleccionadas, componentesSeleccionados, observacion);
         handleClose();
-        
+
     };
 
     const handleSave = () => {
-        setOpenConfirmDialog(true)
+        if (componentesSeleccionados.length == 0 && actividadesSeleccionadas.length == 0) {
+            setActividadOComp(true);
+            setTimeout(() => {
+                setActividadOComp(false);
+            }, 1800)
+            return;
+        }
+        setOpenConfirmDialog(true);
     };
 
     const handleCancel = () => {
@@ -61,8 +70,8 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
         // Extraer todas las actividades de los equipos seleccionados
         setComponentesSeleccionados(componentesSe);
 
-        setObservacion(equipo==null?"":equipo.observacion);
-    }, [actividadesSe, componentesSe]); 
+        setObservacion(equipo == null ? "" : equipo.observacion);
+    }, [actividadesSe, componentesSe]);
 
     const handleAgregarActividad = () => {
         if (actividadSeleccionada) {
@@ -119,7 +128,15 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
     };
 
     return (
+
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+            {ActividadOComponente && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                    <div className="bg-red-500 text-white p-6 rounded-lg shadow-xl">
+                        <h1 className="text-xl font-bold">El equipo debe tener o una actividad o un compoente guardado</h1>
+                    </div>
+                </div>
+            )}
             <DialogTitle sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
                 Editar Equipo
             </DialogTitle>
@@ -215,7 +232,7 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                 <FormControl fullWidth>
                                     <InputLabel>Seleccionar Actividad</InputLabel>
                                     <Select
-                                       
+
                                         onChange={(e) => setActividadSeleccionada(e.target.value)}
                                     >
                                         {actividades.map((actividad) => (
@@ -310,26 +327,26 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                         </TableHead>
                                         <TableBody>
                                             {componentesSeleccionados.map((componente) => (
-                                                    <TableRow key={componente.id}>
-                                                        <TableCell>{componente.id}</TableCell>
-                                                        <TableCell>{componente.nombre}</TableCell>
-                                                        <TableCell>
-                                                            <Button
-                                                                color="secondary"
-                                                                onClick={() => handleEliminar('componente', componente)}
-                                                                sx={{
-                                                                    backgroundColor: 'red',
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        backgroundColor: 'darkred'
-                                                                    }
-                                                                }}
-                                                            >
-                                                                Eliminar
-                                                            </Button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
+                                                <TableRow key={componente.id}>
+                                                    <TableCell>{componente.id}</TableCell>
+                                                    <TableCell>{componente.nombre}</TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            color="secondary"
+                                                            onClick={() => handleEliminar('componente', componente)}
+                                                            sx={{
+                                                                backgroundColor: 'red',
+                                                                color: 'white',
+                                                                '&:hover': {
+                                                                    backgroundColor: 'darkred'
+                                                                }
+                                                            }}
+                                                        >
+                                                            Eliminar
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
