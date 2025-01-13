@@ -324,8 +324,15 @@ const MostrarEquipos = () => {
             )}
 
             {/* Sidebar */}
-            <aside className="w-64 bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
-                <div className="p-6 space-y-2">
+            <aside
+  className="flex flex-col h-screen sticky top-0 bg-[#1a374d] text-white"
+  style={{
+    width: "256px", // Ancho fijo
+    minWidth: "256px", // Ancho mínimo fijo
+    maxWidth: "256px", // Ancho máximo fijo
+    flexShrink: 0, // Evita que se reduzca
+  }}
+>                <div className="p-6 space-y-2">
                     <img
                         src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
                         alt="Logo SK Telecom"
@@ -388,8 +395,8 @@ const MostrarEquipos = () => {
 
                 {/* Table */}
                 <div className="max-w-8xl mx-auto mt-8 bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
+                    <div className="table-container">
+                        <table className="tableEquipos">
                             <thead className="bg-[#2f3b52]">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Código de Barras</th>

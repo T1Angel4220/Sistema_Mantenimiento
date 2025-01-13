@@ -7,7 +7,8 @@
 }
 
 .table-container {
-  overflow-x: auto; /* Asegura que la tabla sea desplazable si es muy ancha */
+  max-width: 100%; /* Ajusta este valor según sea necesario */
+  margin: 0 auto; /* Centra la tabla */
   margin-bottom: 20px; /* Separación con el botón de crear */
 }
 
@@ -42,8 +43,8 @@
   padding: 10px 16px;
   font-weight: bold;
   border: 1px solid #ddd;
-  background-color: #f9f9f9; /* Fondo de pestañas inactivas */
-  color: #555; /* Texto de pestañas inactivas */
+  background-color: #797474; /* Fondo de pestañas inactivas */
+  color: #383737; /* Texto de pestañas inactivas */
   border-radius: 8px 8px 0 0;
 }
 .tabs-trigger.active {
