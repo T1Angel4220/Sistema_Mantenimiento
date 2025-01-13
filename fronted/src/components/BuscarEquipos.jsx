@@ -339,7 +339,7 @@ const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fecha
                             backgroundColor: 'darkred'
                         }
                     }}>
-                        Confirmar
+                        Guardar
                     </Button>
                 </DialogActions>
             </Dialog>

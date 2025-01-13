@@ -13,7 +13,11 @@ import {
   Typography,
   Grid,
   TablePagination,
-  TextField
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from "@mui/material";
 import { es } from 'date-fns/locale';
 import EquiposModal from './BuscarEquipos';
@@ -26,8 +30,8 @@ import EdicionEquipo from './EdicionEquipoMantenimientoModal';
 
 const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
   const [modalOpen, setModalOpen] = useState(false);
-    const [openModal, setOpenModal] = useState(false);
-  
+  const [openModal, setOpenModal] = useState(false);
+
   const [mantenimientoSe, setMantenimiento] = useState(false);
   const [page, setPage] = useState(0); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(8); // Equipos por página
@@ -35,6 +39,18 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
     actividades: [],
     componentes: [],
   });
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+
+
+  const handleCancel = () => {
+    setOpenConfirmDialog(false);
+  };
+  const handleConfirmSave = () => {
+    guardarEditar()
+    onClose();
+    setOpenConfirmDialog(false);
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -91,8 +107,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
 
 
   const handleSave = () => {
-    guardarEditar()
-    onClose();
+    setOpenConfirmDialog(true);
   };
 
   return (
@@ -308,7 +323,37 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
             Guardar
           </Button>
         </Box>
+        <Dialog open={openConfirmDialog} onClose={handleCancel}>
+          <DialogTitle>Confirmación</DialogTitle>
+          <DialogContent>
+            <h1>¿Esta seguro de guardar los cambios realizados?</h1>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancel} color="secondary"
+              sx={{
+                backgroundColor: 'red',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'darkred'
+                }
+              }}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmSave} color="primary"
+              sx={{
+                backgroundColor: 'blue',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'darkred'
+                }
+              }}>
+              Guardar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
       </Box>
+
     </Modal>
   );
 };
