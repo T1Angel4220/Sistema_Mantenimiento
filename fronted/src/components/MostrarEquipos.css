@@ -1,265 +1,509 @@
+
+
 /* Estilos generales */
 .container {
-    width: 80%;
-    margin: 20px auto;
-  }
-  
-  .table-container {
-    overflow-x: auto; /* Asegura que la tabla sea desplazable si es muy ancha */
-    margin-bottom: 20px; /* Separación con el botón de crear */
-  }
-  
-  /* Estilos de la tabla */
-  .tableEquipos {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
-  }
-  
-  .tableEquipos th, .tableEquipos td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-    font-size: 14px; /* Tamaño de fuente más pequeño para mayor legibilidad */
-  }
-  
-  .tableEquipos th {
-    background-color: #2f3b52;
-    color: white;
-    font-weight: bold;
-  }
-  
-  .tableEquipos tr:nth-child(even) {
-    background-color: #f9f9f9; /* Fondo alternado para filas */
-  }
-  
-  .tableEquipos tr:hover {
-    background-color: #f1f1f1; /* Color al pasar el ratón */
-  }
-  
-  .tableEquipos .actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center; /* Alinea los botones en el centro */
-  }
-  
-  .tableEquipos .btn {
-    padding: 8px 15px;
-    font-size: 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  
-  .tableEquipos .btn-warning {
-    background-color:   #c7333a;
-    color: white;
-  }
-  
-  .tableEquipos .btn-danger {
-    background-color: #d9534f;
-    color: white;
-  }
-  
-  /* Estilos del botón de "Crear Nuevo Equipo" */
-  .button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .button-group .btn {
-    padding: 12px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    width: 30%; /* Para que ambos botones tengan el mismo tamaño */
-    
-  }
-  
-  .button-group .btn-create {
-    background: linear-gradient(135deg, #007bff, #00aaff); /* Gradiente atractivo */
-    color: white;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .button-group .btn-create:hover {
-    background: linear-gradient(135deg, #0066cc, #0099cc); /* Gradiente más oscuro al pasar el ratón */
-    transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
-  }
-  
-  .button-group .btn-return {
-    background-color: #ff0000; /* Color de fondo para el botón de regresar */
-    color: white;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .button-group .btn-return:hover {
-    background-color: #ff0000; /* Color de fondo más oscuro al pasar el ratón */
-    transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
-  }
-  
-  /* Sombra y transición para botones */
-  .button-group .btn:hover {
-    opacity: 0.9;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar efecto de profundidad */
-  }
-  
-  /* Estilo del botón de "Crear Nuevo Equipo" */
-  .d-grid.create-button {
-    text-align: center;
-    margin-top: 20px;
-  }
-  
-  .d-grid.create-button .btn-success {
-    background-color: #007bff;
-    padding: 12px 20px;
-    font-size: 16px;
-    text-align: center;
-  }
-  
-  .d-grid.create-button .btn-success:hover {
-    background-color: #0056b3; /* Azul más oscuro */
-  }
-/* Estilos del Modal */
+  width: 80%;
+  margin: 20px auto;
+}
 
-/* Modal fondo */
-.modal-mostrar {
-  position: fixed;
-  top: 0;
-  left: 0;
+.table-container {
+  overflow-x: auto; /* Asegura que la tabla sea desplazable si es muy ancha */
+  margin-bottom: 20px; /* Separación con el botón de crear */
+}
+
+/* Estilos de la tabla */
+.tableEquipos {
   width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
 }
 
-/* Contenido del modal */
-.modal-mostrar .modal-content {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 15px;
-  width: 600px;
-  max-width: 90%;
-  text-align: center;
-  position: relative;
-  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Botón cerrar modal */
-.modal-mostrar .modal-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.modal-mostrar .modal-close:hover {
-  color: red;
-}
-
-/* Estilos del formulario dentro del modal */
-.modal-mostrar .upload-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.modal-mostrar .upload-field {
+.tableEquipos th, .tableEquipos td {
+  padding: 12px 15px;
   text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px; /* Tamaño de fuente más pequeño para mayor legibilidad */
 }
 
-.modal-mostrar .upload-label {
-  font-size: 1rem;
-  color: #555555;
-  margin-bottom: 0.5rem;
+
+.tableEquipos th {
+  background-color: #2f3b52;
+  color: white;
+  font-weight: bold;
+}
+
+
+
+
+
+.tabs-trigger {
+  cursor: pointer;
+  padding: 10px 16px;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9; /* Fondo de pestañas inactivas */
+  color: #555; /* Texto de pestañas inactivas */
+  border-radius: 8px 8px 0 0;
+}
+.tabs-trigger.active {
+  background-color: #ffffff; /* Fondo para pestaña activa */
+  color: #2f3b52; /* Texto de pestaña activa */
+  border-bottom: 2px solid #007bff; /* Indicador visual */
+}
+.tabs-content {
+  display: none; /* Por defecto, ocultar todo el contenido */
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 0 8px 8px 8px;
+  background-color: #ffffff; /* Fondo del contenido */
+}
+.tabs-content.active {
   display: block;
 }
 
-.modal-mostrar .upload-input {
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
-  box-sizing: border-box;
-  outline: none;
+.tableEquipos tr:hover {
+  background-color: #f1f1f1; /* Color al pasar el ratón */
 }
 
-.modal-mostrar .upload-input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+.tableEquipos .actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center; /* Alinea los botones en el centro */
 }
 
-.modal-mostrar .upload-button {
-  background-color: #007bff;
-  color: #ffffff;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
+.tableEquipos .btn {
+  padding: 8px 15px;
+  font-size: 14px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.modal-mostrar .upload-button:hover {
-  background-color: #0056b3;
+.tableEquipos .btn-warning {
+  background-color:   #c7333a;
+  color: white;
 }
 
-.modal-mostrar .upload-message {
-  margin-top: 1rem;
-  font-size: 1rem;
+.tableEquipos .btn-danger {
+  background-color: #d9534f;
+  color: white;
+}
+
+/* Estilos del botón de "Crear Nuevo Equipo" */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.button-group .btn {
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  width: 30%; /* Para que ambos botones tengan el mismo tamaño */
+  
+}
+
+.button-group .btn-create {
+  background: linear-gradient(135deg, #007bff, #00aaff); /* Gradiente atractivo */
+  color: white;
   font-weight: bold;
   text-align: center;
 }
 
+.button-group .btn-create:hover {
+  background: linear-gradient(135deg, #0066cc, #0099cc); /* Gradiente más oscuro al pasar el ratón */
+  transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
+}
+
+.button-group .btn-return {
+  background-color: #ff0000; /* Color de fondo para el botón de regresar */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.button-group .btn-return:hover {
+  background-color: #ff0000; /* Color de fondo más oscuro al pasar el ratón */
+  transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
+}
+
+/* Sombra y transición para botones */
+.button-group .btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar efecto de profundidad */
+}
+
+/* Estilo del botón de "Crear Nuevo Equipo" */
+.d-grid.create-button {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.d-grid.create-button .btn-success {
+  background-color: #007bff;
+  padding: 12px 20px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.d-grid.create-button .btn-success:hover {
+  background-color: #0056b3; /* Azul más oscuro */
+}
+/* Estilos del Modal */
+
+/* Modal fondo */
+.modal-mostrar {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.5);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 1000;
+}
+
+/* Contenido del modal */
+.modal-mostrar .modal-content {
+background: #ffffff;
+padding: 2rem;
+border-radius: 15px;
+width: 600px;
+max-width: 90%;
+text-align: center;
+position: relative;
+box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón cerrar modal */
+.modal-mostrar .modal-close {
+position: absolute;
+top: 10px;
+right: 10px;
+background: transparent;
+border: none;
+font-size: 1.2rem;
+cursor: pointer;
+}
+
+.modal-mostrar .modal-close:hover {
+color: red;
+}
+
+/* Estilos del formulario dentro del modal */
+.modal-mostrar .upload-form {
+display: flex;
+flex-direction: column;
+gap: 1rem;
+}
+
+.modal-mostrar .upload-field {
+text-align: left;
+}
+
+.modal-mostrar .upload-label {
+font-size: 1rem;
+color: #555555;
+margin-bottom: 0.5rem;
+display: block;
+}
+.input-container {
+position: relative;
+width: 100%;
+}
+
+.input-container .icon {
+position: absolute;
+left: 10px;
+top: 50%;
+transform: translateY(-50%);
+width: 20px;
+height: 20px;
+color: gray;
+}
+
+.input-container input {
+width: 100%;
+padding-left: 40px; /* Espaciado para el ícono */
+border: 1px solid #ccc;
+border-radius: 8px;
+height: 40px;
+font-size: 14px;
+}
+
+.input-container input:focus {
+outline: none;
+border-color: #3b82f6; /* Azul brillante */
+box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Sombra azul claro */
+}
+
+.modal-mostrar .upload-input {
+width: 100%;
+padding: 0.75rem;
+font-size: 1rem;
+border: 1px solid #dddddd;
+border-radius: 8px;
+box-sizing: border-box;
+outline: none;
+}
+
+.modal-mostrar .upload-input:focus {
+border-color: #007bff;
+box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+.modal-mostrar .upload-button {
+background-color: #007bff;
+color: #ffffff;
+padding: 0.75rem 1rem;
+font-size: 1rem;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.modal-mostrar .upload-button:hover {
+background-color: #0056b3;
+}
+
+.modal-mostrar .upload-message {
+margin-top: 1rem;
+font-size: 1rem;
+font-weight: bold;
+text-align: center;
+}
+
 .modal-mostrar .upload-message.success {
-  color: #28a745;
+color: #28a745;
 }
 
 .modal-mostrar .upload-message.error {
-  color: #dc3545;
+color: #dc3545;
 }
 .error-message {
-  color: red;
-  font-size: 0.9em;
-  margin-top: 5px;
+color: red;
+font-size: 0.9em;
+margin-top: 5px;
 }
 
 .texto-hidden-file-input {
-  display: none;
+display: none;
 }
 
+
+/* Estilo global si no usas Tailwind */
+.modal-card {
+max-width: 100%; /* Limita el ancho */
+max-height: 100vh; /* Limita la altura */
+overflow-y: auto; /* Activa el scroll */
+border-radius: 8px;
+box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para el Modal */
+.modal-historial {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background-color: white;
+color: black;
+width: 80%;
+max-width: 900px;
+border-radius: 10px;
+box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+animation: fadeIn 0.3s ease;
+overflow: hidden;
+opacity: 1; /* Totalmente opaco */
+}
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.8); /* Fondo negro opaco */
+z-index: 1000;
+}
+/* Lista de mantenimientos */
+/* Estilos generales del timeline */
+.timeline-view {
+position: relative;
+padding-left: 2.5rem; /* Espaciado para el ícono */
+}
+
+/* Línea vertical del timeline */
+.timeline-view::before {
+content: "";
+position: absolute;
+left: 1rem; /* Centra la línea con los íconos */
+top: 0;
+bottom: 0;
+width: 2px;
+background-color: #e2e8f0; /* Gris claro */
+}
+
+/* Elementos individuales del timeline */
+.timeline-item {
+position: relative;
+padding-left: 3rem; /* Espaciado entre el ícono y el texto */
+}
+
+/* Ícono redondeado */
+.timeline-item-icon {
+position: absolute;
+left: 0.5rem; /* Espaciado del borde izquierdo */
+width: 2rem; /* Tamaño del círculo */
+height: 2rem;
+background-color: #3b82f6; /* Azul */
+color: white; /* Blanco para el ícono */
+border-radius: 50%; /* Círculo */
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+/* Texto dentro del timeline */
+.timeline-item-text {
+font-size: 1rem;
+color: #1f2937; /* Gris oscuro */
+}
+
+.timeline-item-text .timeline-date {
+font-size: 0.875rem;
+color: #6b7280; /* Gris claro */
+}
+
+/* Efecto hover */
+.timeline-item:hover .timeline-item-text {
+background-color: #f3f4f6; /* Fondo claro al pasar el mouse */
+border-radius: 0.375rem; /* Bordes redondeados */
+padding: 0.5rem; /* Espaciado interno */
+}
+
+
+
+.modal-historial .modal-header {
+padding: 16px;
+background: linear-gradient(to right, #38bdf8, #60a5fa); /* Gradiente celeste */
+color: white;
+border-radius: 8px 8px 0 0; /* Bordes superiores redondeados */
+display: flex;
+flex-direction: column; /* Asegura que los elementos estén en filas separadas */
+gap: 10px; /* Espacio entre las filas */
+
+}
+.modal-historial .modal-header .info-row {
+display: flex;
+align-items: center;
+gap: 8px; /* Espacio entre ícono y texto */
+font-size: 14px;
+font-weight: 500;
+line-height: 1.5;
+}
+.modal-historial .modal-header .info-row span {
+font-size: 14px;
+font-weight: 500;
+}
+
+.modal-historial .modal-header h2 {
+margin: 0;
+font-size: 1.5rem;
+}
+
+.modal-historial .close-button {
+background: none;
+font-size: 1.5rem;
+color: #666;
+cursor: pointer;
+border: none;
+}
+
+.modal-historial .close-button:hover {
+color: red;
+}
+
+.modal-historial .modal-content {
+padding: 20px;
+background-color: white; /* Fondo blanco */
+color: black; /* Texto negro */
+}
+
+
+.modal-historial .modal-footer {
+padding: 15px;
+text-align: right;
+}
+
+/* Tabs */
+.modal-tabs {
+display: flex;
+justify-content: space-evenly;
+border-bottom: 2px solid #ddd;
+margin-bottom: 20px;
+}
+
+.modal-historial table {
+width: 100%;
+border-collapse: collapse;
+background-color: white; /* Fondo blanco */
+}
+
+.modal-historial th,
+.modal-historial td {
+padding: 12px;
+text-align: left;
+border: 1px solid #ddd; /* Bordes ligeros */
+color: black; /* Asegura que el texto sea negro */
+}
+
+.modal-historial th {
+background-color: #2f3b52; /* Fondo oscuro */
+color: white; /* Texto blanco */
+font-weight: bold;
+}
+
+.modal-tabs .tab {
+background-color: #f8f8f8; /* Fondo gris claro */
+color: #333; /* Texto oscuro */
+}
+.modal-tabs .tab.active {
+background-color: rgb(0, 0, 0); /* Fondo blanco */
+color: #2f3b52; /* Texto destacado */
+}
+
+.modal-tabs .tab:hover {
+background: #f8f8f8;
+}
+
+
 .texto-custom-file-upload {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+display: flex;
+align-items: center;
+gap: 10px;
 }
 
 .texto-upload-button {
-  background-color: #000000; /* Color azul */
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+background-color: #000000; /* Color azul */
+color: white;
+border: none;
+padding: 10px 15px;
+border-radius: 5px;
+cursor: pointer;
+transition: background-color 0.3s ease;
 }
 
 .texto-upload-button:hover {
-  background-color: #000000b4; /* Azul más oscuro */
+background-color: #000000b4; /* Azul más oscuro */
 }
 
 .texto-file-name {
-  font-size: 14px;
-  color: #555;
-  font-style: italic;
+font-size: 14px;
+color: #555;
+font-style: italic;
 }

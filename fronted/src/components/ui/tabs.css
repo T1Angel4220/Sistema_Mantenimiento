@@ -1,0 +1,17 @@
+.tabs-trigger.active {
+    background-color: #ffffff;
+    color: #2f3b52;
+  }
+  
+  .tabs-content.active {
+    display: block;
+  }
+  
+  .tableEquipos tr:hover {
+    background-color: #f1f1f1; /* Color al pasar el ratón */
+  }
+
+  .tabs-content {
+    display: block; /* Visibilidad parcial para pestañas inactivas */
+  }
+  

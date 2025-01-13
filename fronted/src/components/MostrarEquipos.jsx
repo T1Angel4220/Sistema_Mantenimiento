@@ -1,12 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Home } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+import { Box } from 'lucide-react';
+import { PenTool } from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Home, ShoppingCart, Box, PenTool, FileText, LogOut } from 'lucide-react';
 import Notification from './Notification';
+import { unstable_HistoryRouter as Router } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Barcode } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import TimelineView from "./ui/TimelineView";
+import PaginationControls from "./ui/PaginationControls";
+import { Calendar } from 'lucide-react';
+import { Building2 } from 'lucide-react';
+
+import CardComponents from "@/components/ui/card";
+const { Card, CardContent, CardHeader, CardTitle } = CardComponents;
+
+import Badge from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  PenTool as Tool,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Modal } from '@mui/material';
+
 import './MostrarEquipos.css';
 
-const endpoint = 'http://localhost:8000/api/equipos';
+const endpoint = `http://localhost:8000/api/equipos`;
+
 
 const MostrarEquipos = () => {
     const navigate = useNavigate();
@@ -21,6 +58,39 @@ const MostrarEquipos = () => {
     const [showEquipoButtons, setShowEquipoButtons] = useState(true);
     const [notification, setNotification] = useState({ message: '', type: '' });
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [historialData, setHistorialData] = useState({
+        mantenimientos: [],
+        actividades: [],
+        componentes: [],
+        equipos: [],
+    });    const [selectedEquipo, setSelectedEquipo] = useState(null);
+    const [historialModalOpen, setHistorialModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedMantenimiento, setSelectedMantenimiento] = useState(null);
+    const [compSearchTerm, setCompSearchTerm] = useState(""); // Para el filtro de componentes
+    const [currentCompPage, setCurrentCompPage] = useState(1); // Para la paginación de componentes
+    const [activeTab, setActiveTab] = useState("componentes"); // Estado para el tab activo
+  
+
+    const filteredEquipos = equipos.filter((equipo) =>
+        equipo.Nombre_Producto.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+
+
+    useEffect(() => {
+        // Cargar la lista de equipos
+        const fetchEquipos = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/equipos`);
+                setEquipos(response.data);
+            } catch (error) {
+                console.error('Error al cargar los equipos:', error);
+            }
+        };
+
+        fetchEquipos();
+    }, []);
 
     useEffect(() => {
         getAllEquipos();
@@ -55,6 +125,94 @@ const MostrarEquipos = () => {
         setFile(e.target.files[0]);
     };
 
+    const fetchHistorialData = async (equipoId) => {
+      try {
+          // Obtener el historial de mantenimientos asociados al equipo
+          const mantenimientosResponse = await axios.get(
+              `http://localhost:8000/api/historial-equipo/${equipoId}`
+          );
+  
+          // Procesar cada mantenimiento para incluir detalles, componentes y actividades
+          const mantenimientosConComponentesYActividades = await Promise.all(
+              mantenimientosResponse.data.map(async (mantenimiento) => {
+                  try {
+                      // Obtener detalles del mantenimiento
+                      const detallesResponse = await axios.get(
+                          `http://localhost:8000/api/mantenimientoDetalles/${mantenimiento.id}`
+                      );
+  
+                      // Buscar componentes relacionados con el equipo
+                      const componentes = detallesResponse.data.equipos
+                          .find((e) => e.id === equipoId)?.componentes || [];
+  
+                      const componentesConNombre = componentes.map((componente) => ({
+                          ...componente,
+                          componente_nombre:
+                              componente.nombre || componente.componente_nombre || "Nombre no disponible",
+                      }));
+  
+                      // Obtener actividades asociadas al mantenimiento y equipo
+                      const actividadesResponse = await axios.get(
+                          `http://localhost:8000/api/mantenimiento-actividad/${mantenimiento.id}/${equipoId}`
+                      );
+  
+                      // Mapear `fecha_inicio` a `fechaInicio`
+                      return {
+                          ...mantenimiento,
+                          fechaInicio: mantenimiento.fecha_inicio,
+                          componentes: componentesConNombre,
+                          actividades: actividadesResponse.data, // Incluir actividades
+                      };
+                  } catch (detallesError) {
+                      console.error(
+                          `Error al obtener detalles para mantenimiento ${mantenimiento.id}:`,
+                          detallesError
+                      );
+                      return { ...mantenimiento, componentes: [], actividades: [] }; // Devuelve sin detalles ni actividades en caso de error
+                  }
+              })
+          );
+  
+          // Actualizar el estado con los datos procesados (mantenimientos, componentes y actividades)
+          setHistorialData({
+              mantenimientos: mantenimientosConComponentesYActividades,
+              actividades: [], // No es necesario aquí, porque ya se están incluyendo con cada mantenimiento
+              componentes: [],
+              equipos: [],
+          });
+      } catch (error) {
+          console.error("Error al obtener el historial del equipo:", error);
+      }
+  };
+  
+    
+      const handleSelectMantenimiento = (codigo) => {
+        console.log("Código seleccionado:", codigo);
+        const mantenimiento = historialData.mantenimientos.find(
+          (m) => m.codigo_mantenimiento === codigo
+        );
+        console.log("Mantenimiento seleccionado:", mantenimiento);
+        setSelectedMantenimiento(mantenimiento || null);
+      };
+      
+    
+      const handleTabChange = (value) => {
+        console.log("Tab cambiado a:", value);
+        setActiveTab(value); // Actualiza el estado del tab activo
+      };
+
+    const openHistorialModal = (equipo) => {
+        setSelectedEquipo(equipo);
+        fetchHistorialData(equipo.id);
+        setHistorialModalOpen(true);
+    };
+
+    const closeHistorialModal = () => {
+        setSelectedEquipo(null);
+        setHistorialModalOpen(false);
+    };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -67,7 +225,7 @@ const MostrarEquipos = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:8000/api/equipos/import', formData, {
+            const response = await axios.post(`http://localhost:8000/api/equipos/import`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -88,11 +246,11 @@ const MostrarEquipos = () => {
         
                 // Agregar detalles específicos si existen
                 if (duplicatedCodes.length > 0) {
-                    warningMessage += ` Equipos insertados con éxito, excepto los códigos duplicados.`;
+                    warningMessage +=  'Equipos insertados con éxito, excepto los códigos duplicados.';
                 }
         
                 if (invalidProcesses.length > 0) {
-                    warningMessage += ` Equipos insertados con éxito, excepto aquellos con Proceso de Compra inválidos`;
+                    warningMessage +=  'Equipos insertados con éxito, excepto aquellos con Proceso de Compra inválidos';
                 }
         
                 setNotification({ message: warningMessage, type: 'warning' });
@@ -152,6 +310,8 @@ const MostrarEquipos = () => {
         { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
         { icon: FileText, label: 'Reportes', route: '/reportes' },
     ];
+
+    
 
     return (
         <div className="flex min-h-screen bg-gray-100">
@@ -253,7 +413,14 @@ const MostrarEquipos = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{equipo.Descripcion_Equipo}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{equipo.proceso_compra_id || 'N/A'}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <Link to={`/edit/${equipo.id}`} className="text-red-600 hover:text-blue-900 mr-2 bg-blue-100 px-2 py-1 rounded">Editar</Link>
+                                        <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => openHistorialModal(equipo)}
+                                >
+                                    Ver Historial
+                                </Button>
+                                            <Link to={'/edit/${equipo.id}'} className="text-red-600 hover:text-blue-900 mr-2 bg-blue-100 px-2 py-1 rounded">Editar</Link>
                                         </td>
                                     </tr>
                                 ))}
@@ -276,7 +443,7 @@ const MostrarEquipos = () => {
                             key={index + 1}
                             onClick={() => handlePageChange(index + 1)}
                             className={`px-3 py-1 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
-                        >
+                            >
                             {index + 1}
                         </button>
                     ))}
@@ -287,6 +454,197 @@ const MostrarEquipos = () => {
                     >
                         Siguiente &gt;
                     </button>
+                    {selectedEquipo && (
+                        <Modal open={historialModalOpen} onClose={closeHistorialModal}>
+<div className="modal-historial">
+<Card className="modal-card">
+  {/* Header del modal */}
+  <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
+  <div className="modal-header">
+          <div className="info-row">
+          <Box className="w-5 h-5" />
+          <span>Historial del Equipo</span>
+            </div>
+          {selectedEquipo && (
+            <>
+          <div className="info-row">
+                <Barcode className="w-4 h-4" />
+                <span>Código de Barras: {selectedEquipo.Codigo_Barras}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Tool className="w-4 h-4" />
+                <span className="text-sm font-medium">Nombre: {selectedEquipo.Nombre_Producto}</span>
+              </div>
+            </>
+          )}
+        </div>
+      </CardHeader>
+
+      {/* Contenido del modal */}
+      <CardContent className="p-6">
+        {historialData?.mantenimientos && historialData.mantenimientos.length > 0 ? (
+          <div className="flex gap-6">
+            {/* Panel izquierdo: Lista de mantenimientos */}
+            <div className="w-1/3">
+              <div className="mb-4">
+              <div className="input-container">
+              <Search className="icon" />
+                <Input
+                  type="text"
+                  placeholder="Buscar mantenimiento..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md"
+                  icon={<Search className="timeline-item-icon" />} // Ícono personalizado
+                  />
+                  </div>
+              </div>
+              <ScrollArea className="h-[600px]">
+                
+                <TimelineView
+                
+                  mantenimientos={historialData.mantenimientos}
+                  onSelectMant={handleSelectMantenimiento}
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                />
+              </ScrollArea>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={Math.ceil(historialData.mantenimientos.length / itemsPerPage)}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+
+            {/* Panel derecho: Detalles del mantenimiento seleccionado */}
+            <div className="w-2/3">
+              {selectedMantenimiento && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                    <h3 className="text-lg font-semibold">{selectedMantenimiento.codigo_mantenimiento}</h3>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{selectedMantenimiento?.fechaInicio || "Fecha no disponible"}</span>
+                          </div>
+                        <div className="flex items-center gap-1">
+                          <Building2 className="w-4 h-4" />
+                          {selectedMantenimiento?.proveedor || "Proveedor no disponible"}
+                          </div>
+<div
+className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
+  selectedMantenimiento.estado === "No terminado"
+    ? "bg-red-500 text-white"
+    : "bg-gray-800 text-white"
+}`}
+>
+    {selectedMantenimiento.estado}
+  </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tabs para actividades y componentes */}
+                  <Tabs
+  defaultValue="componentes"
+  className="w-full"
+>
+              <TabsList className="tabs-content">
+                  <TabsTrigger value="componentes">
+      Componentes ({selectedMantenimiento?.componentes?.length || 0})
+    </TabsTrigger>
+    <TabsTrigger value="actividades">
+      Actividades ({selectedMantenimiento?.actividades?.length || 0})
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="componentes" className="tabs-content">
+        <div className="mb-4">
+          <div className="input-container">
+            <Search className="icon" />
+            <Input
+              type="text"
+              placeholder="Buscar componente..."
+              value={compSearchTerm}
+              onChange={(e) => setCompSearchTerm(e.target.value)}
+              className="w-full"
+              icon={<Search className="w-4 h-4" />}
+            />
+          </div>
+        </div>
+        <ScrollArea className="h-[400px]">
+          {selectedMantenimiento?.componentes && selectedMantenimiento.componentes.length > 0 ? (
+            <ul>
+              {selectedMantenimiento.componentes.map((componente, index) => (
+                <li key={index} className="mb-4">
+                  <div className="font-semibold text-gray-900">{componente.componente_nombre}</div>
+                  <div className="text-sm text-gray-600">{componente.descripcion || "Descripción no disponible"}</div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay componentes asociados</p>
+          )}
+        </ScrollArea>
+      </TabsContent>
+
+
+  {/* Contenido del tab Actividades */}
+  <TabsContent value="actividades" className="tabs-content">
+        <div className="mb-4">
+          <div className="input-container">
+            <Search className="icon" />
+            <Input
+              type="text"
+              placeholder="Buscar actividad..."
+              value={compSearchTerm} // Puedes cambiar a un estado específico para actividades
+              onChange={(e) => setCompSearchTerm(e.target.value)} // Cambia el manejador si es necesario
+              className="w-full"
+              icon={<Search className="w-4 h-4" />}
+            />
+          </div>
+        </div>
+        <ScrollArea className="h-[400px]">
+          {selectedMantenimiento?.actividades && selectedMantenimiento.actividades.length > 0 ? (
+            <ul>
+              {selectedMantenimiento.actividades.map((actividad, index) => (
+                <li key={index} className="mb-4">
+                  <div className="font-semibold text-gray-900">{actividad.nombre}</div>
+                  <div className="text-sm text-gray-600">{actividad.descripcion || "Descripción no disponible"}</div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay actividades asociadas</p>
+          )}
+        </ScrollArea>
+      </TabsContent>
+</Tabs>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-center">No hay mantenimientos asociados.</p>
+        )}
+      </CardContent>
+
+      {/* Footer con botón de cerrar */}
+      <div className="flex justify-end p-4 bg-gray-100">
+        <Button onClick={closeHistorialModal} variant="outline" className="bg-white text-gray-800">
+          Cerrar
+        </Button>
+      </div>
+    </Card>
+  </div>
+</Modal>
+
+
+
+
+)}
+
+
                 </div>
 
                 {/* Modal for file upload */}
