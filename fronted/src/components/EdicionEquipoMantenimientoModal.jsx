@@ -54,7 +54,7 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
             setActividadOComp(true);
             setTimeout(() => {
                 setActividadOComp(false);
-            }, 1800)
+            }, 3000)
             return;
         }
         setOpenConfirmDialog(true);
@@ -133,7 +133,7 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
             {ActividadOComponente && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
                     <div className="bg-red-500 text-white p-6 rounded-lg shadow-xl">
-                        <h1 className="text-xl font-bold">El equipo debe tener o una actividad o un compoente guardado</h1>
+                        <h1 className="text-xl font-bold">El equipo debe tener una actividad o un componente guardado</h1>
                     </div>
                 </div>
             )}
