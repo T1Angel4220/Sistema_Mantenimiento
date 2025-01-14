@@ -59,7 +59,7 @@ export default function AssetMaintenanceForm() {
   const [mantenimiento, setMantenimiento] = useState({ "equipos": [] });
   const [showTable, setShowTable] = useState(false);
   const [page, setPage] = useState(0); // Página actual
-  const [rowsPerPage, setRowsPerPage] = useState(8); // Equipos por página
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Equipos por página
   const [openModal, setOpenModal] = useState(false);
   const [confirmacionEquipo, setConfirmacionEquipo] = useState(false);
   const [equipoBorrar, setEquipoBorrar] = useState(null);
