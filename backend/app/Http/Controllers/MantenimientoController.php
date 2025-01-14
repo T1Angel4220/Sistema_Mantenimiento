@@ -130,7 +130,7 @@ class MantenimientoController extends Controller
             foreach ($equipo['componentes'] as $componente) {
                 DB::table('equipo_componentes')->insert([
                     'mantenimiento_id' => $mantenimientoId,
-                    'equipo_id' => $equipo['id'],
+                    'equipo_mantenimiento_id' => $equipo['id'],
                     'componente_id' => $componente['id'],
                     'cantidad' => $componente['cantidad'] ?? 1,
                     'created_at' => now(),
