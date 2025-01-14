@@ -306,8 +306,7 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                 <Button
                                     variant="contained"
                                     color="primary"
-
-
+                                    sx={{ mt: 2 }}
                                     onClick={handleAgregarComponente}
 
                                 >
