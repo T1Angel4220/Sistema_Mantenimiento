@@ -17,14 +17,17 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TablePagination,
+  Pagination,
   Typography,
   Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  IconButton
 } from '@mui/material';
+import { ArrowBack, ArrowForward } from '@mui/icons-material';
+
 export default function AssetMaintenanceForm() {
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
@@ -58,7 +61,7 @@ export default function AssetMaintenanceForm() {
   const [equipmentOptions, setEquipmentOptions] = useState({});
   const [mantenimiento, setMantenimiento] = useState({ "equipos": [] });
   const [showTable, setShowTable] = useState(false);
-  const [page, setPage] = useState(0); // Página actual
+  const [page, setPage] = useState(1); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(5); // Equipos por página
   const [openModal, setOpenModal] = useState(false);
   const [confirmacionEquipo, setConfirmacionEquipo] = useState(false);
@@ -135,35 +138,35 @@ export default function AssetMaintenanceForm() {
 
     setConfirmacionEquipo(false);
   }
-  const handleSaveEditionEquip = (actividades, componentes, observacion, fechaFin) => { 
+  const handleSaveEditionEquip = (actividades, componentes, observacion, fechaFin) => {
     console.log(equipoSeleccionado);
     setMantenimiento((prev) => {
-        const nuevosEquipos = prev.equipos.map((equipo) => {
-            // Identificar el equipo seleccionado y actualizar sus arrays
-            if (equipo.id == equipoSeleccionado.id) {
-                return {
-                    ...equipo,
-                    actividades: actividades,
-                    componentes: componentes,
-                    observacion: observacion
-                };
-            }
-            return equipo; // Retornar el resto de los equipos sin modificaciones
-        });
+      const nuevosEquipos = prev.equipos.map((equipo) => {
+        // Identificar el equipo seleccionado y actualizar sus arrays
+        if (equipo.id == equipoSeleccionado.id) {
+          return {
+            ...equipo,
+            actividades: actividades,
+            componentes: componentes,
+            observacion: observacion
+          };
+        }
+        return equipo; // Retornar el resto de los equipos sin modificaciones
+      });
 
-        // Devolver el nuevo estado con los equipos actualizados y cambiar la fecha de fin
-        return { 
-            ...prev, 
-            equipos: nuevosEquipos, 
-            fecha_fin: fechaFin 
-        };
+      // Devolver el nuevo estado con los equipos actualizados y cambiar la fecha de fin
+      return {
+        ...prev,
+        equipos: nuevosEquipos,
+        fecha_fin: fechaFin
+      };
     });
 
     // Confirmar el nuevo estado después de la actualización
     setTimeout(() => {
-        console.log("Estado actualizado de mantenimiento:", mantenimiento);
+      console.log("Estado actualizado de mantenimiento:", mantenimiento);
     }, 0);
-};
+  };
 
 
 
@@ -727,8 +730,9 @@ export default function AssetMaintenanceForm() {
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {mantenimiento.equipos
-                                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                {mantenimiento.equipos.slice((page-1) * rowsPerPage,(page)* rowsPerPage+1)
+
+
                                   .map((equipo, index) => (
                                     <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'action.hover' } }}>
                                       <TableCell>{equipo.Nombre_Producto}</TableCell>
@@ -788,18 +792,17 @@ export default function AssetMaintenanceForm() {
                             </div>
                           )}
                           {/* Paginación */}
-                          <TablePagination
-                            rowsPerPageOptions={[8]}
-                            component="div"
-                            count={mantenimiento.equipos.length}
-                            rowsPerPage={rowsPerPage}
-                            page={page}
-                            onPageChange={handleChangePage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                          />
+                          <div class="w-1/2 mx-auto">
+                            <Pagination
+                                count={Math.ceil(mantenimiento.equipos.length / rowsPerPage)}
+                                page={page}
+                                onChange={handleChangePage}
+                                sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
+                            />
+                          </div>
                           <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado || {}}
-                            actividadesSe={equipoSeleccionado!=null ? equipoSeleccionado.actividades : []}
-                            componentesSe={equipoSeleccionado!=null ? equipoSeleccionado.componentes : []} 
+                            actividadesSe={equipoSeleccionado != null ? equipoSeleccionado.actividades : []}
+                            componentesSe={equipoSeleccionado != null ? equipoSeleccionado.componentes : []}
                             guardarActivComp={handleSaveEditionEquip} />
 
                         </>
