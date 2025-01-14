@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import EdicionEquipo from './EdicionEquipoMantenimientoModal';
 
-const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
+const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
