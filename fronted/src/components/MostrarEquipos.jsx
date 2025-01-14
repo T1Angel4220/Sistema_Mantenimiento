@@ -427,7 +427,7 @@ const MostrarEquipos = () => {
                                 >
                                     Ver Historial
                                 </Button>
-                                            <Link to={'/edit/${equipo.id}'} className="text-red-600 hover:text-blue-900 mr-2 bg-blue-100 px-2 py-1 rounded">Editar</Link>
+                                            <Link to={`/edit/${equipo.id}`} className="text-red-600 hover:text-blue-900 mr-2 bg-blue-100 px-2 py-1 rounded">Editar</Link>
                                         </td>
                                     </tr>
                                 ))}
