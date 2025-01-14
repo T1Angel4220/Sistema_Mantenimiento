@@ -49,7 +49,7 @@ const MostrarEquipos = () => {
     const navigate = useNavigate();
     const [equipos, setEquipos] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 13;
+    const itemsPerPage = 8;
     const [showModal, setShowModal] = useState(false);
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState('');

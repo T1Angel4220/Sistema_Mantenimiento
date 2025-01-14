@@ -763,7 +763,7 @@ const MaintenanceTable = () => {
             </Table>
           </TableContainer>
 
-    
+
           <ModalEdicionMantenimiento
             mantenimiento={selectedMaintenance}
             open={open}
@@ -772,6 +772,12 @@ const MaintenanceTable = () => {
             seleccionarEquipo={handleSeleccionarEquipo}
             guardarEditar={guardarEditar}
             handleAniadirEquipos={handleAddEquipos}
+          />
+          <Pagination
+            count={Math.ceil(filteredData.length / rowsPerPage)}
+            page={page}
+            onChange={handleChangePage}
+            sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
           />
           <Snackbar
             open={snackbarOpen}
