@@ -11,7 +11,7 @@ const Main = () => {
   const [ultimosRegistros, setUltimosRegistros] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const itemsPerPage = 9;
+  const itemsPerPage = 5;
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,7 +180,7 @@ const Main = () => {
               <div key={index} className="bg-white p-4 rounded-lg shadow-md">
                 <h3 className="font-semibold text-lg mb-2">{registro.codigo_mantenimiento}</h3>
                 <p className="text-sm text-gray-600">
-                  Equipo: {registro.nombre_equipo || 'No asignado'}
+                  Tipo: {registro.tipo || 'No asignado'}
                 </p>
                 <p className="text-sm text-gray-500">
                   Registrado el: {new Date(registro.created_at).toLocaleDateString()}
