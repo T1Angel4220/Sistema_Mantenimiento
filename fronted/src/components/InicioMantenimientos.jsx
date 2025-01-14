@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, ShoppingCart, PenTool, FileText, LogOut, Search } from 'lucide-react';
+import { Home, ShoppingCart, PenTool, FileText, LogOut, Box as Box1, Search } from 'lucide-react';
 
 import {
   Table,
@@ -32,6 +32,7 @@ import {
   Grid,
   Alert,
   Snackbar,
+  Pagination
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -154,7 +155,8 @@ const MaintenanceTable = () => {
   const [data, setData] = useState([]);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
   const [equipoSeleccionado, setSelectedEquip] = useState(null);
-
+  const [page, setPage] = useState(1); // Página actual
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -175,7 +177,7 @@ const MaintenanceTable = () => {
   const navItems = [
     { icon: Home, label: 'Inicio', route: '/Main' },
     { icon: ShoppingCart, label: 'Proceso de Compra', route: '/ProcesoCompra' },
-    { icon: Box, label: 'Activos', route: '/equipos' },
+    { icon: Box1, label: 'Activos', route: '/equipos' },
     { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
     { icon: FileText, label: 'Reportes', route: '/reportes' },
   ];
@@ -522,6 +524,9 @@ const MaintenanceTable = () => {
     }
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
   useEffect(() => {
     api.get('/mantenimientos')
       .then((response) => {
@@ -620,7 +625,7 @@ const MaintenanceTable = () => {
             </button>
           </div>
         </aside>
-        <div  style={{ paddingRight: '16px' }}>
+        <div style={{ paddingRight: '16px' }}>
           <Paper elevation={3} sx={{ padding: '24px', marginBottom: '24px', backgroundColor: 'primary.main' }}>
             <Typography variant="h4" align="center" gutterBottom sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>
               <BuildIcon sx={{ marginRight: '8px', verticalAlign: 'middle' }} />
@@ -704,7 +709,7 @@ const MaintenanceTable = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredData.map((item) => (
+                {filteredData.slice((page - 1) * rowsPerPage, (page) * rowsPerPage + 1).map((item) => (
                   <TableRow
                     key={item.id}
                     sx={{
@@ -758,522 +763,7 @@ const MaintenanceTable = () => {
             </Table>
           </TableContainer>
 
-          <Dialog
-            open={openDialog}
-            onClose={handleCloseDialog}
-            maxWidth="md"
-            fullWidth
-          >
-            <DialogTitle sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
-              {isEditing ? 'Editar Mantenimiento' : 'Detalles del Mantenimiento'}
-            </DialogTitle>
-
-            <DialogContent sx={{ mt: 2, p: 0 }}>
-              {isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-                  <CircularProgress />
-                </Box>
-              ) : (
-                <>
-                  {selectedMaintenance?.error && (
-                    <Alert
-                      severity="error"
-                      sx={{ m: 2 }}
-                      onClose={() => {
-                        setSelectedMaintenance(prev => ({ ...prev, error: null }))
-                      }}
-                    >
-                      {selectedMaintenance.error}
-                    </Alert>
-                  )}
-                  <Tabs value={tabValue} onChange={handleTabChange} centered>
-                    <Tab icon={<BuildIcon />} label="Detalles" />
-                    <Tab icon={<ListAltIcon />} label="Actividades" />
-                    <Tab icon={<EngineeringIcon />} label="Componentes" />
-                    <Tab icon={<ComputerIcon />} label="Equipos" />
-                  </Tabs>
-                  <TabPanel value={tabValue} index={0}>
-                    {selectedMaintenance && (
-                      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(2, 1fr)', p: 3 }}>
-                        <TextField
-                          label="Código Mantenimiento"
-                          value={selectedMaintenance.codigo_mantenimiento || ''}
-                          fullWidth
-                          disabled
-                          name="codigo_mantenimiento"
-                          onChange={handleInputChange}
-                        />
-                        <TextField
-                          select
-                          label="Tipo"
-                          value={selectedMaintenance?.tipo || ''}
-                          fullWidth
-                          disabled={selectedMaintenance?.estado === "Terminado" || !isEditing}
-                          name="tipo"
-                          onChange={handleInputChange}
-                          SelectProps={{
-                            native: true,
-                          }}
-                        >
-                          <option value="">Seleccione un tipo</option>
-                          <option value="Interno">Interno</option>
-                          <option value="Externo">Externo</option>
-                        </TextField>
-
-                        <TextField
-                          label="Fecha Inicio"
-                          type="date"
-                          value={selectedMaintenance.fecha_inicio?.split('T')[0] || ''}
-                          fullWidth
-                          disabled={!isEditing}
-                          name="fecha_inicio"
-                          onChange={handleInputChange}
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
-                        />
-                        <TextField
-                          label="Fecha Fin"
-                          type="date"
-                          value={selectedMaintenance.fecha_fin?.split('T')[0] || ''}
-                          fullWidth
-                          disabled={!isEditing}
-                          name="fecha_fin"
-                          onChange={handleInputChange}
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
-                        />
-
-                        {selectedMaintenance.tipo === 'Externo' && (
-                          <>
-                            {isLoadingProveedores ? (
-                              <CircularProgress />
-                            ) : (
-                              <TextField
-                                select
-                                label="Proveedor"
-                                value={selectedMaintenance?.proveedor || ''}
-                                fullWidth
-                                disabled={!isEditing}
-                                name="proveedor"
-                                onChange={handleInputChange}
-                                SelectProps={{
-                                  native: true,
-                                }}
-                                sx={{
-                                  '& .MuiSelect-select': {
-                                    padding: '16.5px 14px',
-                                    backgroundColor: 'background.paper',
-                                  },
-                                }}
-                              >
-                                <option value=""></option>
-                                {proveedores.map((prov, index) => (
-                                  <option key={index} value={typeof prov === 'string' ? prov : prov.nombre}>
-                                    {typeof prov === 'string' ? prov : prov.nombre}
-                                  </option>
-                                ))}
-                              </TextField>
-                            )}
-                            <TextField
-                              label="Contacto Proveedor"
-                              value={selectedMaintenance.contacto_proveedor || ''}
-                              fullWidth
-                              disabled={!isEditing}
-                              name="contacto_proveedor"
-                              onChange={handleInputChange}
-                            />
-                            <TextField
-                              label="Costo"
-                              value={selectedMaintenance.costo || ''}
-                              fullWidth
-                              disabled={!isEditing}
-                              name="costo"
-                              onChange={handleInputChange}
-                              type="number"
-                              InputProps={{
-                                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                              }}
-                            />
-                          </>
-                        )}
-                        <TextField
-                          label="Observaciones"
-                          value={selectedMaintenance.observaciones || ''}
-                          fullWidth
-                          multiline
-                          rows={4}
-                          disabled={!isEditing}
-                          name="observaciones"
-                          onChange={handleInputChange}
-                          sx={{ gridColumn: '1 / -1' }}
-                        />
-                        <TextField
-                          select
-                          label="Estado"
-                          value={selectedMaintenance.estado || 'No terminado'}
-                          fullWidth
-                          disabled={selectedMaintenance.estado === 'Terminado'}
-                          name="estado"
-                          onChange={(e) => handleConfirmChange(e.target.value)}
-
-                          SelectProps={{
-                            native: true,
-                          }}
-                        >
-
-
-                          <option value="No terminado">No Terminado</option>
-                          <option value="Terminado">Terminado</option>
-                          <Dialog
-                            open={confirmDialogOpen}
-                            onClose={cancelStatusChange}
-                          >
-                            <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
-                            <DialogContent>
-                              <Typography>
-                                ¿Está seguro de marcar como <b>{pendingStatus}</b> el mantenimiento?
-                              </Typography>
-                            </DialogContent>
-                            <DialogActions>
-                              <Button onClick={cancelStatusChange} color="primary">
-                                Cancelar
-                              </Button>
-                              <Button
-                                onClick={confirmStatusChange}
-                                color="secondary"
-                                variant="contained"
-                              >
-                                Confirmar
-                              </Button>
-                            </DialogActions>
-                          </Dialog>
-
-                        </TextField>
-                      </Box>
-                    )}
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    {isEditing ? (
-                      <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-                        <Typography variant="h6" sx={{ mb: 2 }}>
-                          Actividades disponibles:
-                        </Typography>
-                        <TextField
-                          select
-                          label="Seleccionar Actividad"
-                          onChange={(e) => handleSelectActivity(e.target.value)}
-                          fullWidth
-                          sx={{
-                            minWidth: 200,
-                            '& .MuiSelect-select': {
-                              padding: '16.5px 14px',
-                              backgroundColor: 'background.paper',
-                            },
-                          }}
-                          SelectProps={{
-                            native: true,
-                          }}
-                        >
-                          <option value="">Seleccione una actividad</option>
-                          {availableActivities.map((actividad) => (
-                            <option key={actividad.id} value={actividad.id}>
-                              {actividad.nombre}
-                            </option>
-                          ))}
-                        </TextField>
-                        <Typography variant="h6" sx={{ mb: 2 }}>
-                          Actividades seleccionadas:
-                        </Typography>
-                        <List>
-                          {selectedMaintenance.actividades.map((actividad) => (
-                            <ListItem
-                              key={actividad.id}
-                              sx={{
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                borderRadius: 1,
-                                mb: 1,
-                                backgroundColor: 'background.paper',
-                              }}
-                            >
-                              <ListItemText
-                                primary={<Typography variant="subtitle1" fontWeight="bold">{actividad.nombre}</Typography>}
-                              />
-                              <Button
-                                variant="contained"
-                                color="error"
-                                onClick={() => handleDeleteActividad(actividad.id)}
-                                startIcon={<DeleteIcon />}
-                              >
-                                Eliminar
-                              </Button>
-                            </ListItem>
-                          ))}
-                        </List>
-                      </Box>
-                    ) : (
-                      <TabPanel value={tabValue} index={1}>
-                        {selectedMaintenance?.actividades?.length > 0 ? (
-                          <List>
-                            {selectedMaintenance.actividades.map((actividad) => (
-                              <ListItem
-                                key={actividad.id}
-                                sx={{
-                                  border: '1px solid',
-                                  borderColor: 'divider',
-                                  borderRadius: 1,
-                                  mb: 1,
-                                  backgroundColor: 'background.paper'
-                                }}
-                              >
-                                <ListItemText
-                                  primary={
-                                    <Typography variant="subtitle1" fontWeight="bold">
-                                      {actividad.nombre}
-                                    </Typography>
-                                  }
-                                />
-                              </ListItem>
-                            ))}
-                          </List>
-                        ) : (
-                          <Box sx={{ p: 4, textAlign: 'center' }}>
-                            <Typography color="text.secondary">
-                              No hay actividades registradas
-                            </Typography>
-                          </Box>
-                        )}
-                      </TabPanel>
-                    )}
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={2}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      {selectedMaintenance?.equipos?.length > 0 ? (
-                        <List>
-                          {selectedMaintenance.equipos.map((equipo) => (
-                            <Box key={equipo.id} sx={{ mb: 3 }}>
-                              <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-                                Equipo: {equipo.Nombre_Producto}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Código de Barras: {equipo.Codigo_Barras}
-                              </Typography>
-
-                              {isEditing && (
-                                <Box
-                                  sx={{
-                                    display: 'flex',
-                                    gap: 2,
-                                    alignItems: 'flex-start',
-                                    p: 2,
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    borderRadius: 1,
-                                    bgcolor: 'background.paper',
-                                    mb: 2,
-                                  }}
-                                >
-                                  <TextField
-                                    select
-                                    label="Componente"
-                                    value={equipo.selectedComponent || ''}
-                                    onChange={(e) => handleSelectComponent(e, equipo.id)}
-                                    sx={{
-                                      minWidth: 200,
-                                      '& .MuiSelect-select': {
-                                        padding: '16.5px 14px',
-                                        backgroundColor: 'background.paper',
-                                      },
-                                    }}
-                                    SelectProps={{
-                                      native: true,
-                                    }}
-                                  >
-                                    <option value=""></option>
-                                    {availableComponents.map((comp) => (
-                                      <option key={comp.id} value={comp.id}>
-                                        {comp.nombre}
-                                      </option>
-                                    ))}
-                                  </TextField>
-                                  <TextField
-                                    type="number"
-                                    label="Cantidad"
-                                    value={equipo.componentQuantity || ''}
-                                    onChange={(e) => handleSetComponentQuantity(e, equipo.id)}
-                                    InputProps={{ inputProps: { min: 1 } }}
-                                    sx={{ width: 100 }}
-                                  />
-                                  <Button
-                                    variant="contained"
-                                    onClick={() => handleAddComponentToEquipo(equipo.id)}
-                                    startIcon={<AddIcon />}
-                                    disabled={!equipo.selectedComponent}
-                                  >
-                                    Agregar
-                                  </Button>
-                                </Box>
-                              )}
-
-                              {equipo.componentes?.length > 0 ? (
-                                <List>
-                                  {equipo.componentes.map((componente) => (
-                                    <ListItem
-                                      key={componente.id}
-                                      sx={{
-                                        border: '1px solid',
-                                        borderColor: 'divider',
-                                        borderRadius: 1,
-                                        mb: 1,
-                                        backgroundColor: 'background.paper',
-                                      }}
-                                      secondaryAction={
-                                        isEditing && (
-                                          <IconButton
-                                            edge="end"
-                                            aria-label="delete"
-                                            onClick={() => handleRemoveComponent(equipo.id, componente.id)}
-                                            color="error"
-                                          >
-                                            <DeleteIcon />
-                                          </IconButton>
-                                        )
-                                      }
-                                    >
-                                      <ListItemText
-                                        primary={
-                                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <Typography variant="subtitle1" fontWeight="bold">
-                                              {componente.nombre}
-                                            </Typography>
-                                            <Chip label={`Cantidad: ${componente.cantidad}`} color="primary" size="small" />
-                                          </Box>
-                                        }
-                                        secondary={
-                                          componente.descripcion && (
-                                            <Typography component="span" display="block">
-                                              {componente.descripcion}
-                                            </Typography>
-                                          )
-                                        }
-                                      />
-                                    </ListItem>
-                                  ))}
-                                </List>
-                              ) : (
-                                <Typography color="text.secondary" align="center">
-                                  No hay componentes registrados para este equipo
-                                </Typography>
-                              )}
-                            </Box>
-                          ))}
-                        </List>
-                      ) : (
-                        <Typography color="text.secondary" align="center">
-                          No hay equipos registrados
-                        </Typography>
-                      )}
-                    </Box>
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={3}>
-                    {selectedMaintenance?.equipos?.length > 0 ? (
-                      <List>
-                        {selectedMaintenance.equipos.map((equipo) => (
-                          <ListItem
-                            key={equipo.id}
-                            sx={{
-                              border: '1px solid',
-                              borderColor: 'divider',
-                              borderRadius: 1,
-                              mb: 1,
-                              backgroundColor: 'background.paper'
-                            }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <Typography variant="subtitle1" fontWeight="bold">
-                                    {equipo.Nombre_Producto}
-                                  </Typography>
-                                  <Chip
-                                    label={equipo.Tipo_Equipo}
-                                    color="primary"
-                                    size="small"
-                                  />
-                                </Box>
-                              }
-                              secondary={
-                                <>
-                                  <Typography component="span" display="block">
-                                    Código de Barras: {equipo.Codigo_Barras}
-                                  </Typography>
-                                  <Typography component="span" display="block">
-                                    Ubicación: {equipo.Ubicacion_Equipo}
-                                  </Typography>
-                                  {equipo.Descripcion_Equipo && (
-                                    <Typography component="span" display="block">
-                                      Descripción: {equipo.Descripcion_Equipo}
-                                    </Typography>
-                                  )}
-                                </>
-                              }
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
-                    ) : (
-                      <Typography color="text.secondary" align="center">
-                        No hay equipos registrados
-                      </Typography>
-                    )}
-                  </TabPanel>
-                </>
-              )}
-            </DialogContent>
-
-            <DialogActions sx={{ p: 2, gap: 1 }}>
-              {isEditing ? (
-                <Button
-                  onClick={handleSave}
-                  variant="contained"
-                  color="primary"
-                  sx={{ color: 'primary.contrastText' }}
-                >
-                  Guardar
-                </Button>
-              ) : (
-                selectedMaintenance?.estado !== "Terminado" && (
-                  <Button
-                    onClick={handleEdit}
-                    startIcon={<EditIcon />}
-                    variant="contained"
-                    color="primary"
-                    sx={{ color: 'primary.contrastText' }}
-                  >
-                    Editar
-                  </Button>
-                )
-              )}
-              <Button
-                onClick={handleCloseDialog}
-                variant="outlined"
-                color="primary"
-                sx={{
-                  borderColor: 'primary.main',
-                  color: 'primary.main',
-                  '&:hover': {
-                    borderColor: 'primary.dark',
-                    backgroundColor: 'primary.light',
-                    color: 'primary.contrastText',
-                  }
-                }}
-              >
-                Cerrar
-              </Button>
-            </DialogActions>
-          </Dialog>
+    
           <ModalEdicionMantenimiento
             mantenimiento={selectedMaintenance}
             open={open}
@@ -1298,8 +788,11 @@ const MaintenanceTable = () => {
             </Alert>
           </Snackbar>
         </div>
+
       </Box>
+
     </ThemeProvider>
+
   );
 };
 
