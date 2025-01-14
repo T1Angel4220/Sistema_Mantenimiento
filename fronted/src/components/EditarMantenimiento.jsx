@@ -118,12 +118,12 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 800,
+          width: 1300,
           bgcolor: "background.paper",
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
-          maxHeight: "80vh",
+          maxHeight: "90vh",
           overflow: "auto",
         }}
       >
@@ -312,7 +312,14 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
 
 
         <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={onClose} sx={{ mr: 2 }}>
+          <Button onClick={onClose} sx={{ 
+            mr: 2,
+            backgroundColor: 'red',
+            color: 'white',
+            '&:hover': {
+                  backgroundColor: 'darkred'
+            }
+           }}>
             Cancelar
           </Button>
           <Button variant="contained" onClick={handleSave}>
