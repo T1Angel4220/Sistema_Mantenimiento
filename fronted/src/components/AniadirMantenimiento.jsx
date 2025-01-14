@@ -265,33 +265,8 @@ export default function AssetMaintenanceForm() {
   }, [maintenanceType, startDate, endDate, provider, contact, cost]);
 
 
-  const handleComponentChangeSelection = (option) => {
-    setSelectedOption(option);
-    if (option === "No") {
-      setEquipmentComponents({});
-    }
-  };
 
-  const handleAddComponentToEquipment = (equipoId, componente) => {
-    if (!componente || !componente.id) return;
-    setEquipmentComponents((prev) => {
-      const updated = { ...prev };
-      if (!updated[equipoId]) updated[equipoId] = [];
-      const existe = updated[equipoId].some((comp) => comp.id === componente.id);
-      if (!existe) {
-        updated[equipoId].push({ ...componente, cantidad: 1 });
-      }
-      return updated;
-    });
-  };
 
-  const handleRemoveComponentFromEquipment = (equipoId, componenteId) => {
-    setEquipmentComponents((prev) => {
-      const updated = { ...prev };
-      updated[equipoId] = updated[equipoId]?.filter((comp) => comp.id !== componenteId) || [];
-      return updated;
-    });
-  };
   const handleCancelMaintenance = async (e) => {
     e.preventDefault();
     setOpenConfirmCancelDialog(true)
@@ -310,8 +285,7 @@ export default function AssetMaintenanceForm() {
       contacto_proveedor: maintenanceType === "Externo" ? contact : null,
       costo: maintenanceType === "Externo" ? parseFloat(cost) : null,
     };
-    console.log(mantenimiento)
-    console.log(mantenimientoGu)
+
     try {
       const response = await axios.post(
         "http://localhost:8000/api/mantenimientosDetalles",
@@ -347,53 +321,7 @@ export default function AssetMaintenanceForm() {
     }
   };
 
-  const handleAddActivity = (e) => {
-    const nombre = e.target.value;
-    const actividad = activities.find((objeto) => objeto.nombre === nombre);
-
-    if (!actividad) {
-      console.error('Actividad no encontrada:', nombre);
-      return;
-    }
-
-    const selected = { id: actividad.id, nombre: actividad.nombre };
-    const existe = selectedActivities.some((activity) => activity.id === actividad.id);
-
-    if (!existe) {
-      setSelectedActivities([...selectedActivities, selected]);
-    }
-
-    e.target.value = '';
-  };
-
-  const handleEquipmentOptionChange = (equipmentId, option) => {
-    setEquipmentOptions((prev) => ({
-      ...prev,
-      [equipmentId]: option,
-    }));
-
-    if (option === "No") {
-      setEquipmentComponents((prev) => {
-        const updated = { ...prev };
-        delete updated[equipmentId];
-        return updated;
-      });
-    }
-  };
-
-  const handleAddEquipment = (e) => {
-    const selectedId = parseInt(e.target.value);
-    const selectedAsset = assets.find(asset => asset.id === selectedId);
-
-    if (selectedAsset && !selectedEquipments.some(equipment => equipment.id === selectedAsset.id)) {
-      setSelectedEquipments([...selectedEquipments, selectedAsset]);
-    }
-    e.target.value = '';
-  };
-
-  const handleRemoveEquipment = (id) => {
-    setSelectedEquipments(selectedEquipments.filter(equipment => equipment.id !== id));
-  };
+  
   const handleOpenModal = (equipo) => {
     setEquipoSeleccionado(equipo);
     setModalOpen(true);
@@ -403,13 +331,7 @@ export default function AssetMaintenanceForm() {
     setModalOpen(false);
     setEquipoSeleccionado(null);
   };
-  const handleRemoveActivity = (activity) => {
-    setSelectedActivities(selectedActivities.filter((a) => a !== activity));
-  };
 
-  const handleSelectAsset = (e) => {
-    setSelectedAsset(e.target.value);
-  };
   const handleAddEquipos = (equipos) => {
     setMantenimiento((prevState) => ({
       ...prevState,
