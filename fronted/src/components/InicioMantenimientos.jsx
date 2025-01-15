@@ -171,8 +171,8 @@ const MaintenanceTable = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [availableActivities, setAvailableActivities] = useState([]);
   const [open, setOpen] = useState(true);
-    const [showLogoutModal, setShowLogoutModal] = useState(false);
-  
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const handleLogout = () => {
     setShowLogoutModal(true);
   };
@@ -448,13 +448,13 @@ const MaintenanceTable = () => {
   };
   const guardarEditar = () => {
     api.get('/mantenimientos')
-    .then((response) => {
-      setData(response.data);
-    })
+      .then((response) => {
+        setData(response.data);
+      })
 
-    .catch((error) => {
-      console.error('Error al obtener los datos:', error);
-    });
+      .catch((error) => {
+        console.error('Error al obtener los datos:', error);
+      });
   };
 
   const handleSelectActivity = (actividadId) => {
@@ -728,8 +728,14 @@ const MaintenanceTable = () => {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>{formatDate(item.fecha_inicio)}</TableCell>
-                    <TableCell>{formatDate(item.fecha_fin)}</TableCell>
+                    <TableCell>{new Date(item.fecha_inicio)
+                      .toISOString()
+                      .split('T')[0]
+                      .replace(/-/g, '/')}</TableCell>
+                    <TableCell>{new Date(item.fecha_fin)
+                      .toISOString()
+                      .split('T')[0]
+                      .replace(/-/g, '/')}</TableCell>
                     <TableCell>{item.proveedor || '-'}</TableCell>
                     <TableCell>{item.contacto_proveedor || '-'}</TableCell>
                     <TableCell>{item.costo ? `$${item.costo}` : '-'}</TableCell>
@@ -797,7 +803,7 @@ const MaintenanceTable = () => {
             </Alert>
           </Snackbar>
         </div>
-        
+
       </Box>
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
