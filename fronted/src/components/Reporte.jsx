@@ -15,56 +15,91 @@ const ReportesMantenimiento = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [error, setError] = useState(null);
 
   const [mantenimientosLista, setMantenimientosLista] = useState([]);
   const [equiposLista, setEquiposLista] = useState([]);
   const [actividadesLista, setActividadesLista] = useState([]);
   const [componentesLista, setComponentesLista] = useState([]);
 
+  // Cargar datos iniciales y lista de mantenimientos
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
-        const mantenimientosResponse = await axios.get('http://localhost:8000/api/lista-mantenimientos');
-        const equiposResponse = await axios.get('http://localhost:8000/api/equipos');
-        const actividadesResponse = await axios.get('http://localhost:8000/api/actividades');
-        const componentesResponse = await axios.get('http://localhost:8000/api/componentes');
+        setLoading(true);
+        const [mantenimientosResponse, equiposResponse, actividadesResponse, componentesResponse, datosResponse] = 
+          await Promise.all([
+            axios.get('http://localhost:8000/api/lista-mantenimientos'),
+            axios.get('http://localhost:8000/api/equipos-mantenimiento'),
+            axios.get('http://localhost:8000/api/actividades'),
+            axios.get('http://localhost:8000/api/componentes'),
+            axios.get('http://localhost:8000/api/mantenimientos') // Cargar datos iniciales
+          ]);
 
         setMantenimientosLista(mantenimientosResponse.data);
         setEquiposLista(equiposResponse.data);
         setActividadesLista(actividadesResponse.data);
         setComponentesLista(componentesResponse.data);
+        setResultados(datosResponse.data); // Establecer datos iniciales
+        setError(null);
       } catch (error) {
         console.error('Error al cargar datos iniciales:', error);
+        setError('Error al cargar los datos. Por favor, intente nuevamente.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
+    fetchInitialData();
   }, []);
 
   const fetchMantenimientos = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await axios.get('http://localhost:8000/api/mantenimientos', {
-        params: {
-          fechaInicio: fechaRango[0] ? fechaRango[0].toISOString().split('T')[0] : null,
-          fechaFin: fechaRango[1] ? fechaRango[1].toISOString().split('T')[0] : null,
-          tipo: mantenimiento,
-          estado,
-          equipo,
-          actividad,
-          tipoActivo,
-          componente,
-        },
-      });
-      setResultados(response.data);
+      // Construct the params object with all filters
+      const params = {
+        fechaInicio: fechaRango[0] ? fechaRango[0].toISOString().split('T')[0] : null,
+        fechaFin: fechaRango[1] ? fechaRango[1].toISOString().split('T')[0] : null,
+        tipo: mantenimiento || null,
+        estado: estado || null,
+        equipo: equipo || null,
+        actividad: actividad || null,
+        tipoActivo: tipoActivo || null,
+        componente: componente || null
+      };
+
+      // Remove null values from params
+      Object.keys(params).forEach(key => params[key] === null && delete params[key]);
+
+      // If we have a date range, ensure we're searching for maintenance records that:
+      // - Start within the range
+      // - End within the range
+      // - Span across the range
+      if (params.fechaInicio && params.fechaFin) {
+        const response = await axios.get('http://localhost:8000/api/mantenimientos', {
+          params: {
+            ...params,
+            includeOverlapping: true // Add this flag to tell backend to include overlapping records
+          }
+        });
+        setResultados(response.data);
+      } else {
+        // If no date range, proceed with normal filtering
+        const response = await axios.get('http://localhost:8000/api/mantenimientos', { params });
+        setResultados(response.data);
+      }
     } catch (error) {
       console.error('Error al buscar mantenimientos:', error);
+      setError('Error al buscar mantenimientos. Por favor, intente nuevamente.');
+      setResultados([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClearFilters = () => {
+  const handleClearFilters = async () => {
+    // Clear all filter states
     setFechaRango([null, null]);
     setMantenimiento('');
     setEquipo('');
@@ -72,18 +107,39 @@ const ReportesMantenimiento = () => {
     setActividad('');
     setComponente('');
     setEstado('');
-    setResultados([]);
+    
+    // Close the modal
+    setModalOpen(false);
+    setSelectedReport(null);
+    
+    // Fetch all maintenance records immediately
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:8000/api/mantenimientos');
+      setResultados(response.data);
+      setError(null);
+    } catch (error) {
+      console.error('Error al cargar mantenimientos:', error);
+      setError('Error al cargar los mantenimientos. Por favor, intente nuevamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRowClick = async (report) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/mantenimientos/${report.id}`);
+      const response = await axios.get(`http://localhost:8000/api/mantenimientoDetalles/${report.id}`);
       setSelectedReport(response.data);
       setModalOpen(true);
     } catch (error) {
       console.error('Error fetching maintenance details:', error);
+      setError('No se pudieron cargar los detalles del mantenimiento. Por favor, intente de nuevo.');
     }
   };
+
+  useEffect(() => {
+    fetchMantenimientos();
+  }, [fechaRango, mantenimiento, equipo, tipoActivo, actividad, componente, estado]);
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial', maxWidth: '1200px', margin: '0 auto' }}>
@@ -154,9 +210,9 @@ const ReportesMantenimiento = () => {
             </select>
           </div>
 
-          {/* Tipo de Activo */}
+          {/* Tipo de Mantenimiento */}
           <div>
-            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Tipo de Activo</label>
+            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Tipo de Mantenimiento</label>
             <select
               value={tipoActivo}
               onChange={(e) => setTipoActivo(e.target.value)}
@@ -199,6 +255,20 @@ const ReportesMantenimiento = () => {
                   {item.nombre}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Estado */}
+          <div>
+            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Estado</label>
+            <select
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
+            >
+              <option value="">Seleccionar estado</option>
+              <option value="Terminado">Terminado</option>
+              <option value="No terminado">No terminado</option>
             </select>
           </div>
         </div>
@@ -246,8 +316,17 @@ const ReportesMantenimiento = () => {
         }}
       >
         <h2 style={{ marginBottom: '20px', fontSize: '18px', fontWeight: 'bold' }}>Resultados del Reporte</h2>
+        
+        {error && (
+          <div style={{ color: 'red', marginBottom: '20px', padding: '10px', backgroundColor: '#ffebee', borderRadius: '5px' }}>
+            {error}
+          </div>
+        )}
+
         {loading ? (
           <p>Cargando...</p>
+        ) : resultados.length === 0 ? (
+          <p>No se encontraron resultados</p>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -339,26 +418,30 @@ const ReportesMantenimiento = () => {
                 }}
               >
                 <h3 style={{ marginBottom: '15px', fontSize: '18px', fontWeight: 'bold' }}>
-                  Equipo: {equipo.nombre || 'No especificado'}
+                  Equipo: {equipo.Nombre_Producto || 'No especificado'}
                 </h3>
 
                 {/* Actividades del Equipo */}
                 <div style={{ marginBottom: '15px' }}>
                   <h4 style={{ marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>Actividades Realizadas</h4>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {equipo.actividades?.map((actividad) => (
-                      <li 
-                        key={actividad.id}
-                        style={{
-                          marginBottom: '5px',
-                          paddingLeft: '20px',
-                          position: 'relative'
-                        }}
-                      >
-                        <span style={{ position: 'absolute', left: '0', content: '"•"' }}>•</span>
-                        {actividad.nombre}
-                      </li>
-                    )) || <li>No hay actividades registradas</li>}
+                    {equipo.actividades && equipo.actividades.length > 0 ? (
+                      equipo.actividades.map((actividad) => (
+                        <li 
+                          key={actividad.id}
+                          style={{
+                            marginBottom: '5px',
+                            paddingLeft: '20px',
+                            position: 'relative'
+                          }}
+                        >
+                          <span style={{ position: 'absolute', left: '0', content: '"•"' }}>•</span>
+                          {actividad.nombre}
+                        </li>
+                      ))
+                    ) : (
+                      <li>No hay actividades registradas</li>
+                    )}
                   </ul>
                 </div>
 
@@ -366,19 +449,23 @@ const ReportesMantenimiento = () => {
                 <div style={{ marginBottom: '15px' }}>
                   <h4 style={{ marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>Componentes Utilizados</h4>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {equipo.componentes?.map((componente) => (
-                      <li 
-                        key={componente.id}
-                        style={{
-                          marginBottom: '5px',
-                          paddingLeft: '20px',
-                          position: 'relative'
-                        }}
-                      >
-                        <span style={{ position: 'absolute', left: '0', content: '"•"' }}>•</span>
-                        {componente.nombre} - Cantidad: {componente.cantidad}
-                      </li>
-                    )) || <li>No hay componentes registrados</li>}
+                    {equipo.componentes && equipo.componentes.length > 0 ? (
+                      equipo.componentes.map((componente) => (
+                        <li 
+                          key={componente.id}
+                          style={{
+                            marginBottom: '5px',
+                            paddingLeft: '20px',
+                            position: 'relative'
+                          }}
+                        >
+                          <span style={{ position: 'absolute', left: '0', content: '"•"' }}>•</span>
+                          {componente.nombre} - Cantidad: {componente.cantidad || 'No especificada'}
+                        </li>
+                      ))
+                    ) : (
+                      <li>No hay componentes registrados</li>
+                    )}
                   </ul>
                 </div>
 

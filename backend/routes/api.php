@@ -139,3 +139,16 @@ Route::get('/procesos-compra', [ProcesoCompraController::class, 'index']);
 Route::post('/equipo', [EquipoController::class, 'store']);
 Route::put('mantenimientos/{id}/estado', [MantenimientoController::class, 'updateEstado']);
 Route::get('/lista-mantenimientos', [MantenimientoController::class, 'getListaMantenimientos']);
+
+
+Route::get('/equipos-mantenimiento', function () {
+    return DB::table('equipos')
+        ->join('equipo_mantenimiento', 'equipos.id', '=', 'equipo_mantenimiento.equipo_id')
+        ->select('equipos.id', 'equipos.Nombre_Producto as nombre')
+        ->distinct()
+        ->get();
+});
+
+Route::get('/mantenimientos', [MantenimientoController::class, 'index']);
+Route::get('/lista-mantenimientos', [MantenimientoController::class, 'getListaMantenimientos']);
+Route::put('/mantenimientos/{id}', [MantenimientoController::class, 'updateDetalles']);

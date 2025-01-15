@@ -26,6 +26,7 @@ class MantenimientoController extends Controller
         // Si se requiere un formulario de creación, puedes devolver una vista
         // return view('mantenimiento.create');
     }
+    
     public function show($id)
     {
         // Obtener el mantenimiento con sus actividades y equipos
@@ -162,66 +163,105 @@ class MantenimientoController extends Controller
         // Si se requiere un formulario de edición, puedes devolver una vista
         // return view('mantenimiento.edit', compact('id'));
     }
-    public function index(){
-
-        
-
-        // Obtener todos los mantenimientos con sus datos básicos, ordenados por updated_at en orden descendente
-        $mantenimientos = DB::table('mantenimiento')
+    public function index(Request $request)
+    {
+        // Start with the base query
+        $query = DB::table('mantenimiento')
             ->select('mantenimiento.*')
-            ->orderBy('updated_at', 'desc') // Ordena en orden descendente por updated_at
-            ->get();
-    
-        // Si no hay mantenimientos, devolver error
-        if ($mantenimientos->isEmpty()) {
-            return response()->json(['error' => 'No se encontraron mantenimientos'], 404);
+            ->distinct();
+
+    // Apply date filters to include only maintenances that fall entirely within the specified range
+    if ($request->filled('fechaInicio') && $request->filled('fechaFin')) {
+        $query->where(function($q) use ($request) {
+            $q->where('fecha_inicio', '>=', $request->fechaInicio)
+              ->where('fecha_fin', '<=', $request->fechaFin);
+        });
+    } elseif ($request->filled('fechaInicio')) {
+        // If only one date is provided, find maintenances active on that date
+        $query->where(function($q) use ($request) {
+            $q->where('fecha_inicio', '<=', $request->fechaInicio)
+              ->where('fecha_fin', '>=', $request->fechaInicio);
+        });
+    }
+
+        // Add specific filter for maintenance code
+        if ($request->filled('tipo')) {
+            $query->where('mantenimiento.codigo_mantenimiento', $request->tipo);
         }
-    
+
+        if ($request->filled('estado')) {
+            $query->where('mantenimiento.estado', $request->estado);
+        }
+
+        if ($request->filled('equipo')) {
+            $query->join('equipo_mantenimiento', 'mantenimiento.id', '=', 'equipo_mantenimiento.mantenimiento_id')
+                  ->where('equipo_mantenimiento.equipo_id', $request->equipo);
+        }
+
+        if ($request->filled('actividad')) {
+            $query->join('mantenimiento_actividad', 'mantenimiento.id', '=', 'mantenimiento_actividad.mantenimiento_id')
+                  ->where('mantenimiento_actividad.actividad_id', $request->actividad);
+        }
+
+        if ($request->filled('tipoActivo')) {
+            $query->where('mantenimiento.tipo', $request->tipoActivo);
+        }
+
+        if ($request->filled('componente')) {
+            $query->join('equipo_componentes', 'mantenimiento.id', '=', 'equipo_componentes.mantenimiento_id')
+                  ->join('componentes', 'equipo_componentes.componente_id', '=', 'componentes.id')
+                  ->where('componentes.id', $request->componente);
+        }
+
+        // Get the filtered mantenimientos
+        $mantenimientos = $query->orderBy('mantenimiento.updated_at', 'desc')->get();
+
+        // Si no hay mantenimientos, devolver array vacío en lugar de error
+        if ($mantenimientos->isEmpty()) {
+            return response()->json([]);
+        }
+
         // Para cada mantenimiento, obtener los equipos asociados
         $mantenimientosConEquipos = $mantenimientos->map(function ($mantenimiento) {
-            // Obtener los equipos asociados al mantenimiento desde la tabla equipo_mantenimiento
+            // Obtener los equipos asociados al mantenimiento
             $equipos = DB::table('equipos')
                 ->join('equipo_mantenimiento', 'equipos.id', '=', 'equipo_mantenimiento.equipo_id')
                 ->where('equipo_mantenimiento.mantenimiento_id', $mantenimiento->id)
                 ->select('equipos.*')
                 ->get();
-    
-            // Para cada equipo, obtener sus componentes y actividades sin duplicados
+
+            // Para cada equipo, obtener sus componentes y actividades
             $equiposConComponentesYActividades = $equipos->map(function ($equipo) use ($mantenimiento) {
-                // Obtener los componentes asociados al equipo
+                // Obtener los componentes
                 $componentes = DB::table('componentes')
                     ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
                     ->where('equipo_componentes.equipo_mantenimiento_id', $equipo->id)
                     ->where('equipo_componentes.mantenimiento_id', $mantenimiento->id)
-                    ->select('componentes.id', 'componentes.nombre', 'componentes.descripcion', 'equipo_componentes.cantidad')
-                    ->distinct() // Aseguramos que los componentes no se repitan
+                    ->select('componentes.*', 'equipo_componentes.cantidad')
+                    ->distinct()
                     ->get();
-    
-                // Asignar los componentes al equipo
+
                 $equipo->componentes = $componentes;
-    
-                // Obtener las actividades únicas asociadas al mantenimiento
+
+                // Obtener las actividades
                 $actividades = DB::table('actividades')
                     ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
                     ->where('mantenimiento_actividad.mantenimiento_id', $mantenimiento->id)
-                    ->where('mantenimiento_actividad.equipo_id', $equipo->id) // Aseguramos que las actividades sean específicas por equipo
-                    ->select('actividades.id', 'actividades.nombre')
-                    ->distinct() // Aseguramos que las actividades no se repitan
+                    ->where('mantenimiento_actividad.equipo_id', $equipo->id)
+                    ->select('actividades.*')
+                    ->distinct()
                     ->get();
-    
-                // Asignar las actividades al equipo
+
                 $equipo->actividades = $actividades;
-    
+
                 return $equipo;
             });
-    
-            // Asignar los equipos al mantenimiento
+
             $mantenimiento->equipos = $equiposConComponentesYActividades;
-    
+
             return $mantenimiento;
         });
-    
-        // Devolver los mantenimientos con los equipos y actividades
+
         return response()->json($mantenimientosConEquipos);
     }
     public function getListaMantenimientos()

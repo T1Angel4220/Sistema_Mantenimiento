@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\EquipoComponente;
+use App\Models\Equipo;
+
 
 class EquipoComponenteController extends Controller
 {
