@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-import { Home, ShoppingCart, Box as Box1 , PenTool, FileText, LogOut, Search } from 'lucide-react';
+import { Home, ShoppingCart, Box as Box1, PenTool, FileText, LogOut, Search } from 'lucide-react';
 
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
@@ -313,178 +313,246 @@ export default function MaintenanceReports() {
         { icon: Box1, label: 'Activos', route: '/equipos' },
         { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
         { icon: FileText, label: 'Reportes', route: '/Reporte' },
-      ];
-        const [showLogoutModal, setShowLogoutModal] = useState(false);
-      const navigate = useNavigate();
-      const handleLogout = () => {
+    ];
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const navigate = useNavigate();
+    const handleLogout = () => {
         setShowLogoutModal(true);
-      };
-    
-      const confirmLogout = () => {
+    };
+
+    const confirmLogout = () => {
         localStorage.removeItem('token');
         navigate('/');
-      };
-    
-      const cancelLogout = () => {
+    };
+
+    const cancelLogout = () => {
         setShowLogoutModal(false);
-      };
+    };
     return (
 
         <div className="flex">
-  {/* Sidebar */}
-  <aside className="w-64 bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
-    <div className="p-6 space-y-2">
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
-        alt="Logo SK Telecom"
-        className="h-12 w-auto"
-      />
-    </div>
-    <nav className="space-y-1 px-3 flex-1">
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        return (
-          <button
-            key={item.route}
-            className="w-full flex items-center px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
-            onClick={() => navigate(item.route)}
-          >
-            <Icon className="mr-2 h-5 w-5" />
-            {item.label}
-          </button>
-        );
-      })}
-    </nav>
-    <div className="p-4 mt-auto">
-      <button 
-        className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-        onClick={handleLogout}
-      >
-        <LogOut className="mr-2 h-5 w-5" />
-        Salir
-      </button>
-    </div>
-  </aside>
+            <Box>
+                {/* Sidebar */}
+                <aside className="w-64 bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
+                    <div className="p-6 space-y-2">
+                        <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
+                            alt="Logo SK Telecom"
+                            className="h-12 w-auto"
+                        />
+                    </div>
+                    <nav className="space-y-1 px-3 flex-1">
+                        {navItems.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                                <button
+                                    key={item.route}
+                                    className="w-full flex items-center px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
+                                    onClick={() => navigate(item.route)}
+                                >
+                                    <Icon className="mr-2 h-5 w-5" />
+                                    {item.label}
+                                </button>
+                            );
+                        })}
+                    </nav>
+                    <div className="p-4 mt-auto">
+                        <button
+                            className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                            onClick={handleLogout}
+                        >
+                            <LogOut className="mr-2 h-5 w-5" />
+                            Salir
+                        </button>
+                    </div>
+                </aside>
 
-  {/* Main content area */}
-  <Box className="flex-1 p-4">
-    <Typography variant="h4" gutterBottom>
-      Reportes de Mantenimiento por Equipos
-    </Typography>
-    <Box p={4}>
-      {/* Select and Input Fields */}
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Seleccionar Tipo de Reporte</InputLabel>
-        <Select value={reportType} onChange={(e) => setReportType(e.target.value)}>
-          <MenuItem value="anual">Reporte Anual</MenuItem>
-          <MenuItem value="mensual">Reporte Mensual</MenuItem>
-          <MenuItem value="personalizado">Reporte Personalizado</MenuItem>
-        </Select>
-      </FormControl>
+                {/* Main content area */}
+            </Box>
+            <Box>
+                <Typography variant="h4" gutterBottom>
+                    Reportes de Mantenimiento por Equipos
+                </Typography>
+                <Box p={4}>
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Seleccionar Tipo de Reporte</InputLabel>
+                        <Select value={reportType} onChange={(e) => setReportType(e.target.value)}>
+                            <MenuItem value="anual">Reporte Anual</MenuItem>
+                            <MenuItem value="mensual">Reporte Mensual</MenuItem>
+                            <MenuItem value="personalizado">Reporte Personalizado</MenuItem>
+                        </Select>
+                    </FormControl>
 
-      {/* Conditional Inputs based on Report Type */}
-      {reportType === "anual" && (
-        <TextField
-          fullWidth
-          margin="normal"
-          type="number"
-          label="Año"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-        />
-      )}
+                    {reportType === "anual" && (
+                        <TextField
+                            fullWidth
+                            margin="normal"
+                            type="number"
+                            label="Año"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                        />
+                    )}
 
-      {reportType === "mensual" && (
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <TextField
-              fullWidth
-              margin="normal"
-              type="number"
-              label="Año"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <FormControl fullWidth margin="normal">
-              <Select
-                label="Mes"
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-              >
-                <MenuItem value={1}>Enero</MenuItem>
-                <MenuItem value={2}>Febrero</MenuItem>
-                {/* Add other months */}
-              </Select>
-            </FormControl>
-          </Grid>
-        </Grid>
-      )}
+                    {reportType === "mensual" && (
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    type="number"
+                                    label="Año"
+                                    value={year}
+                                    onChange={(e) => setYear(e.target.value)}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <Select
+                                        label="Mes"
+                                        value={month}
+                                        onChange={(e) => setMonth(e.target.value)}
+                                    >
+                                        <MenuItem value={1}>Enero</MenuItem>
+                                        <MenuItem value={2}>Febrero</MenuItem>
+                                        <MenuItem value={3}>Marzo</MenuItem>
+                                        <MenuItem value={4}>Abril</MenuItem>
+                                        <MenuItem value={5}>Mayo</MenuItem>
+                                        <MenuItem value={6}>Junio</MenuItem>
+                                        <MenuItem value={7}>Julio</MenuItem>
+                                        <MenuItem value={8}>Agosto</MenuItem>
+                                        <MenuItem value={9}>Septiembre</MenuItem>
+                                        <MenuItem value={10}>Octubre</MenuItem>
+                                        <MenuItem value={11}>Noviembre</MenuItem>
+                                        <MenuItem value={12}>Diciembre</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
 
-      {reportType === "personalizado" && (
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <div className="relative">
-              <DatePicker
-                selected={startDate}  // Mantén el valor de inicio de fecha
-                onChange={(dates) => {
-                  setStartDate(dates[0]);  // Guardar la fecha de inicio
-                  setEndDate(dates[1]);    // Guardar la fecha de fin
-                }}
-                startDate={startDate}  // Rango de inicio
-                endDate={endDate}      // Rango de fin
-                selectsRange           // Permite seleccionar un rango
-                placeholderText="Seleccionar rango de fechas"
-                dateFormat="yyyy-MM-dd"
-                className="w-[300px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
-          </Grid>
-        </Grid>
-      )}
+                        </Grid>
+                    )}
 
-      <Button onClick={handleGenerate} fullWidth variant="contained" color="primary" style={{ marginTop: '16px' }}>
-        Generar Reporte
-      </Button>
+                    {reportType === "personalizado" && (
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <div className="relative">
+                                    <DatePicker
+                                        selected={startDate}  // Mantén el valor de inicio de fecha
+                                        onChange={(dates) => {
+                                            setStartDate(dates[0]);  // Guardar la fecha de inicio
+                                            setEndDate(dates[1]);    // Guardar la fecha de fin
+                                        }}
+                                        startDate={startDate}  // Rango de inicio
+                                        endDate={endDate}      // Rango de fin
+                                        selectsRange           // Permite seleccionar un rango
+                                        placeholderText="Seleccionar rango de fechas"
+                                        dateFormat="yyyy-MM-dd"
+                                        className="w-[300px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                    />
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </Grid>
+                        </Grid>
+                    )}
 
-    </Box>
+                    <Button onClick={handleGenerate} fullWidth variant="contained" color="primary" style={{ marginTop: '16px' }}>
+                        Generar Reporte
+                    </Button>
 
-    {/* Graphs */}
-    {isGenerated && (
-      <>
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', width: '100%' }}>
-          <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-            <CardHeader title="Estado de Mantenimientos" />
-            <CardContent>
-              <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                <Pie data={dataEstadoMantenimientos} options={chartOptionsPie} />
-              </Box>
-            </CardContent>
-          </Card>
-
-          <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-            <CardHeader title="Distribución de Actividades" />
-            <CardContent>
-              {(actividadesRe && actividadesRe.length > 0) ? (
-                <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                  <Bar data={pieData} options={chartOptions} />
                 </Box>
-              ) : (
-                <Typography>No se registraron actividades para mostrar.</Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Box>
-      </>
-    )}
-  </Box>
-</div>
+
+                {isGenerated && (
+                    <>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%' }}>
+                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                <CardHeader title="Estado de Mantenimientos" />
+                                <CardContent>
+                                    {dataEstadoMantenimientos ? (
+                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                            <Pie data={dataEstadoMantenimientos} options={chartOptionsPie} />
+                                        </Box>
+                                    ) : (
+                                        <Typography>No hay datos disponibles para mostrar.</Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                <CardHeader title="Distribución de Actividades" />
+                                <CardContent>
+                                    {actividadesRe && actividadesRe.length > 0 ? (
+                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                            <Bar data={pieData} options={chartOptions} />
+                                        </Box>
+                                    ) : (
+                                        <Typography>No se registraron actividades para mostrar.</Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Box>
+
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%', marginTop: '80px' }}>
+                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                <CardHeader title={reportType === "anual" ? "Componentes Más Usados por Mes" : "Gráfico de Componentes Más Usados"} />
+                                <CardContent>
+                                    {componentBarData ? (
+                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                            <Bar data={componentBarData} options={chartOptions} />
+                                        </Box>
+                                    ) : (
+                                        <Typography>No hay datos disponibles para mostrar.</Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                <CardHeader title="Distribución Componentes" />
+                                <CardContent>
+                                    {componentPieData ? (
+                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                            <Pie data={componentPieData} options={chartOptions} />
+                                        </Box>
+                                    ) : (
+                                        <Typography>No hay datos disponibles para mostrar.</Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Box>
+
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%', marginTop: '80px' }}>
+                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                <CardHeader title="Mantenimientos por Mes" />
+                                <CardContent>
+                                    {barDataMantenimientoPorMes && barDataMantenimientoPorMes.labels ? (
+                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                            <Bar data={barDataMantenimientoPorMes} options={chartOptions} />
+                                        </Box>
+                                    ) : (
+                                        <Typography>No se registraron mantenimientos por mes para mostrar.</Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            <Box mt={4} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={generatePDF}
+                                    disabled={isGeneratingPDF}
+                                >
+                                    {isGeneratingPDF ? 'Generando PDF...' : 'Generar PDF'}
+                                </Button>
+                            </Box>
+                        </Box>
+
+                    </>
+                )}
+            </Box>
+        </div>
 
     );
 }
