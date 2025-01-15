@@ -67,6 +67,8 @@ const ReportesMantenimiento = () => {
   const [componentesLista, setComponentesLista] = useState([]);
   const [showChartModal, setShowChartModal] = useState(false);
   const [selectedChart, setSelectedChart] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Added pagination state
+  const itemsPerPage = 5; // Added items per page
 
   const actividadesChartRef = useRef(null);
   const componentesChartRef = useRef(null);
@@ -145,7 +147,9 @@ const ReportesMantenimiento = () => {
             axios.get('http://localhost:8000/api/equipos-mantenimiento'),
             axios.get('http://localhost:8000/api/actividades'),
             axios.get('http://localhost:8000/api/componentes'),
-            axios.get('http://localhost:8000/api/mantenimientos') // Cargar datos iniciales
+            axios.get('http://localhost:8000/api/mantenimientos', {
+              params: { estado: 'Terminado' }
+            })
           ]);
 
         setMantenimientosLista(mantenimientosResponse.data);
@@ -174,7 +178,7 @@ const ReportesMantenimiento = () => {
         fechaInicio: fechaRango[0] ? fechaRango[0].toISOString().split('T')[0] : null,
         fechaFin: fechaRango[1] ? fechaRango[1].toISOString().split('T')[0] : null,
         tipo: mantenimiento || null,
-        estado: estado || null,
+        estado: "Terminado", // Force estado to be "Terminado"
         equipo: equipo || null,
         actividad: actividad || null,
         tipoActivo: tipoActivo || null,
@@ -184,23 +188,8 @@ const ReportesMantenimiento = () => {
       // Remove null values from params
       Object.keys(params).forEach(key => params[key] === null && delete params[key]);
 
-      // If we have a date range, ensure we're searching for maintenance records that:
-      // - Start within the range
-      // - End within the range
-      // - Span across the range
-      if (params.fechaInicio && params.fechaFin) {
-        const response = await axios.get('http://localhost:8000/api/mantenimientos', {
-          params: {
-            ...params,
-            includeOverlapping: true // Add this flag to tell backend to include overlapping records
-          }
-        });
-        setResultados(response.data);
-      } else {
-        // If no date range, proceed with normal filtering
-        const response = await axios.get('http://localhost:8000/api/mantenimientos', { params });
-        setResultados(response.data);
-      }
+      const response = await axios.get('http://localhost:8000/api/mantenimientos', { params });
+      setResultados(response.data);
     } catch (error) {
       console.error('Error al buscar mantenimientos:', error);
       setError('Error al buscar mantenimientos. Por favor, intente nuevamente.');
@@ -242,7 +231,16 @@ const ReportesMantenimiento = () => {
   const handleRowClick = async (report) => {
     try {
       const response = await axios.get(`http://localhost:8000/api/mantenimientoDetalles/${report.id}`);
-      setSelectedReport(response.data);
+      // Ensure each equipment has a unique ID by combining maintenance ID and equipment ID
+      const uniqueEquipments = response.data.equipos.map(equipo => ({
+        ...equipo,
+        uniqueId: `${report.id}-${equipo.id}` // Create a unique ID
+      }));
+      setSelectedReport({
+        ...response.data,
+        equipos: uniqueEquipments
+      });
+      setCurrentPage(1);
       setModalOpen(true);
     } catch (error) {
       console.error('Error fetching maintenance details:', error);
@@ -415,16 +413,7 @@ const ReportesMantenimiento = () => {
 
           {/* Estado */}
           <div>
-            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Estado</label>
-            <select
-              value={estado}
-              onChange={(e) => setEstado(e.target.value)}
-              style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
-            >
-              <option value="">Seleccionar estado</option>
-              <option value="Terminado">Terminado</option>
-              <option value="No terminado">No terminado</option>
-            </select>
+
           </div>
         </div>
 
@@ -567,16 +556,13 @@ const ReportesMantenimiento = () => {
                         <p className="text-sm font-bold text-[#1a374d]">Fecha Fin</p>
                         <p className="text-sm">{selectedReport.fecha_fin}</p>
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-bold text-[#1a374d]">Estado</p>
-                        <Badge variant={selectedReport.estado === 'Terminado' ? 'default' : 'secondary'}>
-                          {selectedReport.estado}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-bold text-[#1a374d]">Responsable</p>
-                        <p className="text-sm">{selectedReport.nombre_responsable} {selectedReport.apellido_responsable}</p>
-                      </div>
+
+                      {selectedReport.tipo === 'Interno' && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-bold text-[#1a374d]">Responsable</p>
+                          <p className="text-sm">{selectedReport.nombre_responsable} {selectedReport.apellido_responsable}</p>
+                        </div>
+                      )}
                       {selectedReport.proveedor && (
                         <div className="space-y-2">
                           <p className="text-sm font-bold text-[#1a374d]">Proveedor</p>
@@ -596,68 +582,91 @@ const ReportesMantenimiento = () => {
 
               <TabsContent value="equipos">
                 <ScrollArea className="h-[600px] pr-4">
-                  <Accordion type="single" collapsible className="w-full space-y-4">
-                    {selectedReport.equipos?.map((equipo, index) => (
-                      <AccordionItem key={equipo.id} value={`equipo-${equipo.id}`} className="border rounded-lg">
-                        <AccordionTrigger className="px-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">
-                              {equipo.Nombre_Producto || 'No especificado'}
-                            </span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4">
-                          <div className="space-y-4">
-                            {/* Actividades */}
-                            <div>
-                              <h4 className="text-sm font-semibold mb-2">Actividades Realizadas</h4>
-                              {equipo.actividades && equipo.actividades.length > 0 ? (
-                                <ul className="space-y-1">
-                                  {equipo.actividades.map((actividad) => (
-                                    <li key={actividad.id} className="text-sm flex items-center gap-2">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
-                                      {actividad.nombre}
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-sm text-muted-foreground">No hay actividades registradas</p>
-                              )}
+                  <Accordion type="single" collapsible className="w-full space-y-4" key={`accordion-page-${currentPage}`}>
+                    {selectedReport.equipos
+                      ?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                      .map((equipo) => (
+                        <AccordionItem key={equipo.uniqueId} value={`equipo-${equipo.uniqueId}`} className="border rounded-lg">
+                          <AccordionTrigger className="px-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">
+                                {equipo.Nombre_Producto || 'No especificado'}
+                              </span>
                             </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-4 pb-4">
+                            <div className="space-y-4">
+                              {/* Actividades */}
+                              <div>
+                                <h4 className="text-sm font-semibold mb-2">Actividades Realizadas</h4>
+                                {equipo.actividades && equipo.actividades.length > 0 ? (
+                                  <ul className="space-y-1">
+                                    {equipo.actividades.map((actividad) => (
+                                      <li key={actividad.id} className="text-sm flex items-center gap-2">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
+                                        {actividad.nombre}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">No hay actividades registradas</p>
+                                )}
+                              </div>
 
-                            <Separator />
+                              <Separator />
 
-                            {/* Componentes */}
-                            <div>
-                              <h4 className="text-sm font-semibold mb-2">Componentes Utilizados</h4>
-                              {equipo.componentes && equipo.componentes.length > 0 ? (
-                                <ul className="space-y-1">
-                                  {equipo.componentes.map((componente) => (
-                                    <li key={componente.id} className="text-sm flex items-center gap-2">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
-                                      {componente.nombre} - Cantidad: {componente.cantidad || 'No especificada'}
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-sm text-muted-foreground">No hay componentes registrados</p>
-                              )}
+                              {/* Componentes */}
+                              <div>
+                                <h4 className="text-sm font-semibold mb-2">Componentes Utilizados</h4>
+                                {equipo.componentes && equipo.componentes.length > 0 ? (
+                                  <ul className="space-y-1">
+                                    {equipo.componentes.map((componente) => (
+                                      <li key={componente.id} className="text-sm flex items-center gap-2">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
+                                        {componente.nombre} - Cantidad: {componente.cantidad || 'No especificada'}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">No hay componentes registrados</p>
+                                )}
+                              </div>
+
+                              <Separator />
+
+                              {/* Observaciones */}
+                              <div>
+                                <h4 className="text-sm font-semibold mb-2">Observaciones</h4>
+                                <p className="text-sm bg-muted p-2 rounded">
+                                  {equipo.observacion || 'No hay observaciones registradas'}
+                                </p>
+                              </div>
                             </div>
-
-                            <Separator />
-
-                            {/* Observaciones */}
-                            <div>
-                              <h4 className="text-sm font-semibold mb-2">Observaciones</h4>
-                              <p className="text-sm bg-muted p-2 rounded">
-                                {equipo.observacion || 'No hay observaciones registradas'}
-                              </p>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
                   </Accordion>
+                  {selectedReport.equipos && selectedReport.equipos.length > itemsPerPage && (
+                    <div className="flex justify-center mt-4 space-x-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 rounded-md bg-[#1a374d] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Anterior
+                      </button>
+                      <span className="px-3 py-1">
+                        Página {currentPage} de {Math.ceil(selectedReport.equipos.length / itemsPerPage)}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(selectedReport.equipos.length / itemsPerPage)))}
+                        disabled={currentPage === Math.ceil(selectedReport.equipos.length / itemsPerPage)}
+                        className="px-3 py-1 rounded-md bg-[#1a374d] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Siguiente
+                      </button>
+                    </div>
+                  )}
                 </ScrollArea>
               </TabsContent>
 
@@ -750,10 +759,8 @@ const ReportesMantenimiento = () => {
                                     fontSize: 12,
                                     fill: '#666',
                                     fontFamily: 'Arial'
-                                  }}
-                                  ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
-                                />
-                                <Tooltip
+                                  }}                                  ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                                />                                <Tooltip
                                   contentStyle={{
                                     backgroundColor: 'rgba(255, 255, 255, 0.96)',
                                     border: 'none',
