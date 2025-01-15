@@ -287,6 +287,14 @@ export default function AssetMaintenanceForm() {
     };
 
     try {
+      const me=await axios.get(
+        "http://localhost:8000/api/me",
+        mantenimientoGu,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      console.log(me)
       const response = await axios.post(
         "http://localhost:8000/api/mantenimientosDetalles",
         mantenimientoGu,
@@ -294,6 +302,7 @@ export default function AssetMaintenanceForm() {
           headers: { "Content-Type": "application/json" },
         }
       );
+      
       setSubmit(true);
       setTimeout(() => {
         setSubmit(false);
@@ -321,7 +330,7 @@ export default function AssetMaintenanceForm() {
     }
   };
 
-  
+
   const handleOpenModal = (equipo) => {
     setEquipoSeleccionado(equipo);
     setModalOpen(true);

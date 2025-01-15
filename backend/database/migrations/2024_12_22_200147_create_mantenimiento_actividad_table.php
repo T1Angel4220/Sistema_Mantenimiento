@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id(); 
             $table->unsignedBigInteger('mantenimiento_id'); // Define la columna
             $table->unsignedBigInteger('actividad_id');
-            $table->unsignedBigInteger('equipo_id'); // Define la columna
+            $table->unsignedBigInteger('equipo_id'); 
+            // Define la columna
             $table->foreign('mantenimiento_id')->references('id')->on('mantenimiento')->onDelete('cascade'); // Foreign key for 'mantenimiento' table
             $table->foreign('actividad_id')->references('id')->on('actividades')->onDelete('cascade'); // Foreign key for 'actividades' table
             $table->foreign('equipo_id')->references('id')->on('equipos')->onDelete('cascade'); 

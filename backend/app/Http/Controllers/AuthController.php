@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\UsuarioActivo; 
+use Illuminate\Support\Facades\DB;
+ // Asegúrate de importar el modelo
 
 class AuthController extends Controller
 {
@@ -36,16 +39,28 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-
+    
         if (!$token = Auth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
+    
+        // Obtener el usuario autenticado
+        $user = DB::table('users')->where('email', $credentials['email'])->first();    
+        DB::table('usuario_activo')->truncate();
+        DB::table('usuario_activo')->insert([
+            'name' => $user->name,
+            'lastname' => $user->lastname,
+            'email' => $user->email, // Asegúrate de insertar también el email para identificación
+        ]);
+    
         return response()->json(['token' => $token]);
     }
 
+
+
     public function me()
     {
-        return response()->json(Auth::user());
+        $user=session('user');
+        return response()->json($user);
     }
 }

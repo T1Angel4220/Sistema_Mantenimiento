@@ -3,31 +3,40 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User; // Asegúrate de importar el modelo User
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;  // Importar la clase Validator
+use Illuminate\Support\Facades\Validator; // Importar la clase Validator
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\UsuarioActivo;  // Asegúrate de importar el modelo
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
-    {
-        // Validar las credenciales
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
+   
+public function login(Request $request)
+{
+    $credentials = $request->only('email', 'password');
 
-        if ($validator->fails()) {
-            return response()->json(['error' => 'Credenciales inválidas'], 400); // Mejor mensaje para credenciales inválidas
-        }
-
-        // Intentar autenticar al usuario
-        if ($token = JWTAuth::attempt($request->only('email', 'password'))) {
-            // Si es exitoso, retornar el token
-            return response()->json(['token' => $token]);
-        }
-
-        // Si las credenciales no son correctas, un mensaje más claro
-        return response()->json(['error' => 'Correo o contraseña incorrectos'], 401);
+    if (!$token = Auth::attempt($credentials)) {
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
+
+    // Obtener el usuario autenticado
+    $user = Auth::user();
+
+    // Guardar o actualizar el usuario en la tabla usuario_activo
+    $usuarioActivo = UsuarioActivo::updateOrCreate(
+        ['email' => $user->email],  // Usamos el email para identificar al usuario
+        [
+            'name' => $user->name,
+            'lastname' => $user->lastname,
+            'email_verified_at' => $user->email_verified_at,
+            'password' => $user->password,
+            'remember_token' => $user->remember_token,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]
+    );
+
+    return response()->json(['token' => $token]);
+}
 }
