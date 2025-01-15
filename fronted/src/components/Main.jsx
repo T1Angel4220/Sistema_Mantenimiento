@@ -127,7 +127,7 @@ const Main = () => {
     { icon: ShoppingCart, label: 'Proceso de Compra', route: '/ProcesoCompra' },
     { icon: Box, label: 'Activos', route: '/equipos' },
     { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
-    { icon: FileText, label: 'Reportes', route: '/reportes' },
+    { icon: FileText, label: 'Reportes', route: '/Reporte' },
   ];
 
   return (

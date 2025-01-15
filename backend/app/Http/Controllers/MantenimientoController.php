@@ -163,6 +163,9 @@ class MantenimientoController extends Controller
         // return view('mantenimiento.edit', compact('id'));
     }
     public function index(){
+
+        
+
         // Obtener todos los mantenimientos con sus datos básicos, ordenados por updated_at en orden descendente
         $mantenimientos = DB::table('mantenimiento')
             ->select('mantenimiento.*')
@@ -221,7 +224,17 @@ class MantenimientoController extends Controller
         // Devolver los mantenimientos con los equipos y actividades
         return response()->json($mantenimientosConEquipos);
     }
-    
+    public function getListaMantenimientos()
+{
+    // Obtener todos los mantenimientos
+    $mantenimientos = DB::table('mantenimiento')
+        ->select('id', 'codigo_mantenimiento')
+        ->orderBy('codigo_mantenimiento', 'asc')
+        ->get();
+
+    return response()->json($mantenimientos);
+}
+
     public function updateDetalles(Request $request, $id)
     {
         // Validación de los datos de entrada
