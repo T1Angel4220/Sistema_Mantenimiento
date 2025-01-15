@@ -109,7 +109,9 @@ const Main = () => {
 
   const confirmLogout = () => {
     localStorage.removeItem('token');
-    navigate('/');
+    setTimeout(() => {
+      navigate('/');
+    }, 100);
   };
 
   const cancelLogout = () => {

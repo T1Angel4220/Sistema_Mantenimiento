@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BrowserRouter as Router, Routes, Route,Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import Main from './components/Main';  // Asegúrate de importar el componente Inicio
@@ -20,13 +20,11 @@ function App() {
     return (
         <Router>
             <Routes>
-                
-                    <Route
-                        path="/"
-                        element={token ? <Navigate to="/Main" /> : <Login />}
-                    />
-                    <Route path="/Main" element={<Main />} />
-                            
+                <Route
+                    path="/"
+                    element={token ? <Navigate to="/main" replace /> : <Login />}
+                />
+                <Route path="/Main" element={<Main />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/Main" element={<Main />} />  {/* Ruta para la página de inicio */}
                 <Route path="/equipos" element={<MostrarEquipos />} />

@@ -475,7 +475,9 @@ const MaintenanceTable = () => {
   };
   const confirmLogout = () => {
     localStorage.removeItem('token');
-    navigate('/');
+    setTimeout(() => {
+      navigate('/');
+    }, 100);
   };
 
   const cancelLogout = () => {
@@ -595,7 +597,7 @@ const MaintenanceTable = () => {
         backgroundColor: 'background.default',
         minHeight: '100vh',
       }}>
-        <aside className="bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
+        <aside className="w-64 bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
           <div className="p-6 space-y-2">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
@@ -621,10 +623,10 @@ const MaintenanceTable = () => {
           <div className="p-4 mt-auto">
             <button
               className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-              onClick={handleLogout}
+              onClick={() => navigate('/Main')}
             >
               <LogOut className="mr-2 h-5 w-5" />
-              Salir
+              Regresar
             </button>
           </div>
         </aside>
