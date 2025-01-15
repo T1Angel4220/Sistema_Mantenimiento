@@ -138,3 +138,4 @@ Route::prefix('equipo-componentes')->group(function () {
 Route::get('/procesos-compra', [ProcesoCompraController::class, 'index']);
 Route::post('/equipo', [EquipoController::class, 'store']);
 Route::put('mantenimientos/{id}/estado', [MantenimientoController::class, 'updateEstado']);
+Route::get('/lista-mantenimientos', [MantenimientoController::class, 'getListaMantenimientos']);
