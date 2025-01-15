@@ -48,61 +48,23 @@ const Main = () => {
       console.error('Error al obtener los mantenimientos:', error);
     }
   };
-
   useEffect(() => {
     let filtered = [...mantenimientos];
-
+  
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(item => 
-        item.codigo_mantenimiento?.toLowerCase().includes(search) ||
-        item.nombre_equipo?.toLowerCase().includes(search) ||
-        item.codigo_barras?.toLowerCase().includes(search)
+        String(item.equipos.length).toLowerCase().includes(search)
       );
     }
-
-    if (codigoFilter) {
-      filtered = filtered.filter(item =>
-        item.codigo_mantenimiento?.toLowerCase().includes(codigoFilter.toLowerCase())
-      );
-    }
-
-    if (fechaInicioFilter) {
-      filtered = filtered.filter(item =>
-        new Date(item.fecha_inicio) >= new Date(fechaInicioFilter)
-      );
-    }
-
-    if (fechaFinFilter) {
-      filtered = filtered.filter(item =>
-        new Date(item.fecha_fin) <= new Date(fechaFinFilter)
-      );
-    }
-
-    if (tipoEquipoFilter) {
-      filtered = filtered.filter(item =>
-        item.tipo_equipo === tipoEquipoFilter
-      );
-    }
-
-    if (tipoMantenimientoFilter) {
-      filtered = filtered.filter(item => item.tipo === tipoMantenimientoFilter);
-    }
-
-    if (procesoCompraFilter) {
-      filtered = filtered.filter(item =>
-        item.proceso_compra_id?.toLowerCase().includes(procesoCompraFilter.toLowerCase())
-      );
-    }
-
-    if (estadoFilter) {
-      filtered = filtered.filter(item => item.estado === estadoFilter);
-    }
-
+  
+    // Contar la cantidad de activos registrados que coinciden con el término de búsqueda
+    const activosRegistrados = filtered.length;
+    console.log(`Cantidad de activos registrados: ${activosRegistrados}`);
+  
     setFilteredMantenimientos(filtered);
     setCurrentPage(1);
-  }, [searchTerm, codigoFilter, fechaInicioFilter, fechaFinFilter, tipoEquipoFilter, tipoMantenimientoFilter, procesoCompraFilter, estadoFilter, mantenimientos]);
-
+  }, [searchTerm, mantenimientos]);
   const handleLogout = () => {
     setShowLogoutModal(true);
   };
@@ -195,7 +157,7 @@ const Main = () => {
         {/* Filtros */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Buscar</label>
+            <label className="text-sm font-medium text-gray-700">Buscar cantidad de Activos</label>
             <div className="relative">
               <input
                 type="text"
@@ -219,25 +181,9 @@ const Main = () => {
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Fecha Inicio</label>
-            <input
-              type="date"
-              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={fechaInicioFilter}
-              onChange={(e) => setFechaInicioFilter(e.target.value)}
-            />
-          </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Fecha Fin</label>
-            <input
-              type="date"
-              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={fechaFinFilter}
-              onChange={(e) => setFechaFinFilter(e.target.value)}
-            />
-          </div>
+
+
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Tipo de Mantenimiento</label>
             <select
