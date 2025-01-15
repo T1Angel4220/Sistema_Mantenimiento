@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ActividadesSeeder::class,
             ComponentesSeeder::class, // Agrega aquí el seeder de componentes
+            UserSeeder::class,
         ]);
     }
 }
