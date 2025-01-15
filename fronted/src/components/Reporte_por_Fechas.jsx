@@ -543,7 +543,7 @@ export default function MaintenanceReports() {
                             </Box>
 
                             <div className="h-8"></div>
-                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%' }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', width: '100%' }}>
 
                                 <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
                                     <CardHeader title="Estado de Mantenimientos" />
@@ -562,7 +562,7 @@ export default function MaintenanceReports() {
                                     <CardHeader title="Distribución de Actividades" />
                                     <CardContent>
                                         {actividadesRe && actividadesRe.length > 0 ? (
-                                            <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                            <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', padding: '' }}>
                                                 <Bar data={pieData} options={chartOptions} />
                                             </Box>
                                         ) : (
