@@ -63,6 +63,18 @@ export default function MaintenanceReports() {
             },
         ],
     });
+    const [equiposBarData, setEquipBarData] = useState({
+        labels: [], // Nombre de los componentes
+        datasets: [
+            {
+                label: 'Total Componentes Usados',
+                data: [], // Total de veces que cada componente ha sido usado
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',  // Color personalizado para las barras
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1,
+            },
+        ],
+    });
     const [equiposRe, setEquiposRe] = useState(null);
     const [componentesRe, setComponentesRe] = useState(null);
     const [actividadesRe, setActividadesRe] = useState(null);
@@ -178,6 +190,8 @@ export default function MaintenanceReports() {
 
             const response = await axios.post('http://localhost:8000/api/reportesPorFecha', payload);
             setReportData(response.data);
+            console.log("aqui")
+
             console.log(response.data)
             // Si el reporte es anual, preparar los datos mensuales
 
@@ -212,7 +226,19 @@ export default function MaintenanceReports() {
                     },
                 ],
             });
-
+            setEquipBarData({
+                labels: equipos.map((equipo) => equipo.Nombre_Producto),
+                datasets: [
+                    {
+                        label: 'Cantidad de Mantenimientos',
+                        data: equipos.map((equipo) => equipo.cantidad),
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                    },
+                ],
+            });
+            
             setComponentBarData({
                 labels: componentes.map((componente) => componente.nombre),
                 datasets: [
@@ -561,11 +587,11 @@ export default function MaintenanceReports() {
                                 </Card>
 
                                 <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-                                    <CardHeader title="Distribución Componentes" />
+                                    <CardHeader title="Distribución equipos" />
                                     <CardContent>
                                         {componentPieData ? (
                                             <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                                                <Pie data={componentPieData} options={chartOptions} />
+                                                <Bar data={equiposBarData} options={chartOptions} />
                                             </Box>
                                         ) : (
                                             <Typography>No hay datos disponibles para mostrar.</Typography>
