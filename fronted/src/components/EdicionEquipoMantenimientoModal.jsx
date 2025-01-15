@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogActions, DialogContent, Tabs, Tab, Box, Grid, TextField, Button, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Select, MenuItem, TablePagination } from '@mui/material';
+import { Dialog, DialogTitle, DialogActions, DialogContent, Tabs, Tab, Box, Grid, TextField, Button, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Select, MenuItem, Pagination } from '@mui/material';
 import BuildIcon from '@mui/icons-material/Build';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import EngineeringIcon from '@mui/icons-material/Engineering';
@@ -13,9 +13,9 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
     const [actividadesSeleccionadas, setActividadesSeleccionadas] = useState([]);
     const [componenteSeleccionado, setComponenteSeleccionado] = useState('');
     const [componentesSeleccionados, setComponentesSeleccionados] = useState([]);
-    const [pageActividades, setPageActividades] = useState(0);
+    const [pageActividades, setPageActividades] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [pageComponentes, setPageComponentes] = useState(0);
+    const [pageComponentes, setPageComponentes] = useState(1);
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const [actividades, setActividades] = useState([]);
     const [componentes, setComponentes] = useState([]);
@@ -75,10 +75,10 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
 
     const handleAgregarActividad = () => {
         if (actividadSeleccionada) {
-            const actividad = actividades.find((actividad) => actividad.id === actividadSeleccionada);
+            const actividad = actividades.find((actividad) => actividad.id == actividadSeleccionada);
             // Verifica si ya está seleccionada
-            if (!actividadesSeleccionadas.some((a) => a.id === actividad.id)) {
-                setActividadesSeleccionadas([...actividadesSeleccionadas, actividad]);
+            if (!actividadesSeleccionadas.some((a) => a.id == actividad.id)) {
+                setActividadesSeleccionadas([ actividad,...actividadesSeleccionadas]);
             }
             setActividadSeleccionada('');
         }
@@ -261,7 +261,7 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {actividadesSeleccionadas
+                                            {actividadesSeleccionadas.slice((pageActividades-1) * rowsPerPage,(pageActividades)* rowsPerPage+1)
                                                 .map((actividad) => (
                                                     <TableRow key={actividad.id}>
                                                         <TableCell>{actividad.id}</TableCell>
@@ -279,13 +279,11 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
-                                <TablePagination
-                                    component="div"
-                                    count={actividadesSeleccionadas.length}
+                                <Pagination
+                                    count={Math.ceil(actividadesSeleccionadas.length / rowsPerPage)}
                                     page={pageActividades}
-                                    onPageChange={handleChangePageActividades}
-                                    rowsPerPage={rowsPerPage}
-                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                    onChange={handleChangePageActividades}
+                                    sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
                                 />
                             </Box>
                         )}
@@ -308,8 +306,7 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                 <Button
                                     variant="contained"
                                     color="primary"
-
-
+                                    sx={{ mt: 2 }}
                                     onClick={handleAgregarComponente}
 
                                 >
@@ -326,7 +323,7 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {componentesSeleccionados.map((componente) => (
+                                            {componentesSeleccionados.slice((pageComponentes-1) * rowsPerPage,(pageComponentes)* rowsPerPage+1).map((componente) => (
                                                 <TableRow key={componente.id}>
                                                     <TableCell>{componente.id}</TableCell>
                                                     <TableCell>{componente.nombre}</TableCell>
@@ -350,13 +347,11 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
-                                <TablePagination
-                                    component="div"
-                                    count={componentesSeleccionados.length}
+                                <Pagination
+                                    count={Math.ceil(componentesSeleccionados.length / rowsPerPage)}
                                     page={pageComponentes}
-                                    onPageChange={handleChangePageComponentes}
-                                    rowsPerPage={rowsPerPage}
-                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                    onChange={handleChangePageComponentes}
+                                    sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
                                 />
                             </Box>
                         )}
@@ -380,7 +375,6 @@ const EdicionEquipo = ({ open, handleClose, equipo, actividadesSe, componentesSe
                 )}
             </DialogContent>
             <Dialog open={confirmarEliminar.abierto} onClose={() => setConfirmarEliminar({ abierto: false, tipo: '', item: null })}>
-                <DialogTitle>¿Está seguro?</DialogTitle>
                 <DialogContent>
                     ¿Está seguro de que desea eliminar esta {confirmarEliminar.tipo === 'actividad' ? 'actividad' : 'componente'}?
                 </DialogContent>

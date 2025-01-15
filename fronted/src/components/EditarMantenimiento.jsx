@@ -12,7 +12,7 @@ import {
   Button,
   Typography,
   Grid,
-  TablePagination,
+  Pagination,
   TextField,
   Dialog,
   DialogTitle,
@@ -28,13 +28,13 @@ import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import EdicionEquipo from './EdicionEquipoMantenimientoModal';
 
-const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
+const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
   const [mantenimientoSe, setMantenimiento] = useState(false);
-  const [page, setPage] = useState(0); // Página actual
-  const [rowsPerPage, setRowsPerPage] = useState(8); // Equipos por página
+  const [page, setPage] = useState(1); // Página actual
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Equipos por página
   const [equipoSeleccionado, setEquipoSeleccionado] = useState({
     actividades: [],
     componentes: [],
@@ -118,12 +118,12 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 800,
+          width: 1300,
           bgcolor: "background.paper",
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
-          maxHeight: "80vh",
+          maxHeight: "90vh",
           overflow: "auto",
         }}
       >
@@ -284,7 +284,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
             </TableHead>
             <TableBody>
               {mantenimiento.equipos
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((equipo) => (
+               .slice((page-1) * rowsPerPage,(page)* rowsPerPage+1).map((equipo) => (
                   <TableRow key={equipo.id}>
                     <TableCell>{equipo.Nombre_Producto}</TableCell>
                     <TableCell>{equipo.Codigo_Barras}</TableCell>
@@ -302,21 +302,24 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[8]}
-          component="div"
-          count={mantenimiento.equipos.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-
+        <Pagination
+            count={Math.ceil(mantenimiento.equipos.length / rowsPerPage)}
+            page={page}
+            onChange={handleChangePage}
+            sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
+          />
         <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado} actividadesSe={equipoSeleccionado == null ? [] : equipoSeleccionado.actividades} componentesSe={equipoSeleccionado == null ? [] : equipoSeleccionado.componentes} guardarActivComp={handleSaveEditionEquip} />
 
 
         <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={onClose} sx={{ mr: 2 }}>
+          <Button onClick={onClose} sx={{ 
+            mr: 2,
+            backgroundColor: 'red',
+            color: 'white',
+            '&:hover': {
+                  backgroundColor: 'darkred'
+            }
+           }}>
             Cancelar
           </Button>
           <Button variant="contained" onClick={handleSave}>
@@ -350,10 +353,11 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
               Guardar
             </Button>
           </DialogActions>
+          
         </Dialog>
 
       </Box>
-
+      
     </Modal>
   );
 };

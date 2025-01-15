@@ -11,7 +11,7 @@ const Main = () => {
   const [ultimosRegistros, setUltimosRegistros] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const itemsPerPage = 9;
+  const itemsPerPage = 5;
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,7 +180,7 @@ const Main = () => {
               <div key={index} className="bg-white p-4 rounded-lg shadow-md">
                 <h3 className="font-semibold text-lg mb-2">{registro.codigo_mantenimiento}</h3>
                 <p className="text-sm text-gray-600">
-                  Equipo: {registro.nombre_equipo || 'No asignado'}
+                  Tipo: {registro.tipo || 'No asignado'}
                 </p>
                 <p className="text-sm text-gray-500">
                   Registrado el: {new Date(registro.created_at).toLocaleDateString()}
@@ -299,13 +299,10 @@ const Main = () => {
                   Código Mantenimiento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Nombre del Equipo
+                  Proveedor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Código de Barras
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Tipo de Equipo
+                  Contacto proveedor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Fecha de Inicio
@@ -315,9 +312,6 @@ const Main = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Tipo de Mantenimiento
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Proceso de Compra
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Estado del Mantenimiento
@@ -331,13 +325,10 @@ const Main = () => {
                     {item.codigo_mantenimiento}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {item.nombre_equipo || 'No asignado'}
+                    {item.proveedor || 'No asignado'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {item.codigo_barras || 'No asignado'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {item.tipo_equipo}
+                    {item.contacto_proveedor}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {new Date(item.fecha_inicio).toLocaleDateString()}
@@ -351,9 +342,6 @@ const Main = () => {
                     }`}>
                       {item.tipo}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {item.proceso_compra_id || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

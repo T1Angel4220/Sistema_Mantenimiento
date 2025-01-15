@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Home, ShoppingCart, Box, PenTool, FileText, LogOut } from 'lucide-react';
-
+import {
+  Pagination
+} from '@mui/material';
 const ProcesoCompra = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -27,7 +29,7 @@ const ProcesoCompra = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (form.name && form.description && form.date && form.provider) {
       try {
         const response = await axios.post('http://localhost:8000/api/proceso-compra', form);
@@ -40,7 +42,11 @@ const ProcesoCompra = () => {
       }
     }
   };
-
+  const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [page, setPage] = useState(1); // Página actual
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
   const navItems = [
     { icon: Home, label: 'Inicio', route: '/Main' },
     { icon: ShoppingCart, label: 'Proceso de Compra', route: '/ProcesoCompra' },
@@ -76,7 +82,7 @@ const ProcesoCompra = () => {
           })}
         </nav>
         <div className="p-4 mt-auto">
-          <button 
+          <button
             className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
             onClick={() => navigate('/Main')}
           >
@@ -96,7 +102,7 @@ const ProcesoCompra = () => {
             <p className="text-center text-gray-600 mb-6">
               Ingrese los detalles del nuevo proceso de compra
             </p>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -198,8 +204,8 @@ const ProcesoCompra = () => {
         <div className="max-w-4xl mx-auto mt-8 bg-white rounded-lg shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-            <thead className="bg-[#2f3b52]">
-            <tr>
+              <thead className="bg-[#2f3b52]">
+                <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Descripción</th>
@@ -208,7 +214,7 @@ const ProcesoCompra = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {purchases.map((purchase) => (
+                {purchases.slice((page - 1) * rowsPerPage, (page) * rowsPerPage + 1).map((purchase) => (
                   <tr key={purchase.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{purchase.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{purchase.nombre}</td>
@@ -219,6 +225,12 @@ const ProcesoCompra = () => {
                 ))}
               </tbody>
             </table>
+            <Pagination
+              count={Math.ceil(purchases.length / rowsPerPage)}
+              page={page}
+              onChange={handleChangePage}
+              sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
+            />
           </div>
         </div>
       </main>

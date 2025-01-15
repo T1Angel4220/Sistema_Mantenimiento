@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Home, ShoppingCart, PenTool, FileText, LogOut, Box as Box1, Search } from 'lucide-react';
 
 import {
   Table,
@@ -31,6 +32,7 @@ import {
   Grid,
   Alert,
   Snackbar,
+  Pagination
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -153,7 +155,8 @@ const MaintenanceTable = () => {
   const [data, setData] = useState([]);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
   const [equipoSeleccionado, setSelectedEquip] = useState(null);
-
+  const [page, setPage] = useState(1); // Página actual
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -168,6 +171,16 @@ const MaintenanceTable = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [availableActivities, setAvailableActivities] = useState([]);
   const [open, setOpen] = useState(true);
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+  const navItems = [
+    { icon: Home, label: 'Inicio', route: '/Main' },
+    { icon: ShoppingCart, label: 'Proceso de Compra', route: '/ProcesoCompra' },
+    { icon: Box1, label: 'Activos', route: '/equipos' },
+    { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
+    { icon: FileText, label: 'Reportes', route: '/reportes' },
+  ];
 
   const navigate = useNavigate();
   const fetchActividades = async () => {
@@ -434,7 +447,7 @@ const MaintenanceTable = () => {
   const guardarEditar = (event, newValue) => {
     console.log(selectedMaintenance)
     try {
-      api.put(`/mantenimientosDetalles`, 
+      api.put(`/mantenimientosDetalles`,
         selectedMaintenance)
         .then(response => {
           console.log('Mantenimiento actualizado exitosamente:', response.data);
@@ -511,13 +524,16 @@ const MaintenanceTable = () => {
     }
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
   useEffect(() => {
     api.get('/mantenimientos')
       .then((response) => {
         setData(response.data);
         console.log(response.data)
       })
-     
+
       .catch((error) => {
         console.error('Error al obtener los datos:', error);
       });
@@ -566,686 +582,223 @@ const MaintenanceTable = () => {
   };
 
   return (
+
     <ThemeProvider theme={theme}>
-      <Box sx={{ padding: '24px', backgroundColor: 'background.default', minHeight: '100vh' }}>
-        <Paper elevation={3} sx={{ padding: '24px', marginBottom: '24px', backgroundColor: 'primary.main' }}>
-          <Typography variant="h4" align="center" gutterBottom sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>
-            <BuildIcon sx={{ marginRight: '8px', verticalAlign: 'middle' }} />
-            ESTADO DE MANTENIMIENTOS
-          </Typography>
-        </Paper>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<ArrowBackIcon />}
-            onClick={handleReturn}
-          >
-            Regresar
-          </Button>
-
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<AddIcon />}
-            onClick={handleNewMaintenance}
-          >
-            Ingresar nuevo mantenimiento
-          </Button>
-        </Box>
-
-        <TextField
-          fullWidth
-          label="Buscar en todos los campos..."
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ marginBottom: '24px', backgroundColor: 'background.paper' }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-          {Object.keys(filters).map((field) => (
-            <TextField
-              key={field}
-              label={field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}
-              value={filters[field]}
-              onChange={(e) => handleFilterChange(field, e.target.value)}
-              variant="outlined"
-              sx={{
-                backgroundColor: 'background.paper',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'primary.main',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'primary.dark',
-                  },
-                }
-              }}
+      <Box sx={{
+        display: 'grid', // Cambiamos a grid layout
+        gridTemplateColumns: '250px 1fr', // Sidebar toma 250px, contenido ocupa el resto
+        gap: '16px', // Espaciado entre las secciones
+        backgroundColor: 'background.default',
+        minHeight: '100vh',
+      }}>
+        <aside className="bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
+          <div className="p-6 space-y-2">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
+              alt="Logo SK Telecom"
+              className="h-12 w-auto"
             />
-          ))}
-        </Box>
-
-        <TableContainer component={Paper} elevation={3}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: 'primary.main' }}>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>ID</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Código Mantenimiento</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Tipo</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Inicio</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Fin</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Proveedor</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Contacto Proveedor</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Costo</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Estado</TableCell>
-                <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredData.map((item) => (
-                <TableRow
-                  key={item.id}
-                  sx={{
-                    '&:nth-of-type(odd)': { backgroundColor: 'action.hover' }
-                  }}
+          </div>
+          <nav className="space-y-1 px-3 flex-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.route}
+                  className="w-full flex items-center px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
+                  onClick={() => navigate(item.route)}
                 >
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{item.codigo_mantenimiento}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={item.tipo}
-                      color={item.tipo === 'Interno' ? 'success' : 'error'}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>{formatDate(item.fecha_inicio)}</TableCell>
-                  <TableCell>{formatDate(item.fecha_fin)}</TableCell>
-                  <TableCell>{item.proveedor || '-'}</TableCell>
-                  <TableCell>{item.contacto_proveedor || '-'}</TableCell>
-                  <TableCell>{item.costo ? `$${item.costo}` : '-'}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={item.estado}
-                      color={item.estado === 'Terminado' ? 'success' : 'warning'}
-                      size="small"
+                  <Icon className="mr-2 h-5 w-5" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+          <div className="p-4 mt-auto">
+            <button
+              className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-5 w-5" />
+              Salir
+            </button>
+          </div>
+        </aside>
+        <div style={{ paddingRight: '16px' }}>
+          <Paper elevation={3} sx={{ padding: '24px', marginBottom: '24px', backgroundColor: 'primary.main' }}>
+            <Typography variant="h4" align="center" gutterBottom sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>
+              <BuildIcon sx={{ marginRight: '8px', verticalAlign: 'middle' }} />
+              ESTADO DE MANTENIMIENTOS
+            </Typography>
+          </Paper>
 
-                      sx={{ cursor: 'pointer' }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title="Ver detalles">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleMaintenanceClick(item)}
-                        size="small"
-                        sx={{
-                          backgroundColor: 'primary.main',
-                          color: 'primary.contrastText',
-                          '&:hover': {
-                            backgroundColor: 'primary.dark',
-                          }
-                        }}
-                      >
-                        <InfoIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleReturn}
+            >
+              Regresar
+            </Button>
+
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<AddIcon />}
+              onClick={handleNewMaintenance}
+            >
+              Ingresar nuevo mantenimiento
+            </Button>
+          </Box>
+
+          <TextField
+            fullWidth
+            label="Buscar en todos los campos..."
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ marginBottom: '24px', backgroundColor: 'background.paper' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+            {Object.keys(filters).map((field) => (
+              <TextField
+                key={field}
+                label={field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}
+                value={filters[field]}
+                onChange={(e) => handleFilterChange(field, e.target.value)}
+                variant="outlined"
+                sx={{
+                  backgroundColor: 'background.paper',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'primary.dark',
+                    },
+                  }
+                }}
+              />
+            ))}
+          </Box>
+
+          <TableContainer component={Paper} elevation={3}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: 'primary.main' }}>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>ID</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Código Mantenimiento</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Tipo</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Inicio</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Fecha Fin</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Proveedor</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Contacto Proveedor</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Costo</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Estado</TableCell>
+                  <TableCell sx={{ color: 'primary.contrastText', fontWeight: 'bold' }}>Acciones</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <Dialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
-            {isEditing ? 'Editar Mantenimiento' : 'Detalles del Mantenimiento'}
-          </DialogTitle>
-
-          <DialogContent sx={{ mt: 2, p: 0 }}>
-            {isLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-                <CircularProgress />
-              </Box>
-            ) : (
-              <>
-                {selectedMaintenance?.error && (
-                  <Alert
-                    severity="error"
-                    sx={{ m: 2 }}
-                    onClose={() => {
-                      setSelectedMaintenance(prev => ({ ...prev, error: null }))
+              </TableHead>
+              <TableBody>
+                {filteredData.slice((page - 1) * rowsPerPage, (page) * rowsPerPage + 1).map((item) => (
+                  <TableRow
+                    key={item.id}
+                    sx={{
+                      '&:nth-of-type(odd)': { backgroundColor: 'action.hover' }
                     }}
                   >
-                    {selectedMaintenance.error}
-                  </Alert>
-                )}
-                <Tabs value={tabValue} onChange={handleTabChange} centered>
-                  <Tab icon={<BuildIcon />} label="Detalles" />
-                  <Tab icon={<ListAltIcon />} label="Actividades" />
-                  <Tab icon={<EngineeringIcon />} label="Componentes" />
-                  <Tab icon={<ComputerIcon />} label="Equipos" />
-                </Tabs>
-                <TabPanel value={tabValue} index={0}>
-                  {selectedMaintenance && (
-                    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(2, 1fr)', p: 3 }}>
-                      <TextField
-                        label="Código Mantenimiento"
-                        value={selectedMaintenance.codigo_mantenimiento || ''}
-                        fullWidth
-                        disabled
-                        name="codigo_mantenimiento"
-                        onChange={handleInputChange}
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{item.codigo_mantenimiento}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={item.tipo}
+                        color={item.tipo === 'Interno' ? 'success' : 'error'}
+                        size="small"
                       />
-                      <TextField
-                        select
-                        label="Tipo"
-                        value={selectedMaintenance?.tipo || ''}
-                        fullWidth
-                        disabled={selectedMaintenance?.estado === "Terminado" || !isEditing}
-                        name="tipo"
-                        onChange={handleInputChange}
-                        SelectProps={{
-                          native: true,
-                        }}
-                      >
-                        <option value="">Seleccione un tipo</option>
-                        <option value="Interno">Interno</option>
-                        <option value="Externo">Externo</option>
-                      </TextField>
+                    </TableCell>
+                    <TableCell>{formatDate(item.fecha_inicio)}</TableCell>
+                    <TableCell>{formatDate(item.fecha_fin)}</TableCell>
+                    <TableCell>{item.proveedor || '-'}</TableCell>
+                    <TableCell>{item.contacto_proveedor || '-'}</TableCell>
+                    <TableCell>{item.costo ? `$${item.costo}` : '-'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={item.estado}
+                        color={item.estado === 'Terminado' ? 'success' : 'warning'}
+                        size="small"
 
-                      <TextField
-                        label="Fecha Inicio"
-                        type="date"
-                        value={selectedMaintenance.fecha_inicio?.split('T')[0] || ''}
-                        fullWidth
-                        disabled={!isEditing}
-                        name="fecha_inicio"
-                        onChange={handleInputChange}
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
+                        sx={{ cursor: 'pointer' }}
                       />
-                      <TextField
-                        label="Fecha Fin"
-                        type="date"
-                        value={selectedMaintenance.fecha_fin?.split('T')[0] || ''}
-                        fullWidth
-                        disabled={!isEditing}
-                        name="fecha_fin"
-                        onChange={handleInputChange}
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                      />
-
-                      {selectedMaintenance.tipo === 'Externo' && (
-                        <>
-                          {isLoadingProveedores ? (
-                            <CircularProgress />
-                          ) : (
-                            <TextField
-                              select
-                              label="Proveedor"
-                              value={selectedMaintenance?.proveedor || ''}
-                              fullWidth
-                              disabled={!isEditing}
-                              name="proveedor"
-                              onChange={handleInputChange}
-                              SelectProps={{
-                                native: true,
-                              }}
-                              sx={{
-                                '& .MuiSelect-select': {
-                                  padding: '16.5px 14px',
-                                  backgroundColor: 'background.paper',
-                                },
-                              }}
-                            >
-                              <option value=""></option>
-                              {proveedores.map((prov, index) => (
-                                <option key={index} value={typeof prov === 'string' ? prov : prov.nombre}>
-                                  {typeof prov === 'string' ? prov : prov.nombre}
-                                </option>
-                              ))}
-                            </TextField>
-                          )}
-                          <TextField
-                            label="Contacto Proveedor"
-                            value={selectedMaintenance.contacto_proveedor || ''}
-                            fullWidth
-                            disabled={!isEditing}
-                            name="contacto_proveedor"
-                            onChange={handleInputChange}
-                          />
-                          <TextField
-                            label="Costo"
-                            value={selectedMaintenance.costo || ''}
-                            fullWidth
-                            disabled={!isEditing}
-                            name="costo"
-                            onChange={handleInputChange}
-                            type="number"
-                            InputProps={{
-                              startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                            }}
-                          />
-                        </>
-                      )}
-                      <TextField
-                        label="Observaciones"
-                        value={selectedMaintenance.observaciones || ''}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        disabled={!isEditing}
-                        name="observaciones"
-                        onChange={handleInputChange}
-                        sx={{ gridColumn: '1 / -1' }}
-                      />
-                      <TextField
-                        select
-                        label="Estado"
-                        value={selectedMaintenance.estado || 'No terminado'}
-                        fullWidth
-                        disabled={selectedMaintenance.estado === 'Terminado'}
-                        name="estado"
-                        onChange={(e) => handleConfirmChange(e.target.value)}
-
-                        SelectProps={{
-                          native: true,
-                        }}
-                      >
-
-
-                        <option value="No terminado">No Terminado</option>
-                        <option value="Terminado">Terminado</option>
-                        <Dialog
-                          open={confirmDialogOpen}
-                          onClose={cancelStatusChange}
-                        >
-                          <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
-                          <DialogContent>
-                            <Typography>
-                              ¿Está seguro de marcar como <b>{pendingStatus}</b> el mantenimiento?
-                            </Typography>
-                          </DialogContent>
-                          <DialogActions>
-                            <Button onClick={cancelStatusChange} color="primary">
-                              Cancelar
-                            </Button>
-                            <Button
-                              onClick={confirmStatusChange}
-                              color="secondary"
-                              variant="contained"
-                            >
-                              Confirmar
-                            </Button>
-                          </DialogActions>
-                        </Dialog>
-
-                      </TextField>
-                    </Box>
-                  )}
-                </TabPanel>
-                <TabPanel value={tabValue} index={1}>
-                  {isEditing ? (
-                    <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-                      <Typography variant="h6" sx={{ mb: 2 }}>
-                        Actividades disponibles:
-                      </Typography>
-                      <TextField
-                        select
-                        label="Seleccionar Actividad"
-                        onChange={(e) => handleSelectActivity(e.target.value)}
-                        fullWidth
-                        sx={{
-                          minWidth: 200,
-                          '& .MuiSelect-select': {
-                            padding: '16.5px 14px',
-                            backgroundColor: 'background.paper',
-                          },
-                        }}
-                        SelectProps={{
-                          native: true,
-                        }}
-                      >
-                        <option value="">Seleccione una actividad</option>
-                        {availableActivities.map((actividad) => (
-                          <option key={actividad.id} value={actividad.id}>
-                            {actividad.nombre}
-                          </option>
-                        ))}
-                      </TextField>
-                      <Typography variant="h6" sx={{ mb: 2 }}>
-                        Actividades seleccionadas:
-                      </Typography>
-                      <List>
-                        {selectedMaintenance.actividades.map((actividad) => (
-                          <ListItem
-                            key={actividad.id}
-                            sx={{
-                              border: '1px solid',
-                              borderColor: 'divider',
-                              borderRadius: 1,
-                              mb: 1,
-                              backgroundColor: 'background.paper',
-                            }}
-                          >
-                            <ListItemText
-                              primary={<Typography variant="subtitle1" fontWeight="bold">{actividad.nombre}</Typography>}
-                            />
-                            <Button
-                              variant="contained"
-                              color="error"
-                              onClick={() => handleDeleteActividad(actividad.id)}
-                              startIcon={<DeleteIcon />}
-                            >
-                              Eliminar
-                            </Button>
-                          </ListItem>
-                        ))}
-                      </List>
-                    </Box>
-                  ) : (
-                    <TabPanel value={tabValue} index={1}>
-                      {selectedMaintenance?.actividades?.length > 0 ? (
-                        <List>
-                          {selectedMaintenance.actividades.map((actividad) => (
-                            <ListItem
-                              key={actividad.id}
-                              sx={{
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                borderRadius: 1,
-                                mb: 1,
-                                backgroundColor: 'background.paper'
-                              }}
-                            >
-                              <ListItemText
-                                primary={
-                                  <Typography variant="subtitle1" fontWeight="bold">
-                                    {actividad.nombre}
-                                  </Typography>
-                                }
-                              />
-                            </ListItem>
-                          ))}
-                        </List>
-                      ) : (
-                        <Box sx={{ p: 4, textAlign: 'center' }}>
-                          <Typography color="text.secondary">
-                            No hay actividades registradas
-                          </Typography>
-                        </Box>
-                      )}
-                    </TabPanel>
-                  )}
-                </TabPanel>
-                <TabPanel value={tabValue} index={2}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {selectedMaintenance?.equipos?.length > 0 ? (
-                      <List>
-                        {selectedMaintenance.equipos.map((equipo) => (
-                          <Box key={equipo.id} sx={{ mb: 3 }}>
-                            <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-                              Equipo: {equipo.Nombre_Producto}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                              Código de Barras: {equipo.Codigo_Barras}
-                            </Typography>
-
-                            {isEditing && (
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  gap: 2,
-                                  alignItems: 'flex-start',
-                                  p: 2,
-                                  border: '1px solid',
-                                  borderColor: 'divider',
-                                  borderRadius: 1,
-                                  bgcolor: 'background.paper',
-                                  mb: 2,
-                                }}
-                              >
-                                <TextField
-                                  select
-                                  label="Componente"
-                                  value={equipo.selectedComponent || ''}
-                                  onChange={(e) => handleSelectComponent(e, equipo.id)}
-                                  sx={{
-                                    minWidth: 200,
-                                    '& .MuiSelect-select': {
-                                      padding: '16.5px 14px',
-                                      backgroundColor: 'background.paper',
-                                    },
-                                  }}
-                                  SelectProps={{
-                                    native: true,
-                                  }}
-                                >
-                                  <option value=""></option>
-                                  {availableComponents.map((comp) => (
-                                    <option key={comp.id} value={comp.id}>
-                                      {comp.nombre}
-                                    </option>
-                                  ))}
-                                </TextField>
-                                <TextField
-                                  type="number"
-                                  label="Cantidad"
-                                  value={equipo.componentQuantity || ''}
-                                  onChange={(e) => handleSetComponentQuantity(e, equipo.id)}
-                                  InputProps={{ inputProps: { min: 1 } }}
-                                  sx={{ width: 100 }}
-                                />
-                                <Button
-                                  variant="contained"
-                                  onClick={() => handleAddComponentToEquipo(equipo.id)}
-                                  startIcon={<AddIcon />}
-                                  disabled={!equipo.selectedComponent}
-                                >
-                                  Agregar
-                                </Button>
-                              </Box>
-                            )}
-
-                            {equipo.componentes?.length > 0 ? (
-                              <List>
-                                {equipo.componentes.map((componente) => (
-                                  <ListItem
-                                    key={componente.id}
-                                    sx={{
-                                      border: '1px solid',
-                                      borderColor: 'divider',
-                                      borderRadius: 1,
-                                      mb: 1,
-                                      backgroundColor: 'background.paper',
-                                    }}
-                                    secondaryAction={
-                                      isEditing && (
-                                        <IconButton
-                                          edge="end"
-                                          aria-label="delete"
-                                          onClick={() => handleRemoveComponent(equipo.id, componente.id)}
-                                          color="error"
-                                        >
-                                          <DeleteIcon />
-                                        </IconButton>
-                                      )
-                                    }
-                                  >
-                                    <ListItemText
-                                      primary={
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                          <Typography variant="subtitle1" fontWeight="bold">
-                                            {componente.nombre}
-                                          </Typography>
-                                          <Chip label={`Cantidad: ${componente.cantidad}`} color="primary" size="small" />
-                                        </Box>
-                                      }
-                                      secondary={
-                                        componente.descripcion && (
-                                          <Typography component="span" display="block">
-                                            {componente.descripcion}
-                                          </Typography>
-                                        )
-                                      }
-                                    />
-                                  </ListItem>
-                                ))}
-                              </List>
-                            ) : (
-                              <Typography color="text.secondary" align="center">
-                                No hay componentes registrados para este equipo
-                              </Typography>
-                            )}
-                          </Box>
-                        ))}
-                      </List>
-                    ) : (
-                      <Typography color="text.secondary" align="center">
-                        No hay equipos registrados
-                      </Typography>
-                    )}
-                  </Box>
-                </TabPanel>
-                <TabPanel value={tabValue} index={3}>
-                  {selectedMaintenance?.equipos?.length > 0 ? (
-                    <List>
-                      {selectedMaintenance.equipos.map((equipo) => (
-                        <ListItem
-                          key={equipo.id}
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title="Ver detalles">
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleMaintenanceClick(item)}
+                          size="small"
                           sx={{
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            borderRadius: 1,
-                            mb: 1,
-                            backgroundColor: 'background.paper'
+                            backgroundColor: 'primary.main',
+                            color: 'primary.contrastText',
+                            '&:hover': {
+                              backgroundColor: 'primary.dark',
+                            }
                           }}
                         >
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                  {equipo.Nombre_Producto}
-                                </Typography>
-                                <Chip
-                                  label={equipo.Tipo_Equipo}
-                                  color="primary"
-                                  size="small"
-                                />
-                              </Box>
-                            }
-                            secondary={
-                              <>
-                                <Typography component="span" display="block">
-                                  Código de Barras: {equipo.Codigo_Barras}
-                                </Typography>
-                                <Typography component="span" display="block">
-                                  Ubicación: {equipo.Ubicacion_Equipo}
-                                </Typography>
-                                {equipo.Descripcion_Equipo && (
-                                  <Typography component="span" display="block">
-                                    Descripción: {equipo.Descripcion_Equipo}
-                                  </Typography>
-                                )}
-                              </>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  ) : (
-                    <Typography color="text.secondary" align="center">
-                      No hay equipos registrados
-                    </Typography>
-                  )}
-                </TabPanel>
-              </>
-            )}
-          </DialogContent>
+                          <InfoIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          <DialogActions sx={{ p: 2, gap: 1 }}>
-            {isEditing ? (
-              <Button
-                onClick={handleSave}
-                variant="contained"
-                color="primary"
-                sx={{ color: 'primary.contrastText' }}
-              >
-                Guardar
-              </Button>
-            ) : (
-              selectedMaintenance?.estado !== "Terminado" && (
-                <Button
-                  onClick={handleEdit}
-                  startIcon={<EditIcon />}
-                  variant="contained"
-                  color="primary"
-                  sx={{ color: 'primary.contrastText' }}
-                >
-                  Editar
-                </Button>
-              )
-            )}
-            <Button
-              onClick={handleCloseDialog}
-              variant="outlined"
-              color="primary"
-              sx={{
-                borderColor: 'primary.main',
-                color: 'primary.main',
-                '&:hover': {
-                  borderColor: 'primary.dark',
-                  backgroundColor: 'primary.light',
-                  color: 'primary.contrastText',
-                }
-              }}
-            >
-              Cerrar
-            </Button>
-          </DialogActions>
-        </Dialog>
-        <ModalEdicionMantenimiento
-          mantenimiento={selectedMaintenance}
-          open={open}
-          onClose={handleCloseModal}
-          guardar={handleSaveEditionEquip}
-          seleccionarEquipo={handleSeleccionarEquipo}
-          guardarEditar={guardarEditar}
-          handleAniadirEquipos={handleAddEquipos}
-        />
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
-          <Alert
+
+          <ModalEdicionMantenimiento
+            mantenimiento={selectedMaintenance}
+            open={open}
+            onClose={handleCloseModal}
+            guardar={handleSaveEditionEquip}
+            seleccionarEquipo={handleSeleccionarEquipo}
+            guardarEditar={guardarEditar}
+            handleAniadirEquipos={handleAddEquipos}
+          />
+          <Pagination
+            count={Math.ceil(filteredData.length / rowsPerPage)}
+            page={page}
+            onChange={handleChangePage}
+            sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
+          />
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={3000}
             onClose={() => setSnackbarOpen(false)}
-            severity={snackbarMessage.startsWith('Error') ? 'error' : 'success'}
-            sx={{ width: '100%' }}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           >
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
+            <Alert
+              onClose={() => setSnackbarOpen(false)}
+              severity={snackbarMessage.startsWith('Error') ? 'error' : 'success'}
+              sx={{ width: '100%' }}
+            >
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
+        </div>
+
       </Box>
+
     </ThemeProvider>
+
   );
 };
 
