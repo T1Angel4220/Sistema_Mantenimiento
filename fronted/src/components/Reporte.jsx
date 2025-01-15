@@ -1,7 +1,16 @@
+'use client'
+
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Badge from '@/components/ui/badge';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import { X } from 'lucide-react'
 
 const ReportesMantenimiento = () => {
   const [fechaRango, setFechaRango] = useState([null, null]);
@@ -363,127 +372,184 @@ const ReportesMantenimiento = () => {
         )}
       </div>
 
-      {/* Detalles del Mantenimiento */}
+      {/* Detalles del Mantenimiento - Modal Mejorado */}
       {modalOpen && selectedReport && (
-        <div 
-          style={{
-            marginTop: '20px',
-            borderRadius: '10px',
-            border: '1px solid #ddd',
-            backgroundColor: '#fff',
-            padding: '20px',
-          }}
-        >
-          <div style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>Hoja de Vida del Reporte</h2>
-              <button 
-                onClick={() => setModalOpen(false)}
-                style={{
-                  border: 'none',
-                  background: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  padding: '0 5px'
-                }}
-              >
-                ×
-              </button>
-            </div>
+        <Card className="mt-4">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-2xl font-bold">Hoja de Vida del Reporte</CardTitle>
+            <button 
+              onClick={() => setModalOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="general" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="general">Información General</TabsTrigger>
+                <TabsTrigger value="equipos">Equipos ({selectedReport.equipos?.length || 0})</TabsTrigger>
+                <TabsTrigger value="resumen">Resumen</TabsTrigger>
+              </TabsList>
 
-            {/* Información General del Mantenimiento */}
-            <div style={{ marginBottom: '20px', padding: '15px', borderRadius: '5px', border: '1px solid #ddd' }}>
-              <h3 style={{ marginBottom: '15px', fontSize: '18px', fontWeight: 'bold' }}>Información General</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <p><strong>Código:</strong> {selectedReport.codigo_mantenimiento}</p>
-                <p><strong>Tipo:</strong> {selectedReport.tipo}</p>
-                <p><strong>Fecha Inicio:</strong> {selectedReport.fecha_inicio}</p>
-                <p><strong>Fecha Fin:</strong> {selectedReport.fecha_fin}</p>
-                <p><strong>Estado:</strong> {selectedReport.estado}</p>
-                {selectedReport.proveedor && <p><strong>Proveedor:</strong> {selectedReport.proveedor}</p>}
-                {selectedReport.costo && <p><strong>Costo:</strong> ${selectedReport.costo}</p>}
-              </div>
-            </div>
+              <TabsContent value="general">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Código</p>
+                        <p className="text-sm">{selectedReport.codigo_mantenimiento}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Tipo</p>
+                        <p className="text-sm">{selectedReport.tipo}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Fecha Inicio</p>
+                        <p className="text-sm">{selectedReport.fecha_inicio}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Fecha Fin</p>
+                        <p className="text-sm">{selectedReport.fecha_fin}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Estado</p>
+                        <Badge variant={selectedReport.estado === 'Terminado' ? 'default' : 'secondary'}>
+                          {selectedReport.estado}
+                        </Badge>
+                      </div>
+                      {selectedReport.proveedor && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Proveedor</p>
+                          <p className="text-sm">{selectedReport.proveedor}</p>
+                        </div>
+                      )}
+                      {selectedReport.costo && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Costo</p>
+                          <p className="text-sm">${selectedReport.costo}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            {/* Lista de Equipos */}
-            {selectedReport.equipos && selectedReport.equipos.map((equipo, index) => (
-              <div 
-                key={equipo.id}
-                style={{
-                  marginBottom: '20px',
-                  padding: '15px',
-                  borderRadius: '5px',
-                  border: '1px solid #ddd',
-                  backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#fff'
-                }}
-              >
-                <h3 style={{ marginBottom: '15px', fontSize: '18px', fontWeight: 'bold' }}>
-                  Equipo: {equipo.Nombre_Producto || 'No especificado'}
-                </h3>
+              <TabsContent value="equipos">
+                <ScrollArea className="h-[600px] pr-4">
+                  <Accordion type="single" collapsible className="w-full space-y-4">
+                    {selectedReport.equipos?.map((equipo, index) => (
+                      <AccordionItem key={equipo.id} value={`equipo-${equipo.id}`} className="border rounded-lg">
+                        <AccordionTrigger className="px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">
+                              {equipo.Nombre_Producto || 'No especificado'}
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-4 pb-4">
+                          <div className="space-y-4">
+                            {/* Actividades */}
+                            <div>
+                              <h4 className="text-sm font-semibold mb-2">Actividades Realizadas</h4>
+                              {equipo.actividades && equipo.actividades.length > 0 ? (
+                                <ul className="space-y-1">
+                                  {equipo.actividades.map((actividad) => (
+                                    <li key={actividad.id} className="text-sm flex items-center gap-2">
+                                      <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
+                                      {actividad.nombre}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">No hay actividades registradas</p>
+                              )}
+                            </div>
 
-                {/* Actividades del Equipo */}
-                <div style={{ marginBottom: '15px' }}>
-                  <h4 style={{ marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>Actividades Realizadas</h4>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {equipo.actividades && equipo.actividades.length > 0 ? (
-                      equipo.actividades.map((actividad) => (
-                        <li 
-                          key={actividad.id}
-                          style={{
-                            marginBottom: '5px',
-                            paddingLeft: '20px',
-                            position: 'relative'
-                          }}
-                        >
-                          <span style={{ position: 'absolute', left: '0', content: '"•"' }}>•</span>
-                          {actividad.nombre}
-                        </li>
-                      ))
-                    ) : (
-                      <li>No hay actividades registradas</li>
-                    )}
-                  </ul>
-                </div>
+                            <Separator />
 
-                {/* Componentes del Equipo */}
-                <div style={{ marginBottom: '15px' }}>
-                  <h4 style={{ marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>Componentes Utilizados</h4>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {equipo.componentes && equipo.componentes.length > 0 ? (
-                      equipo.componentes.map((componente) => (
-                        <li 
-                          key={componente.id}
-                          style={{
-                            marginBottom: '5px',
-                            paddingLeft: '20px',
-                            position: 'relative'
-                          }}
-                        >
-                          <span style={{ position: 'absolute', left: '0', content: '"•"' }}>•</span>
-                          {componente.nombre} - Cantidad: {componente.cantidad || 'No especificada'}
-                        </li>
-                      ))
-                    ) : (
-                      <li>No hay componentes registrados</li>
-                    )}
-                  </ul>
-                </div>
+                            {/* Componentes */}
+                            <div>
+                              <h4 className="text-sm font-semibold mb-2">Componentes Utilizados</h4>
+                              {equipo.componentes && equipo.componentes.length > 0 ? (
+                                <ul className="space-y-1">
+                                  {equipo.componentes.map((componente) => (
+                                    <li key={componente.id} className="text-sm flex items-center gap-2">
+                                      <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
+                                      {componente.nombre} - Cantidad: {componente.cantidad || 'No especificada'}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">No hay componentes registrados</p>
+                              )}
+                            </div>
 
-                {/* Observaciones del Equipo */}
-                <div>
-                  <h4 style={{ marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>Observaciones</h4>
-                  <p style={{ margin: 0, padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-                    {equipo.observacion || 'No hay observaciones registradas'}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                            <Separator />
+
+                            {/* Observaciones */}
+                            <div>
+                              <h4 className="text-sm font-semibold mb-2">Observaciones</h4>
+                              <p className="text-sm bg-muted p-2 rounded">
+                                {equipo.observacion || 'No hay observaciones registradas'}
+                              </p>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="resumen">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-semibold mb-2">Resumen General</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 rounded-lg bg-muted">
+                            <p className="text-sm font-medium">Total de Equipos</p>
+                            <p className="text-2xl font-bold">{selectedReport.equipos?.length || 0}</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-muted">
+                            <p className="text-sm font-medium">Total de Actividades</p>
+                            <p className="text-2xl font-bold">
+                              {selectedReport.equipos?.reduce((total, equipo) => 
+                                total + (equipo.actividades?.length || 0), 0
+                              )}
+                            </p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-muted">
+                            <p className="text-sm font-medium">Total de Componentes</p>
+                            <p className="text-2xl font-bold">
+                              {selectedReport.equipos?.reduce((total, equipo) => 
+                                total + (equipo.componentes?.length || 0), 0
+                              )}
+                            </p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-muted">
+                            <p className="text-sm font-medium">Duración</p>
+                            <p className="text-2xl font-bold">
+                              {Math.ceil((new Date(selectedReport.fecha_fin) - new Date(selectedReport.fecha_inicio)) / (1000 * 60 * 60 * 24))} días
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
 };
+
+
 
 export default ReportesMantenimiento;
 
