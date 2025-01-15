@@ -115,8 +115,15 @@ const detailRows = [
   { label: 'TIPO:', value: selectedReport?.tipo || 'N/A' },
   { label: 'INICIO:', value: selectedReport?.fecha_inicio || 'N/A' },
   { label: 'FIN:', value: selectedReport?.fecha_fin || 'N/A' },
-  { label: 'RESPONSABLE:', value: `${selectedReport?.nombre_responsable} ${selectedReport?.apellido_responsable}` },
 ];
+
+// Añadir Responsable si el mantenimiento es interno
+if (selectedReport?.tipo?.toLowerCase() === 'interno') {
+  detailRows.push({
+    label: 'RESPONSABLE:',
+    value: `${selectedReport?.nombre_responsable} ${selectedReport?.apellido_responsable}` || 'N/A',
+  });
+}
 
 // Añadir Proveedor y Costo si el mantenimiento es externo
 if (selectedReport?.tipo?.toLowerCase() === 'externo') {
