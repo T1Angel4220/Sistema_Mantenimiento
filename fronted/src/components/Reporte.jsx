@@ -11,6 +11,25 @@ import Badge from '@/components/ui/badge';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { X } from 'lucide-react'
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend
+} from 'recharts';
+import { PieChart, Pie, Cell } from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+const BAR_COLORS = [
+  '#FF6B6B', // coral red
+  '#4ECDC4', // turquoise
+  '#45B7D1', // sky blue
+  '#96CEB4', // sage green
+  '#FFEEAD', // cream yellow
+  '#D4A5A5', // dusty rose
+  '#9B5DE5', // purple
+  '#00BBF9', // bright blue
+  '#00F5D4', // mint
+  '#FEE440'  // yellow
+];
 
 const ReportesMantenimiento = () => {
   const [fechaRango, setFechaRango] = useState([null, null]);
@@ -25,11 +44,12 @@ const ReportesMantenimiento = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [error, setError] = useState(null);
-
   const [mantenimientosLista, setMantenimientosLista] = useState([]);
   const [equiposLista, setEquiposLista] = useState([]);
   const [actividadesLista, setActividadesLista] = useState([]);
   const [componentesLista, setComponentesLista] = useState([]);
+  const [showChartModal, setShowChartModal] = useState(false);
+  const [selectedChart, setSelectedChart] = useState(null);
 
   // Cargar datos iniciales y lista de mantenimientos
   useEffect(() => {
@@ -390,6 +410,7 @@ const ReportesMantenimiento = () => {
                 <TabsTrigger value="general">Información General</TabsTrigger>
                 <TabsTrigger value="equipos">Equipos ({selectedReport.equipos?.length || 0})</TabsTrigger>
                 <TabsTrigger value="resumen">Resumen</TabsTrigger>
+                <TabsTrigger value="estadisticas">Estadísticas</TabsTrigger>
               </TabsList>
 
               <TabsContent value="general">
@@ -541,15 +562,385 @@ const ReportesMantenimiento = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+              <TabsContent value="estadisticas">
+  <Card>
+    <CardContent className="pt-6">
+      <div className="grid grid-cols-1 gap-6">
+        {/* Gráfico de Actividades por Equipo */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Actividades por Equipo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center">
+              <div className="relative h-[400px] w-full">
+                <BarChart
+                  width={900}
+                  height={400}
+                  data={selectedReport?.equipos?.map(equipo => ({
+                    name: equipo.Nombre_Producto,
+                    actividades: equipo.actividades?.length || 0
+                  })) || []}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 120 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-35}
+                    textAnchor="end"
+                    height={120}
+                    interval={0}
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                  />
+                  <YAxis
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                    ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Legend 
+                    verticalAlign="top"
+                    height={36}
+                    iconType="circle"
+                    iconSize={10}
+                    wrapperStyle={{
+                      paddingBottom: '20px'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="actividades" 
+                    name="Número de Actividades"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  >
+                    {selectedReport?.equipos?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+                <button
+                  onClick={() => {
+                    setSelectedChart('actividades');
+                    setShowChartModal(true);
+                  }}
+                  className="absolute bottom-4 right-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+                >
+                  Ver gráfico completo
+                </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Gráfico de Componentes por Equipo */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Componentes por Equipo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center">
+              <div className="relative h-[400px] w-full">
+                <BarChart
+                  width={900}
+                  height={400}
+                  data={selectedReport?.equipos?.map(equipo => ({
+                    name: equipo.Nombre_Producto,
+                    componentes: equipo.componentes?.length || 0
+                  })) || []}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 120 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-35}
+                    textAnchor="end"
+                    height={120}
+                    interval={0}
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                  />
+                  <YAxis
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                    ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Legend 
+                    verticalAlign="top"
+                    height={36}
+                    iconType="circle"
+                    iconSize={10}
+                    wrapperStyle={{
+                      paddingBottom: '20px'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="componentes" 
+                    name="Número de Componentes"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  >
+                    {selectedReport?.equipos?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+                <button
+                  onClick={() => {
+                    setSelectedChart('componentes');
+                    setShowChartModal(true);
+                  }}
+                  className="absolute bottom-4 right-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+                >
+                  Ver gráfico completo
+                </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Gráfico de Resumen General */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Resumen General del Mantenimiento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[500px] w-full flex justify-center items-center">
+              <PieChart width={800} height={500}>
+                <Pie
+                  data={[
+                    {
+                      name: 'Equipos',
+                      value: selectedReport.equipos?.length || 0,
+                      label: `Total de Equipos: ${selectedReport.equipos?.length || 0}`
+                    },
+                    {
+                      name: 'Actividades',
+                      value: selectedReport.equipos?.reduce((total, equipo) => 
+                        total + (equipo.actividades?.length || 0), 0
+                      ),
+                      label: `Total de Actividades: ${selectedReport.equipos?.reduce((total, equipo) => 
+                        total + (equipo.actividades?.length || 0), 0
+                      )}`
+                    },
+                    {
+                      name: 'Componentes',
+                      value: selectedReport.equipos?.reduce((total, equipo) => 
+                        total + (equipo.componentes?.length || 0), 0
+                      ),
+                      label: `Total de Componentes: ${selectedReport.equipos?.reduce((total, equipo) => 
+                        total + (equipo.componentes?.length || 0), 0
+                      )}`
+                    },
+                    {
+                      name: 'Días',
+                      value: Math.ceil((new Date(selectedReport.fecha_fin) - new Date(selectedReport.fecha_inicio)) / (1000 * 60 * 60 * 24)),
+                      label: `Duración: ${Math.ceil((new Date(selectedReport.fecha_fin) - new Date(selectedReport.fecha_inicio)) / (1000 * 60 * 60 * 24))} días`
+                    }
+                  ]}
+                  cx={400}
+                  cy={250}
+                  innerRadius={100}
+                  outerRadius={160}
+                  paddingAngle={5}
+                  dataKey="value"
+                  labelLine={true}
+                  label={({ label }) => label}
+                >
+                  {[0, 1, 2, 3].map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={COLORS[index % COLORS.length]}
+                      stroke="#fff"
+                      strokeWidth={2}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value, name) => [`${value}`, name]}
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  iconType="circle"
+                  iconSize={10}
+                />
+              </PieChart>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </CardContent>
+  </Card>
+</TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       )}
+      {/* Modal para gráfico completo */}
+      {showChartModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[90vw] h-[90vh]">
+            <div className="flex justify-between mb-4">
+              <h3 className="text-xl font-bold">{selectedChart === 'actividades' ? 'Actividades por Equipo' : 'Componentes por Equipo'}</h3>
+              <button onClick={() => setShowChartModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="h-[calc(90vh-100px)]">
+              {selectedChart === 'actividades' ? (
+                <BarChart
+                  width={window.innerWidth * 0.85}
+                  height={window.innerHeight * 0.8}
+                  data={selectedReport?.equipos?.map(equipo =>({
+                    name: equipo.Nombre_Producto,
+                    actividades: equipo.actividades?.length || 0
+                  })) || []}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 120 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    angle={-35}
+                    textAnchor="end"
+                    height={120}
+                    interval={0}
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                  />
+                  <YAxis
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                    ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="top"
+                    height={36}
+                    iconType="circle"
+                    iconSize={10}
+                  />
+                  <Bar
+                    dataKey="actividades"
+                    name="Número de Actividades"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  >
+                    {selectedReport?.equipos?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              ) : (
+                <BarChart
+                  width={window.innerWidth * 0.85}
+                  height={window.innerHeight * 0.8}
+                  data={selectedReport?.equipos?.map(equipo => ({
+                    name: equipo.Nombre_Producto,
+                    componentes: equipo.componentes?.length || 0
+                  })) || []}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 120 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    angle={-35}
+                    textAnchor="end"
+                    height={120}
+                    interval={0}
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                  />
+                  <YAxis
+                    tick={{
+                      fontSize: 12,
+                      fill: '#666',
+                      fontFamily: 'Arial'
+                    }}
+                    ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="top"
+                    height={36}
+                    iconType="circle"
+                    iconSize={10}
+                  />
+                  <Bar
+                    dataKey="componentes"
+                    name="Número de Componentes"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  >
+                    {selectedReport?.equipos?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-
 
 export default ReportesMantenimiento;
 
