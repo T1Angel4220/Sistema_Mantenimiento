@@ -18,12 +18,13 @@ import {
     IconButton,
     Pagination,
     TextField,
-    Checkbox
+    Checkbox,
+    MenuItem
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 
-const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fechaFin }) => {
+const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio, fechaFin }) => {
     const [equipos, setEquipos] = useState([]);
     const [filters, setFilters] = useState({
         nombre_producto: '',
@@ -43,33 +44,33 @@ const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fecha
 
     useEffect(() => {
         const fetchEquiposDis = async () => {
-          try {
-            const ids = equiposSe.map((equipo) => equipo.id);
-            const requestData = {
-              fecha_inicio: new Date(fechaInicio).toISOString().split("T")[0],
-              fecha_fin: new Date(fechaFin).toISOString().split("T")[0],
-              excluir_equipos:ids, // IDs de equipos a excluir (opcional)
-            };
-            console.log(requestData)
-            // Realizar la solicitud al endpoint
-            const response = await axios.post(
-              'http://localhost:8000/api/equipoDisponibles',
-              requestData
-            );
-    
-            // Actualizar el estado con los equipos obtenidos
-            setFilteredData(response.data);
-          } catch (err) {
-            console.error("Error al obtener los equipos:", err);
-          } finally {
-           
-          }
-        };
-    
-        fetchEquiposDis();
-      }, [equiposSe]);
+            try {
+                const ids = equiposSe.map((equipo) => equipo.id);
+                const requestData = {
+                    fecha_inicio: new Date(fechaInicio).toISOString().split("T")[0],
+                    fecha_fin: new Date(fechaFin).toISOString().split("T")[0],
+                    excluir_equipos: ids, // IDs de equipos a excluir (opcional)
+                };
+                console.log(requestData)
+                // Realizar la solicitud al endpoint
+                const response = await axios.post(
+                    'http://localhost:8000/api/equipoDisponibles',
+                    requestData
+                );
 
-   
+                // Actualizar el estado con los equipos obtenidos
+                setFilteredData(response.data);
+            } catch (err) {
+                console.error("Error al obtener los equipos:", err);
+            } finally {
+
+            }
+        };
+
+        fetchEquiposDis();
+    }, [equiposSe]);
+
+
 
     const handleSelectAll = () => {
         setSelectedEquipos(filteredData.map((equipo) => equipo.id));
@@ -105,14 +106,14 @@ const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fecha
     };
 
     const handleSearch = async () => {
-        
+
         try {
             const ids = equiposSe.map((equipo) => equipo.id);
             const requestData = {
-              ...filters,
-              fecha_inicio: new Date(fechaInicio).toISOString().split("T")[0],
-              fecha_fin: new Date(fechaFin).toISOString().split("T")[0],
-              excluir_equipos:ids, 
+                ...filters,
+                fecha_inicio: new Date(fechaInicio).toISOString().split("T")[0],
+                fecha_fin: new Date(fechaFin).toISOString().split("T")[0],
+                excluir_equipos: ids,
             };
             console.log(requestData)
             const response = await axios.post('http://localhost:8000/api/equiposDisponiblesFiltros', requestData);
@@ -173,11 +174,20 @@ const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fecha
                         <TextField
                             fullWidth
                             label="Tipo de Equipo"
-                            variant="outlined"
+                            select
                             value={filters.tipo_equipo}
                             onChange={(e) => handleFilterChange('tipo_equipo', e.target.value)}
-                        />
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        >
+                            <MenuItem value="Informático">Informático</MenuItem>
+                            <MenuItem value="Electrónicos y Eléctricos">Electrónicos y Eléctricos</MenuItem>
+                            <MenuItem  value="Industriales">Industriales</MenuItem>
+                            <MenuItem value="Audiovisuales">Audiovisuales</MenuItem>
+                        </TextField>
                     </Grid>
+
                     <Grid item xs={12} sm={6} md={4}>
                         <TextField
                             fullWidth
@@ -208,11 +218,21 @@ const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fecha
                         <TextField
                             fullWidth
                             label="Ubicación Equipo"
-                            variant="outlined"
+                            select
                             value={filters.ubicacion_equipo}
                             onChange={(e) => handleFilterChange('ubicacion_equipo', e.target.value)}
-                        />
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            margin="normal"
+                        >
+                            <MenuItem value="Departamento de TI">Departamento de TI</MenuItem>
+                            <MenuItem value="Laboratorio de Redes">Laboratorio de Redes</MenuItem>
+                            <MenuItem value="Sala de reuniones">Sala de reuniones</MenuItem>
+                            < MenuItem value="Laboratorio CTT">Laboratorio CTT</MenuItem>
+                        </TextField>
                     </Grid>
+
                 </Grid>
 
                 {/* Botón Buscar */}
@@ -320,24 +340,24 @@ const EquiposModal = ({ open, onClose, onAddEquipo, equiposSe, fechaInicio,fecha
                     <h1>¿Esta seguro de que quiere añadir estos equipos?</h1>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCancel} color="secondary" 
-                     sx={{
-                        backgroundColor: 'red',
-                        color: 'white',
-                        '&:hover': {
-                            backgroundColor: 'darkred'
-                        }
-                    }}>
+                    <Button onClick={handleCancel} color="secondary"
+                        sx={{
+                            backgroundColor: 'red',
+                            color: 'white',
+                            '&:hover': {
+                                backgroundColor: 'darkred'
+                            }
+                        }}>
                         Cancelar
                     </Button>
                     <Button onClick={handleConfirmSave} color="primary"
-                     sx={{
-                        backgroundColor: 'blue',
-                        color: 'white',
-                        '&:hover': {
-                            backgroundColor: 'darkred'
-                        }
-                    }}>
+                        sx={{
+                            backgroundColor: 'blue',
+                            color: 'white',
+                            '&:hover': {
+                                backgroundColor: 'darkred'
+                            }
+                        }}>
                         Guardar
                     </Button>
                 </DialogActions>

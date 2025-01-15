@@ -330,7 +330,7 @@ export default function AssetMaintenanceForm() {
     }
   };
 
-  
+
   const handleOpenModal = (equipo) => {
     setEquipoSeleccionado(equipo);
     setModalOpen(true);

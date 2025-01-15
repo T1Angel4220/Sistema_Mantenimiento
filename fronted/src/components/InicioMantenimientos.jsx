@@ -171,6 +171,8 @@ const MaintenanceTable = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [availableActivities, setAvailableActivities] = useState([]);
   const [open, setOpen] = useState(true);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+  
   const handleLogout = () => {
     setShowLogoutModal(true);
   };
@@ -477,6 +479,14 @@ const MaintenanceTable = () => {
     } else {
       // Si la actividad ya está, no hacer nada
     }
+  };
+  const confirmLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   // Función para eliminar una actividad de selectedMaintenance
@@ -794,9 +804,29 @@ const MaintenanceTable = () => {
             </Alert>
           </Snackbar>
         </div>
-
+        
       </Box>
-
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
+          <div className="bg-white p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">¿Está seguro de que desea cerrar sesión?</h3>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                onClick={confirmLogout}
+              >
+                Sí
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                onClick={cancelLogout}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ThemeProvider>
 
   );
