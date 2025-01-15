@@ -294,26 +294,14 @@ const ReportesMantenimiento = () => {
     {/* Wrap the existing content */}
     <main className="flex-1 p-8">
       <div style={{ padding: '20px', fontFamily: 'Arial', maxWidth: '1200px', margin: '0 auto' }}>
-<h1 style={{ 
-  textAlign: 'center', 
-  marginBottom: '20px', 
-  color: '#4A90E2', 
-  fontFamily: 'Arial, sans-serif', 
-  fontSize: '2.5em', 
-  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)' 
-}}>
-  Reportes Mantenimientos
-</h1>
+<div className="w-full bg-[#1a374d] text-white p-4 mb-6 rounded-lg shadow-lg">
+  <h1 className="text-2xl font-bold text-center">
+    Reporte de Mantenimientos
+  </h1>
+</div>
       {/* Filtros */}
-      <div
-        style={{
-          border: '1px solid #ddd',
-          borderRadius: '10px',
-          padding: '20px',
-          backgroundColor: '#f9f9f9',
-        }}
-      >
-        <h2 style={{ marginBottom: '20px', fontSize: '18px', fontWeight: 'bold' }}>Filtros de Reporte</h2>
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-[#1a374d]">Filtros de Reporte</h2>
         <div
           style={{
             display: 'grid',
@@ -322,17 +310,25 @@ const ReportesMantenimiento = () => {
           }}
         >
           {/* Rango de Fechas */}
-          <div>
-            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Rango de Fechas</label>
-            <DatePicker
-              selected={fechaRango[0]}
-              onChange={(dates) => setFechaRango(dates)}
-              startDate={fechaRango[0]}
-              endDate={fechaRango[1]}
-              selectsRange
-              placeholderText="Seleccionar rango de fechas"
-              dateFormat="yyyy-MM-dd"
-            />
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-700">Rango de Fechas</label>
+            <div className="relative">
+              <DatePicker
+                selected={fechaRango[0]}
+                onChange={(dates) => setFechaRango(dates)}
+                startDate={fechaRango[0]}
+                endDate={fechaRango[1]}
+                selectsRange
+                placeholderText="Seleccionar rango de fechas"
+                dateFormat="yyyy-MM-dd"
+                className="w-[300px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Mantenimiento */}
@@ -556,40 +552,40 @@ const ReportesMantenimiento = () => {
                   <CardContent className="pt-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Código</p>
+                        <p className="text-sm font-bold text-[#1a374d]">Código</p>
                         <p className="text-sm">{selectedReport.codigo_mantenimiento}</p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Tipo</p>
+                        <p className="text-sm font-bold text-[#1a374d]">Tipo</p>
                         <p className="text-sm">{selectedReport.tipo}</p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Fecha Inicio</p>
+                        <p className="text-sm font-bold text-[#1a374d]">Fecha Inicio</p>
                         <p className="text-sm">{selectedReport.fecha_inicio}</p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Fecha Fin</p>
+                        <p className="text-sm font-bold text-[#1a374d]">Fecha Fin</p>
                         <p className="text-sm">{selectedReport.fecha_fin}</p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Estado</p>
+                        <p className="text-sm font-bold text-[#1a374d]">Estado</p>
                         <Badge variant={selectedReport.estado === 'Terminado' ? 'default' : 'secondary'}>
                           {selectedReport.estado}
                         </Badge>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Responsable</p>
+                        <p className="text-sm font-bold text-[#1a374d]">Responsable</p>
                         <p className="text-sm">{selectedReport.nombre_responsable} {selectedReport.apellido_responsable}</p>
                       </div>
                       {selectedReport.proveedor && (
                         <div className="space-y-2">
-                          <p className="text-sm font-medium">Proveedor</p>
+                          <p className="text-sm font-bold text-[#1a374d]">Proveedor</p>
                           <p className="text-sm">{selectedReport.proveedor}</p>
                         </div>
                       )}
                       {selectedReport.costo && (
                         <div className="space-y-2">
-                          <p className="text-sm font-medium">Costo</p>
+                          <p className="text-sm font-bold text-[#1a374d]">Costo</p>
                           <p className="text-sm">${selectedReport.costo}</p>
                         </div>
                       )}
@@ -790,8 +786,7 @@ const ReportesMantenimiento = () => {
                                   setSelectedChart('actividades');
                                   setShowChartModal(true);
                                 }}
-                                className="absolute bottom-4 right-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
-                              >
+                                className="absolute bottom-4 right-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"                              >
                                 Ver gráfico completo
                               </button>
                             </div>
