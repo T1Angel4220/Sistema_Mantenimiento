@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
     Box,
     Button,
@@ -359,10 +360,10 @@ export default function MaintenanceReports() {
                     <div className="p-4 mt-auto">
                         <button
                             className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                            onClick={handleLogout}
-                        >
+                            onClick={() => navigate('/Reporte')}
+                            >
                             <LogOut className="mr-2 h-5 w-5" />
-                            Salir
+                            Regresar
                         </button>
                     </div>
                 </aside>
@@ -371,7 +372,11 @@ export default function MaintenanceReports() {
             </Box>
             <Box>
                 <Typography variant="h4" gutterBottom>
-                    Reportes de Mantenimiento por Equipos
+          <div className="w-full bg-[#1a374d] text-white p-4 mb-6 rounded-lg shadow-lg">
+            <h1 className="text-2xl font-bold text-center">
+            Reportes de Mantenimiento por Equipos
+            </h1>
+          </div>
                 </Typography>
                 <Box p={4}>
                     <FormControl fullWidth margin="normal">
