@@ -17,7 +17,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  InputLabel,
+  Select,
+  MenuItem
 } from "@mui/material";
 import { es } from 'date-fns/locale';
 import EquiposModal from './BuscarEquipos';
@@ -27,11 +30,13 @@ import { format } from 'date-fns';
 
 import DatePicker from 'react-datepicker';
 import EdicionEquipo from './EdicionEquipoMantenimientoModal';
+import { FormControl } from "@mui/material";
 
-const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
+const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, seleccionarEquipo, guardarEditar, handleAniadirEquipos }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-
+  const [ActividadOComponente, setActividadOComp] = useState(false);
+  const [Estado, SetEstado]=useState("");
   const [mantenimientoSe, setMantenimiento] = useState(false);
   const [page, setPage] = useState(1); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(5); // Equipos por página
@@ -106,7 +111,19 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, sel
     return
 
 
+
+
   const handleSave = () => {
+    for (const equipo of mantenimiento.equipos) {
+      console.log(equipo)
+      if (equipo.componentes.length == 0 && equipo.actividades.length == 0) {
+        setActividadOComp(true);
+        setTimeout(() => {
+          setActividadOComp(false);
+        }, 3000)
+        return;
+      }
+    }
     setOpenConfirmDialog(true);
   };
 
@@ -134,6 +151,24 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, sel
         <div className="h-8"></div>
 
         <Grid item xs={6}>
+          {ActividadOComponente && (
+            <Modal
+              open={true}
+              onClose={() => { }}
+            >
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+              >
+                <div className="bg-red-500 text-white p-6 rounded-lg shadow-xl max-w-lg w-full text-center">
+                  <h1 className="text-xl font-bold">
+                    El equipo debe tener una actividad o un componente guardado
+                  </h1>
+                </div>
+              </div>
+            </Modal>
+          )}
+
+
           <TextField
             label="Codigo mantenimento"
             value={
@@ -152,6 +187,23 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, sel
             fullWidth
             disabled
           />
+           <Grid container spacing={2}>
+          {/* ComboBox para el estado */}
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel id="estado-label">Estado</InputLabel>
+              <Select
+                labelId="estado-label"
+                value={mantenimiento.estado} // Estado actual como predeterminado
+                onChange={(e) => handleEstadoChange(e.target.value)}
+                label="Estado"
+              >
+                <MenuItem value="Terminado">Terminado</MenuItem>
+                <MenuItem value="No terminado">No terminado</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
 
         </Grid>
         <div className="h-2"></div>
@@ -284,7 +336,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, sel
             </TableHead>
             <TableBody>
               {mantenimiento.equipos
-               .slice((page-1) * rowsPerPage,(page)* rowsPerPage+1).map((equipo) => (
+                .slice((page - 1) * rowsPerPage, (page) * rowsPerPage + 1).map((equipo) => (
                   <TableRow key={equipo.id}>
                     <TableCell>{equipo.Nombre_Producto}</TableCell>
                     <TableCell>{equipo.Codigo_Barras}</TableCell>
@@ -303,23 +355,23 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, sel
           </Table>
         </TableContainer>
         <Pagination
-            count={Math.ceil(mantenimiento.equipos.length / rowsPerPage)}
-            page={page}
-            onChange={handleChangePage}
-            sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
-          />
+          count={Math.ceil(mantenimiento.equipos.length / rowsPerPage)}
+          page={page}
+          onChange={handleChangePage}
+          sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
+        />
         <EdicionEquipo open={modalOpen} handleClose={handleCloseModal} equipo={equipoSeleccionado} actividadesSe={equipoSeleccionado == null ? [] : equipoSeleccionado.actividades} componentesSe={equipoSeleccionado == null ? [] : equipoSeleccionado.componentes} guardarActivComp={handleSaveEditionEquip} />
 
 
         <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={onClose} sx={{ 
+          <Button onClick={onClose} sx={{
             mr: 2,
             backgroundColor: 'red',
             color: 'white',
             '&:hover': {
-                  backgroundColor: 'darkred'
+              backgroundColor: 'darkred'
             }
-           }}>
+          }}>
             Cancelar
           </Button>
           <Button variant="contained" onClick={handleSave}>
@@ -353,11 +405,11 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose , guardar, sel
               Guardar
             </Button>
           </DialogActions>
-          
+
         </Dialog>
 
       </Box>
-      
+
     </Modal>
   );
 };

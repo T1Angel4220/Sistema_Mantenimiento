@@ -299,10 +299,7 @@ const Main = () => {
                   Código Mantenimiento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Proveedor
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Contacto proveedor
+                  Cantidad de activos registrados
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Fecha de Inicio
@@ -326,9 +323,6 @@ const Main = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {item.proveedor || 'No asignado'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {item.contacto_proveedor}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {new Date(item.fecha_inicio).toLocaleDateString()}
