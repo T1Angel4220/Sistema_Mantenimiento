@@ -218,7 +218,7 @@ export default function MaintenanceReports() {
                 datasets: [
                     {
                         label: 'Total Componentes Usados',
-                        data: componentes.map((componente) => componente.total),
+                        data: componentes.map((componente) => componente.cantidad),
                         backgroundColor: 'rgba(153, 102, 255, 0.6)',  // Color personalizado para las barras
                         borderColor: 'rgba(153, 102, 255, 1)',
                         borderWidth: 1,
