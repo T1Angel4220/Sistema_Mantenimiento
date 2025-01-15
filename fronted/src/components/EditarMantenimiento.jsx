@@ -38,7 +38,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
   const [modalOpen, setModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [ActividadOComponente, setActividadOComp] = useState(false);
-  const [Estado, SetEstado] = useState(mantenimiento?.estado ?? null);
+  const [Estado, SetEstado] = useState( null);
   const [mantenimientoSe, setMantenimiento] = useState(false);
   const [page, setPage] = useState(1); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(5); // Equipos por página
@@ -67,6 +67,8 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
         mantenimientoGu)
         .then(response => {
           console.log('Mantenimiento actualizado exitosamente:', response.data);
+          guardarEditar();
+
         })
         .catch(error => {
           console.error('Error al actualizar mantenimiento:', error);
@@ -77,8 +79,8 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
       console.error('Error al guardar los cambios:', error);
     };
     onClose();
-    guardarEditar();
     setOpenConfirmDialog(false);
+    
   };
 
   const handleChangePage = (event, newPage) => {
@@ -220,7 +222,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
 
               <TextField
                 fullWidth
-                value={Estado}
+                value={Estado==null?mantenimiento.estado:Estado}
                 label="Estado"
                 select
                 onChange={(e) => SetEstado(e.target.value)}
