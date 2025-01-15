@@ -20,6 +20,8 @@ import { PieChart, Pie, Cell } from 'recharts';
 import { jsPDF } from 'jspdf';
 
 import PDFDownloadButton from './pdf-download-button'; // Adjust path as needed
+import { Home, ShoppingCart, Box, PenTool, FileText, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -38,6 +40,15 @@ const BAR_COLORS = [
 ];
 
 const ReportesMantenimiento = () => {
+  const navigate = useNavigate();
+
+  const navItems = [
+    { icon: Home, label: 'Inicio', route: '/Main' },
+    { icon: ShoppingCart, label: 'Proceso de Compra', route: '/ProcesoCompra' },
+    { icon: Box, label: 'Activos', route: '/equipos' },
+    { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
+    { icon: FileText, label: 'Reportes', route: '/Reporte' },
+  ];
   const [fechaRango, setFechaRango] = useState([null, null]);
   const [mantenimiento, setMantenimiento] = useState('');
   const [equipo, setEquipo] = useState('');
@@ -244,9 +255,55 @@ const ReportesMantenimiento = () => {
   }, [fechaRango, mantenimiento, equipo, tipoActivo, actividad, componente, estado]);
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Sistema de Reportes de Mantenimiento</h1>
+    <div className="flex min-h-screen bg-gray-100">
+    {/* Sidebar */}
+    <aside className="w-64 bg-[#1a374d] text-white flex flex-col h-screen sticky top-0">
+      <div className="p-6 space-y-2">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SK_Telecom_Logo.svg/1200px-SK_Telecom_Logo.svg.png"
+          alt="Logo SK Telecom"
+          className="h-12 w-auto"
+        />
+      </div>
+      <nav className="space-y-1 px-3 flex-1">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.route}
+              className="w-full flex items-center px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
+              onClick={() => navigate(item.route)}
+            >
+              <Icon className="mr-2 h-5 w-5" />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+      <div className="p-4 mt-auto">
+        <button
+          className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+          onClick={() => navigate('/Main')}
+        >
+          <LogOut className="mr-2 h-5 w-5" />
+          Regresar
+        </button>
+      </div>
+    </aside>
 
+    {/* Wrap the existing content */}
+    <main className="flex-1 p-8">
+      <div style={{ padding: '20px', fontFamily: 'Arial', maxWidth: '1200px', margin: '0 auto' }}>
+<h1 style={{ 
+  textAlign: 'center', 
+  marginBottom: '20px', 
+  color: '#4A90E2', 
+  fontFamily: 'Arial, sans-serif', 
+  fontSize: '2.5em', 
+  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)' 
+}}>
+  Reportes Mantenimientos
+</h1>
       {/* Filtros */}
       <div
         style={{
@@ -1055,7 +1112,9 @@ const ReportesMantenimiento = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </main>
+  </div>
   );
 };
 
