@@ -114,7 +114,7 @@ Route::post('/equipos/import', [EquipoImportController::class, 'import']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::get('me', [AuthController::class, 'me'])->middleware('auth:api');
+Route::get('me', [AuthController::class, 'me']);
 
 Route::controller(EquipoController::class)->group(function () {
     Route::get('/equipos', 'index');

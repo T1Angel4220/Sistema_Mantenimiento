@@ -187,7 +187,10 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
             fullWidth
             disabled
           />
+          <div className="h-2"></div>
            <Grid container spacing={2}>
+           
+
           {/* ComboBox para el estado */}
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>

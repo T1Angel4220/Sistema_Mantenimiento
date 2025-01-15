@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Componente;
 use App\Models\ObservacionMantenimiento;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth; // Para usar auth()->user()
+
 class MantenimientoController extends Controller
 {
    
@@ -89,6 +91,14 @@ class MantenimientoController extends Controller
         'equipos.*.componentes.*.id' => 'integer|exists:componentes,id',
     ]);
 
+    // Obtener el único usuario activo desde la tabla 'usuario_activo'
+    $user = DB::table('usuario_activo')->first(); 
+
+    // Verificar si existe un registro en 'usuario_activo'
+    if (!$user) {
+        return response()->json(['error' => 'No hay un usuario activo registrado'], 404);
+    }
+
     // Crear el mantenimiento
     $mantenimientoId = DB::table('mantenimiento')->insertGetId([
         'codigo_mantenimiento' => $data['codigo_mantenimiento'],
@@ -98,6 +108,8 @@ class MantenimientoController extends Controller
         'proveedor' => $data['proveedor'],
         'contacto_proveedor' => $data['contacto_proveedor'],
         'costo' => $data['costo'],
+        'nombre_responsable' => $user->name, // Guardar el nombre del usuario activo
+        'apellido_responsable' => $user->lastname, // Guardar el apellido del usuario activo
         'created_at' => now(),
         'updated_at' => now(),
     ]);
@@ -119,6 +131,7 @@ class MantenimientoController extends Controller
                     'mantenimiento_id' => $mantenimientoId,
                     'equipo_id' => $equipo['id'],
                     'actividad_id' => $actividad['id'],
+                   // Guardar el apellido del usuario activo
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -142,6 +155,8 @@ class MantenimientoController extends Controller
 
     return response()->json(['success' => 'Mantenimiento creado exitosamente', 'mantenimiento_id' => $mantenimientoId], 201);
 }
+
+    
 
     public function obtenerIdMaximo()
     {

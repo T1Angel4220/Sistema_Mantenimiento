@@ -18,6 +18,8 @@ return new class extends Migration
             $table->enum('tipo', ['Interno', 'Externo']);
             $table->date('fecha_inicio')->nullable();
             $table->date('fecha_fin');
+            $table->string('nombre_responsable'); // Columna para el nombre del responsable
+            $table->string('apellido_responsable')->nullable();;
             $table->enum('proveedor', ['ACME Maintenance', 'TechSupport S.A.', 'ServiMaq Ltda.', 'Otro'])->nullable();
             $table->string('contacto_proveedor', 255)->nullable();
             $table->decimal('costo', 10, 2)->nullable();

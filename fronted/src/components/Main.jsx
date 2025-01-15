@@ -236,22 +236,6 @@ const Main = () => {
               onChange={(e) => setFechaFinFilter(e.target.value)}
             />
           </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Tipo de Equipo</label>
-            <select
-              value={tipoEquipoFilter}
-              onChange={(e) => setTipoEquipoFilter(e.target.value)}
-              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Todos</option>
-              <option value="Informático">Informático</option>
-              <option value="Electrónicos y Eléctricos">Electrónicos y Eléctricos</option>
-              <option value="Industriales">Industriales</option>
-              <option value="Audiovisuales">Audiovisuales</option>
-            </select>
-          </div>
-
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Tipo de Mantenimiento</label>
             <select
@@ -265,16 +249,7 @@ const Main = () => {
             </select>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Proceso de Compra</label>
-            <input
-              type="text"
-              placeholder="Proceso de compra..."
-              className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={procesoCompraFilter}
-              onChange={(e) => setProcesoCompraFilter(e.target.value)}
-            />
-          </div>
+         
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Estado del Mantenimiento</label>
@@ -322,7 +297,7 @@ const Main = () => {
                     {item.codigo_mantenimiento}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {item.proveedor || 'No asignado'}
+                    {item.equipos.length || 'No asignado'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {new Date(item.fecha_inicio).toLocaleDateString()}
