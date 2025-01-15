@@ -537,7 +537,7 @@ export default function MaintenanceReports() {
                                 )}
                                 {reportType === "personalizado" && (
                                     <Typography variant="h6">
-                                        Reporte Personalizado - Desde {startDate?.toLocaleDateString()} hasta {endDate?.toLocaleDateString()}
+                                        Reporte Personalizado - Desde {startDate==null?"":startDate.toLocaleDateString()} hasta {endDate==null?"":endDate.toLocaleDateString()}
                                     </Typography>
                                 )}
                             </Box>
