@@ -446,8 +446,25 @@ const ReportesMantenimiento = () => {
               >
                 Borrar Filtros
               </button>
+
+              <button
+            onClick={() => navigate('/Reporte_por_Fechas')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#4CAF50',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginLeft: '20px', // Separar "Reporte General" hacia la derecha
+              
+            }}
+            >
+            Reporte General
+            </button>
             </div>
           </div>
+          <div style={{ marginTop: '20px', textAlign: 'center' }}></div>
 
           {/* Resultados */}
           <div
