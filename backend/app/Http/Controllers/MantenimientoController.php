@@ -17,12 +17,216 @@ use Illuminate\Support\Facades\Auth; // Para usar auth()->user()
 
 class MantenimientoController extends Controller
 {
-   
-    
-    
-    
 
     
+    public function getReportes(Request $reporteRequest)
+    {
+        if ($reporteRequest['tipo_reporte'] === 'anual') {
+            // Mantenimientos Iniciados
+            $mantenimientosIniciados = Mantenimiento::whereYear('fecha_inicio', $reporteRequest['anio'])->count();
+            
+            // Mantenimientos Terminados
+            $mantenimientosTerminados = Mantenimiento::whereYear('fecha_fin', $reporteRequest['anio'])
+                ->whereNotNull('fecha_fin')
+                ->count();
+            
+            // Mantenimientos en Proceso (sin fecha de fin)
+            $mantenimientosEnProceso = Mantenimiento::whereYear('fecha_inicio', $reporteRequest['anio'])
+                ->whereNull('fecha_fin')
+                ->count();
+        } elseif ($reporteRequest['tipo_reporte'] === 'mensual') {
+            // Mantenimientos Iniciados
+            $mantenimientosIniciados = Mantenimiento::whereYear('fecha_inicio', $reporteRequest['anio'])
+                ->whereMonth('fecha_inicio', $reporteRequest['mes'])
+                ->count();
+            
+            // Mantenimientos Terminados
+            $mantenimientosTerminados = Mantenimiento::whereYear('fecha_fin', $reporteRequest['anio'])
+                ->whereMonth('fecha_fin', $reporteRequest['mes'])
+                ->whereNotNull('fecha_fin')
+                ->count();
+            
+            // Mantenimientos en Proceso (sin fecha de fin)
+            $mantenimientosEnProceso = Mantenimiento::whereYear('fecha_inicio',$reporteRequest['anio'])
+                ->whereMonth('fecha_inicio', $reporteRequest['mes'])
+                ->whereNull('fecha_fin')
+                ->count();
+        } elseif ($reporteRequest['tipo_reporte'] === 'personalizado') {
+            // Mantenimientos Iniciados
+            $mantenimientosIniciados = Mantenimiento::whereBetween('fecha_inicio', [$reporteRequest['fecha_inicio'], $reporteRequest['fecha_fin']])->count();
+            
+            // Mantenimientos Terminados
+            $mantenimientosTerminados = Mantenimiento::whereBetween('fecha_fin', [$reporteRequest['fecha_inicio'], $reporteRequest['fecha_fin']])
+                ->whereNotNull('fecha_fin')
+                ->count();
+            
+            // Mantenimientos en Proceso (sin fecha de fin)
+            $mantenimientosEnProceso = Mantenimiento::whereBetween('fecha_inicio', [$reporteRequest['fecha_inicio'],$reporteRequest['fecha_fin']])
+                ->whereNull('fecha_fin')
+                ->count();
+        }
+        $tipoReporte = $reporteRequest['tipo_reporte'];
+        
+        // Consultas para obtener los datos
+        switch ($tipoReporte) {
+            case 'anual':
+                return $this->getReporteAnual($reporteRequest['anio'], $mantenimientosIniciados,$mantenimientosTerminados,  $mantenimientosEnProceso);
+                
+            case 'mensual':
+                return $this->getReporteMensual($reporteRequest['anio'], $reporteRequest['mes'], $mantenimientosIniciados,$mantenimientosTerminados,  $mantenimientosEnProceso);
+                
+            case 'personalizado':
+                return $this->getReportePersonalizado($reporteRequest['fecha_inicio'], $reporteRequest['fecha_fin'], $mantenimientosIniciados,$mantenimientosTerminados,  $mantenimientosEnProceso);
+                
+            default:
+                return response()->json(['error' => 'Tipo de reporte no válido'], 400);
+        }
+    }
+
+    private function getReporteAnual($anio, $mantenimientosIniciados,$mantenimientosTerminados,  $mantenimientosEnProceso)
+    {
+        // Obtener el total de mantenimientos por mes en el año especificado
+        $mantenimientosPorMes = DB::table('mantenimiento')
+            ->select(DB::raw('EXTRACT(MONTH FROM fecha_inicio) as mes'), DB::raw('COUNT(*) as cantidad'))
+            ->whereYear('fecha_inicio', $anio)
+            ->groupBy(DB::raw('EXTRACT(MONTH FROM fecha_inicio)'))
+            ->orderBy(DB::raw('EXTRACT(MONTH FROM fecha_inicio)'))
+            ->get();
+
+        // Obtener los equipos que han tenido mantenimiento
+        $equipos = DB::table('equipos')
+            ->join('mantenimiento_actividad', 'equipos.id', '=', 'mantenimiento_actividad.equipo_id')
+            ->join('mantenimiento', 'mantenimiento_actividad.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereYear('mantenimiento.fecha_inicio', $anio)
+            ->select('equipos.id', 'equipos.Nombre_Producto', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('equipos.id', 'equipos.Nombre_Producto')
+            ->get();
+
+        // Obtener las actividades usadas en los mantenimientos
+        $actividades = DB::table('actividades')
+            ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
+            ->join('mantenimiento', 'mantenimiento_actividad.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereYear('mantenimiento.fecha_inicio', $anio)
+            ->select('actividades.id', 'actividades.nombre', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('actividades.id', 'actividades.nombre')
+            ->get();
+
+        // Obtener los componentes usados en los mantenimientos
+        $componentes = DB::table('componentes')
+            ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
+            ->join('mantenimiento', 'equipo_componentes.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereYear('mantenimiento.fecha_inicio', $anio)
+            ->select('componentes.id', 'componentes.nombre', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('componentes.id', 'componentes.nombre')
+            ->get();
+
+        return [
+            'mantenimientos_iniciados' => $mantenimientosIniciados,
+            'mantenimientos_terminados' => $mantenimientosTerminados,
+            'mantenimientos_en_proceso' => $mantenimientosEnProceso,
+            'mantenimientos_por_mes' => $mantenimientosPorMes,
+            'equipos' => $equipos,
+            'actividades' => $actividades,
+            'componentes' => $componentes
+        ];
+    }
+
+    private function getReporteMensual($anio, $mes, $mantenimientosIniciados,$mantenimientosTerminados,  $mantenimientosEnProceso)
+    {
+        // Obtener el total de mantenimientos del mes
+        $mantenimientos = DB::table('mantenimiento')
+            ->whereYear('fecha_inicio', $anio)
+            ->whereMonth('fecha_inicio', $mes)
+            ->count();
+
+        // Obtener los equipos que han tenido mantenimiento en ese mes
+        $equipos = DB::table('equipos')
+            ->join('mantenimiento_actividad', 'equipos.id', '=', 'mantenimiento_actividad.equipo_id')
+            ->join('mantenimiento', 'mantenimiento_actividad.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereYear('mantenimiento.fecha_inicio', $anio)
+            ->whereMonth('mantenimiento.fecha_inicio', $mes)
+            ->select('equipos.id', 'equipos.Nombre_Producto', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('equipos.id', 'equipos.Nombre_Producto')
+            ->get();
+
+        // Obtener las actividades usadas en los mantenimientos en ese mes
+        $actividades = DB::table('actividades')
+            ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
+            ->join('mantenimiento', 'mantenimiento_actividad.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereYear('mantenimiento.fecha_inicio', $anio)
+            ->whereMonth('mantenimiento.fecha_inicio', $mes)
+            ->select('actividades.id', 'actividades.nombre', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('actividades.id', 'actividades.nombre')
+            ->get();
+
+        // Obtener los componentes usados en los mantenimientos en ese mes
+        $componentes = DB::table('componentes')
+            ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
+            ->join('mantenimiento', 'equipo_componentes.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereYear('mantenimiento.fecha_inicio', $anio)
+            ->whereMonth('mantenimiento.fecha_inicio', $mes)
+            ->select('componentes.id', 'componentes.nombre', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('componentes.id', 'componentes.nombre')
+            ->get();
+
+        return [
+            'mantenimientos_iniciados' => $mantenimientosIniciados,
+            'mantenimientos_terminados' => $mantenimientosTerminados,
+            'mantenimientos_en_proceso' => $mantenimientosEnProceso,
+            'mantenimientos' => $mantenimientos,
+            'equipos' => $equipos,
+            'actividades' => $actividades,
+            'componentes' => $componentes
+        ];
+    }
+
+    private function getReportePersonalizado($fechaInicio, $fechaFin, $mantenimientosIniciados,$mantenimientosTerminados,  $mantenimientosEnProceso)
+    {
+        // Obtener mantenimientos entre las fechas proporcionadas
+        $mantenimientos = DB::table('mantenimiento')
+            ->whereBetween('fecha_inicio', [$fechaInicio, $fechaFin])
+            ->count();
+
+        // Obtener los equipos que han tenido mantenimiento en el rango de fechas
+        $equipos = DB::table('equipos')
+            ->join('mantenimiento_actividad', 'equipos.id', '=', 'mantenimiento_actividad.equipo_id')
+            ->join('mantenimiento', 'mantenimiento_actividad.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereBetween('mantenimiento.fecha_inicio', [$fechaInicio, $fechaFin])
+            ->select('equipos.id', 'equipos.Nombre_Producto', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('equipos.id', 'equipos.Nombre_Producto')
+            ->get();
+
+        // Obtener las actividades usadas en los mantenimientos en el rango de fechas
+        $actividades = DB::table('actividades')
+            ->join('mantenimiento_actividad', 'actividades.id', '=', 'mantenimiento_actividad.actividad_id')
+            ->join('mantenimiento', 'mantenimiento_actividad.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereBetween('mantenimiento.fecha_inicio', [$fechaInicio, $fechaFin])
+            ->select('actividades.id', 'actividades.nombre', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('actividades.id', 'actividades.nombre')
+            ->get();
+
+        // Obtener los componentes usados en los mantenimientos en el rango de fechas
+        $componentes = DB::table('componentes')
+            ->join('equipo_componentes', 'componentes.id', '=', 'equipo_componentes.componente_id')
+            ->join('mantenimiento', 'equipo_componentes.mantenimiento_id', '=', 'mantenimiento.id')
+            ->whereBetween('mantenimiento.fecha_inicio', [$fechaInicio, $fechaFin])
+            ->select('componentes.id', 'componentes.nombre', DB::raw('COUNT(mantenimiento.id) as cantidad'))
+            ->groupBy('componentes.id', 'componentes.nombre')
+            ->get();
+
+        return [
+            'mantenimientos_iniciados' => $mantenimientosIniciados,
+            'mantenimientos_terminados' => $mantenimientosTerminados,
+            'mantenimientos_en_proceso' => $mantenimientosEnProceso,
+            'mantenimientos' => $mantenimientos,
+            'equipos' => $equipos,
+            'actividades' => $actividades,
+            'componentes' => $componentes
+        ];
+    }
+
+
+
     public function create()
     {
         // Si se requiere un formulario de creación, puedes devolver una vista

@@ -67,6 +67,7 @@ Route::post('/proceso-compra', [ProcesoCompraController::class, 'store']);
 Route::get('/proceso-compra', [ProcesoCompraController::class, 'index']);
 
 Route::controller(MantenimientoController::class)->group(function () {
+    Route::post('/reportesPorFecha', 'getReportes');
     Route::get('/mantenimientos', 'index');
     Route::put('/mantenimientosDetalles', 'guardarMantenimiento');
     Route::post('/mantenimientosDetalles', 'store');
