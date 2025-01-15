@@ -175,7 +175,6 @@ export default function MaintenanceReports() {
             };
             console.log(payload)
             // Eliminar las propiedades vacías o innecesarias
-            Object.keys(payload).forEach(key => (payload[key] === '' || payload[key] === undefined) && delete payload[key]);
 
             const response = await axios.post('http://localhost:8000/api/reportesPorFecha', payload);
             setReportData(response.data);
@@ -282,6 +281,10 @@ export default function MaintenanceReports() {
         }
     };
 
+    const nombresMeses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre",
+        "Octubre", "Noviembre", "Diciembre"
+    ];
 
 
     const generatePDF = async () => {
@@ -498,7 +501,7 @@ export default function MaintenanceReports() {
                             >
                                 {reportType === "mensual" && (
                                     <Typography variant="h6">
-                                        Reporte Mensual - {monthNames[month - 1]} {year}
+                                        Reporte Mensual - {nombresMeses[month - 1]} {year}
                                     </Typography>
                                 )}
                                 {reportType === "anual" && (
@@ -508,7 +511,7 @@ export default function MaintenanceReports() {
                                 )}
                                 {reportType === "personalizado" && (
                                     <Typography variant="h6">
-                                        Reporte Personalizado - Desde {startDate} hasta {endDate}
+                                        Reporte Personalizado - Desde {startDate?.toLocaleDateString()} hasta {endDate?.toLocaleDateString()}
                                     </Typography>
                                 )}
                             </Box>
