@@ -301,7 +301,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
           {/* Fecha Final */}
           <Grid item xs={6} className="mb-8">
             <div>
-              <Typography variant="h10" gutterBottom className="mb-4">
+              <Typography variant="h12" gutterBottom className="mb-4">
                 Fecha Final
               </Typography>
               <DatePicker

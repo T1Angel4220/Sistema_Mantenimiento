@@ -51,15 +51,15 @@ const Login = () => {
                 {error && <Notification message={error} type="error" onClose={() => setError('')} />}
                 {/* Mostrar mensaje de éxito */}
                 {successMessage && <Notification message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
-    
+
                 <div className="login-box">
-                <div className="login-icon">
-        <img 
-            src="https://w7.pngwing.com/pngs/653/121/png-transparent-preventive-maintenance-company-service-reliability-centered-maintenance-others-thumbnail.png" 
-            alt="Icono de usuario" 
-            className="icon-image" 
-        />
-    </div>
+                    <div className="login-icon">
+                        <img
+                            src="https://w7.pngwing.com/pngs/653/121/png-transparent-preventive-maintenance-company-service-reliability-centered-maintenance-others-thumbnail.png"
+                            alt="Icono de usuario"
+                            className="icon-image"
+                        />
+                    </div>
                     <h2 className="login-title">Sistema de Mantenimientos</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="input-group">
@@ -87,7 +87,7 @@ const Login = () => {
                         <button type="submit" className="form-button">
                             Iniciar Sesión
                         </button>
- 
+
                     </form>
                     <button
                         type="button"

@@ -13,6 +13,7 @@ import CrearMantenimiento from  './components/AniadirMantenimiento';
 import InicioMantenimientos from './components/InicioMantenimientos';
 import ProcesoDCompra from './components/ProcesoDCompra';
 import Reporte from './components/Reporte';
+import MaintenanceReports from './components/Reporte_por_Fechas';
 
 
 
@@ -32,20 +33,7 @@ function App() {
                 <Route path="/InicioMantenimientos" element={<InicioMantenimientos/>} /> 
                 <Route path="/ProcesoDCompra" element={<ProcesoDCompra/>} /> 
                 <Route path="/Reporte" element={<Reporte/>} /> 
-
-
-
-
-
-
-                
-
-
-
-
-
-
-
+                <Route path="/Reporte_por_Fechas" element={<MaintenanceReports/>} /> 
             </Routes>
         </Router>
     );
