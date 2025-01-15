@@ -294,6 +294,7 @@ class MantenimientoController extends Controller
         'equipos.*.actividades.*.id' => 'integer|exists:actividades,id',
         'equipos.*.componentes' => 'array',
         'equipos.*.componentes.*.id' => 'integer|exists:componentes,id',
+        'equipos.*.observacion' => 'nullable|string',   
     ]);
 
     // Obtener el único usuario activo desde la tabla 'usuario_activo'
@@ -321,10 +322,12 @@ class MantenimientoController extends Controller
 
     // Asociar equipos, actividades y componentes al mantenimiento
     foreach ($data['equipos'] as $equipo) {
+        
         // Asociar equipo al mantenimiento
         DB::table('equipo_mantenimiento')->insert([
             'mantenimiento_id' => $mantenimientoId,
             'equipo_id' => $equipo['id'],
+            'observacion' => $equipoData['observacion'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

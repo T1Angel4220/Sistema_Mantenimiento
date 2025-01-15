@@ -286,18 +286,25 @@ export default function MaintenanceReports() {
 
     const generatePDF = async () => {
         setIsGeneratingPDF(true);
-        const element = document.getElementById('report-container');
-        const canvas = await html2canvas(element);
-        const imgData = canvas.toDataURL('image/png');
 
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        try {
+            const element = document.getElementById("report-container");
+            const canvas = await html2canvas(element, {
+                scale: 2, // Aumenta la resolución del canvas
+            });
+            const imgData = canvas.toDataURL("image/png");
 
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('reporte-mantenimiento-equipos.pdf');
-        setIsGeneratingPDF(false);
-        setSnackbarOpen(true);
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+            pdf.save("report.pdf");
+        } catch (error) {
+            console.error("Error generating PDF: ", error);
+        } finally {
+            setIsGeneratingPDF(false);
+        }
     };
 
     // Chart options
@@ -369,7 +376,7 @@ export default function MaintenanceReports() {
 
                 {/* Main content area */}
             </Box>
-            <Box>
+            <Box >
                 <Typography variant="h4" gutterBottom>
                     Reportes de Mantenimiento por Equipos
                 </Typography>
@@ -467,7 +474,7 @@ export default function MaintenanceReports() {
 
                 {isGenerated && (
                     <>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%' }}>
+                        <Box id="report-container" sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%' }}>
                             <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
                                 <CardHeader title="Estado de Mantenimientos" />
                                 <CardContent>
