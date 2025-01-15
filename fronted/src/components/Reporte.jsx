@@ -371,7 +371,7 @@ const ReportesMantenimiento = () => {
               onChange={(e) => setTipoActivo(e.target.value)}
               style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
             >
-              <option value="">Seleccionar tipo de activo</option>
+              <option value="">Seleccionar tipo de mantenimiento</option>
               <option value="Interno">Interno</option>
               <option value="Externo">Externo</option>
             </select>
