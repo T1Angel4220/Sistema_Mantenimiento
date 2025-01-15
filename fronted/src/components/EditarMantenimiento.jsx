@@ -38,7 +38,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
   const [modalOpen, setModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [ActividadOComponente, setActividadOComp] = useState(false);
-  const [Estado, SetEstado] = useState( null);
+  const [Estado, SetEstado] = useState(null);
   const [mantenimientoSe, setMantenimiento] = useState(false);
   const [page, setPage] = useState(1); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(5); // Equipos por página
@@ -56,10 +56,11 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
   const handleConfirmSave = () => {
 
     console.log(mantenimiento)
+    const EstadoFin = Estado ?? mantenimiento.estado;
     const mantenimientoGu = {
       ...mantenimiento,
-      fecha_fin: fechaFin??mantenimiento.fecha_fin,
-      estado: Estado
+      fecha_fin: fechaFin ?? mantenimiento.fecha_fin,
+      estado: EstadoFin
     };
     console.log(mantenimientoGu)
     try {
@@ -80,7 +81,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
     };
     onClose();
     setOpenConfirmDialog(false);
-    
+
   };
 
   const handleChangePage = (event, newPage) => {
@@ -222,7 +223,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
 
               <TextField
                 fullWidth
-                value={Estado==null?mantenimiento.estado:Estado}
+                value={Estado == null ? mantenimiento.estado : Estado}
                 label="Estado"
                 select
                 onChange={(e) => SetEstado(e.target.value)}
@@ -288,7 +289,10 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
           <Grid item xs={6}>
             <TextField
               label="Fecha de Inicio"
-              value={mantenimiento.fecha_inicio || ''}
+              value={new Date(mantenimiento.fecha_inicio)
+                .toISOString()
+                .split('T')[0]
+                .replace(/-/g, '/') }
               fullWidth
               disabled
             />
@@ -302,21 +306,26 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
               </Typography>
               <DatePicker
                 selected={mantenimiento.fecha_fin || fechaFin} // Valor inicial del DatePicker
-                onChange={(date) => {
-                  setFechaFin(date); // Actualiza el estado fechaFin al cambiar la fecha
-                }}
+                onChange={(date) => setFechaFin(date)} // Actualiza el estado
                 locale={es}
                 dateFormat="dd/MM/yyyy"
-                minDate={mantenimiento.fecha_inicio}
+                minDate={
+                  mantenimiento.fecha_inicio
+                    ? new Date(new Date(mantenimiento.fecha_inicio).setDate(new Date(mantenimiento.fecha_inicio).getDate() + 1))
+                    : undefined
+                }
                 customInput={
                   <button
                     type="button"
-                    className="border border-black p-2 flex items-center text-black w-80 ">
+                    className="border border-black p-2 flex items-center text-black w-80">
                     <Calendar className="mr-2 h-4 w-4 text-black" />
-                    {fechaFin ? format(fechaFin, 'dd/MM/yyyy') : format(mantenimiento.fecha_fin, 'dd/MM/yyyy')}
+                    {fechaFin
+                      ? fechaFin
+                      : mantenimiento.fecha_fin}
                   </button>
                 }
               />
+
             </div>
           </Grid>
         </Grid>
