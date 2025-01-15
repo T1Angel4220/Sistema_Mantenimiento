@@ -15,6 +15,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend
 } from 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
+import { PDFDownloadLink } from '@react-pdf/renderer'
+import { MaintenanceReportPDF } from './maintenance-report-pdf.jsx'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -331,6 +333,28 @@ const ReportesMantenimiento = () => {
           >
             Borrar Filtros
           </button>
+          <button
+            onClick={() => {}}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#4CAF50',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginLeft: '10px',
+            }}
+          >
+            <PDFDownloadLink
+              document={<MaintenanceReportPDF data={selectedReport} />}
+              fileName={`mantenimiento-${selectedReport?.codigo_mantenimiento || 'reporte'}.pdf`}
+              style={{ color: '#fff', textDecoration: 'none' }}
+            >
+              {({ blob, url, loading, error }) =>
+                loading ? 'Generando PDF...' : 'Generar PDF'
+              }
+            </PDFDownloadLink>
+          </button>
         </div>
       </div>
 
@@ -438,6 +462,10 @@ const ReportesMantenimiento = () => {
                         <Badge variant={selectedReport.estado === 'Terminado' ? 'default' : 'secondary'}>
                           {selectedReport.estado}
                         </Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Responsable</p>
+                        <p className="text-sm">{selectedReport.nombre_responsable} {selectedReport.apellido_responsable}</p>
                       </div>
                       {selectedReport.proveedor && (
                         <div className="space-y-2">
@@ -792,8 +820,7 @@ const ReportesMantenimiento = () => {
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                   }}
                 />
-                <Legend 
-                  verticalAlign="bottom" 
+                <Legend                                     verticalAlign="bottom" 
                   height={36}
                   iconType="circle"
                   iconSize={10}
