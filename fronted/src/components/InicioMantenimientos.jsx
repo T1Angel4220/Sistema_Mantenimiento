@@ -181,7 +181,7 @@ const MaintenanceTable = () => {
     { icon: ShoppingCart, label: 'Proceso de Compra', route: '/ProcesoCompra' },
     { icon: Box1, label: 'Activos', route: '/equipos' },
     { icon: PenTool, label: 'Mantenimientos', route: '/InicioMantenimientos' },
-    { icon: FileText, label: 'Reportes', route: '/reportes' },
+    { icon: FileText, label: 'Reportes', route: '/Reporte' },
   ];
 
   const navigate = useNavigate();
