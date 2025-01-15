@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import axios from 'axios';
+
 import {
   Modal,
   Box,
@@ -36,7 +38,7 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
   const [modalOpen, setModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [ActividadOComponente, setActividadOComp] = useState(false);
-  const [Estado, SetEstado]=useState("");
+  const [Estado, SetEstado] = useState(mantenimiento?.estado ?? null);
   const [mantenimientoSe, setMantenimiento] = useState(false);
   const [page, setPage] = useState(1); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(5); // Equipos por página
@@ -45,14 +47,37 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
     componentes: [],
   });
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [fechaFin, setFechaFin] = useState(null);
 
 
   const handleCancel = () => {
     setOpenConfirmDialog(false);
   };
   const handleConfirmSave = () => {
-    guardarEditar()
+
+    console.log(mantenimiento)
+    const mantenimientoGu = {
+      ...mantenimiento,
+      fecha_fin: fechaFin??mantenimiento.fecha_fin,
+      estado: Estado
+    };
+    console.log(mantenimientoGu)
+    try {
+      axios.put(`http://localhost:8000/api/mantenimientosDetalles`,
+        mantenimientoGu)
+        .then(response => {
+          console.log('Mantenimiento actualizado exitosamente:', response.data);
+        })
+        .catch(error => {
+          console.error('Error al actualizar mantenimiento:', error);
+        });
+
+
+    } catch (error) {
+      console.error('Error al guardar los cambios:', error);
+    };
     onClose();
+    guardarEditar();
     setOpenConfirmDialog(false);
   };
 
@@ -84,7 +109,6 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
     setFechaFin(mantenimiento?.fecha_fin);
   }, []);
 
-  const [fechaFin, setFechaFin] = useState(null);
   const handleCloseModal = () => {
     setModalOpen(false);
     setEquipoSeleccionado(null);
@@ -188,25 +212,29 @@ const ModalEdicionMantenimiento = ({ mantenimiento, open, onClose, guardar, sele
             disabled
           />
           <div className="h-2"></div>
-           <Grid container spacing={2}>
-           
+          <Grid container spacing={2}>
 
-          {/* ComboBox para el estado */}
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel id="estado-label">Estado</InputLabel>
-              <Select
-                labelId="estado-label"
-                value={mantenimiento.estado} // Estado actual como predeterminado
-                onChange={(e) => handleEstadoChange(e.target.value)}
+
+            {/* ComboBox para el estado */}
+            <Grid item xs={12} sm={6} md={4}>
+
+              <TextField
+                fullWidth
+                value={Estado}
                 label="Estado"
+                select
+                onChange={(e) => SetEstado(e.target.value)}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                margin="normal"
               >
                 <MenuItem value="Terminado">Terminado</MenuItem>
                 <MenuItem value="No terminado">No terminado</MenuItem>
-              </Select>
-            </FormControl>
+              </TextField>
+
+            </Grid>
           </Grid>
-        </Grid>
 
         </Grid>
         <div className="h-2"></div>

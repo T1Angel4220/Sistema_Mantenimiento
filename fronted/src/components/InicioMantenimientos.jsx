@@ -446,22 +446,15 @@ const MaintenanceTable = () => {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
-  const guardarEditar = (event, newValue) => {
-    console.log(selectedMaintenance)
-    try {
-      api.put(`/mantenimientosDetalles`,
-        selectedMaintenance)
-        .then(response => {
-          console.log('Mantenimiento actualizado exitosamente:', response.data);
-        })
-        .catch(error => {
-          console.error('Error al actualizar mantenimiento:', error);
-        });
+  const guardarEditar = () => {
+    api.get('/mantenimientos')
+    .then((response) => {
+      setData(response.data);
+    })
 
-
-    } catch (error) {
-      console.error('Error al guardar los cambios:', error);
-    }
+    .catch((error) => {
+      console.error('Error al obtener los datos:', error);
+    });
   };
 
   const handleSelectActivity = (actividadId) => {

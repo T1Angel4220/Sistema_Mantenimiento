@@ -421,6 +421,7 @@ public function guardarMantenimiento(Request $request)
 {
     $validatedData = $request->validate([
         'id' => 'required|integer',
+        'estado'=>'string',
         'codigo_mantenimiento' => 'required|string|max:50',
         'fecha_fin' => 'required|date', // Validar la nueva fecha de fin
         'equipos' => 'required|array',
@@ -442,6 +443,8 @@ public function guardarMantenimiento(Request $request)
         $mantenimiento = Mantenimiento::findOrFail($validatedData['id']);
 
         $mantenimiento->fecha_fin = $validatedData['fecha_fin'];
+        $mantenimiento->estado = $validatedData['estado'];
+
         $mantenimiento->save();
 
         // Eliminar los registros de las tablas intermedias directamente
