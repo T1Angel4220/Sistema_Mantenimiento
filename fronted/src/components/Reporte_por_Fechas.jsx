@@ -376,10 +376,21 @@ export default function MaintenanceReports() {
 
                 {/* Main content area */}
             </Box>
-            <Box >
-                <Typography variant="h4" gutterBottom>
+            <Box className="w-full">
+                <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{
+                        textAlign: 'center',
+                        color: '#ffffff',
+                        backgroundColor: '#4caf50',
+                        padding: '16px',
+                        borderRadius: '8px',
+                    }}
+                >
                     Reportes de Mantenimiento por Equipos
                 </Typography>
+
                 <Box p={4}>
                     <FormControl fullWidth margin="normal">
                         <InputLabel>Seleccionar Tipo de Reporte</InputLabel>
@@ -474,88 +485,119 @@ export default function MaintenanceReports() {
 
                 {isGenerated && (
                     <>
-                        <Box id="report-container" sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%' }}>
-                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-                                <CardHeader title="Estado de Mantenimientos" />
-                                <CardContent>
-                                    {dataEstadoMantenimientos ? (
-                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                                            <Pie data={dataEstadoMantenimientos} options={chartOptionsPie} />
-                                        </Box>
-                                    ) : (
-                                        <Typography>No hay datos disponibles para mostrar.</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
+                        <Box id="report-container">
+                            <Box
+                                sx={{
+                                    textAlign: 'center',
+                                    backgroundColor: '#1976d2',
+                                    color: '#ffffff',
+                                    padding: '16px',
+                                    borderRadius: '8px',
+                                    marginBottom: '16px',
+                                }}
+                            >
+                                {reportType === "mensual" && (
+                                    <Typography variant="h6">
+                                        Reporte Mensual - {monthNames[month - 1]} {year}
+                                    </Typography>
+                                )}
+                                {reportType === "anual" && (
+                                    <Typography variant="h6">
+                                        Reporte Anual - {year}
+                                    </Typography>
+                                )}
+                                {reportType === "personalizado" && (
+                                    <Typography variant="h6">
+                                        Reporte Personalizado - Desde {startDate} hasta {endDate}
+                                    </Typography>
+                                )}
+                            </Box>
 
-                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-                                <CardHeader title="Distribución de Actividades" />
-                                <CardContent>
-                                    {actividadesRe && actividadesRe.length > 0 ? (
-                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                                            <Bar data={pieData} options={chartOptions} />
-                                        </Box>
-                                    ) : (
-                                        <Typography>No se registraron actividades para mostrar.</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </Box>
+                            <div className="h-8"></div>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%' }}>
 
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%', marginTop: '80px' }}>
-                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-                                <CardHeader title={reportType === "anual" ? "Componentes Más Usados por Mes" : "Gráfico de Componentes Más Usados"} />
-                                <CardContent>
-                                    {componentBarData ? (
-                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                                            <Bar data={componentBarData} options={chartOptions} />
-                                        </Box>
-                                    ) : (
-                                        <Typography>No hay datos disponibles para mostrar.</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                    <CardHeader title="Estado de Mantenimientos" />
+                                    <CardContent>
+                                        {dataEstadoMantenimientos ? (
+                                            <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                                <Pie data={dataEstadoMantenimientos} options={chartOptionsPie} />
+                                            </Box>
+                                        ) : (
+                                            <Typography>No hay datos disponibles para mostrar.</Typography>
+                                        )}
+                                    </CardContent>
+                                </Card>
 
-                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-                                <CardHeader title="Distribución Componentes" />
-                                <CardContent>
-                                    {componentPieData ? (
-                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                                            <Pie data={componentPieData} options={chartOptions} />
-                                        </Box>
-                                    ) : (
-                                        <Typography>No hay datos disponibles para mostrar.</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </Box>
+                                <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                    <CardHeader title="Distribución de Actividades" />
+                                    <CardContent>
+                                        {actividadesRe && actividadesRe.length > 0 ? (
+                                            <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                                <Bar data={pieData} options={chartOptions} />
+                                            </Box>
+                                        ) : (
+                                            <Typography>No se registraron actividades para mostrar.</Typography>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </Box>
 
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%', marginTop: '80px' }}>
-                            <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
-                                <CardHeader title="Mantenimientos por Mes" />
-                                <CardContent>
-                                    {barDataMantenimientoPorMes && barDataMantenimientoPorMes.labels ? (
-                                        <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
-                                            <Bar data={barDataMantenimientoPorMes} options={chartOptions} />
-                                        </Box>
-                                    ) : (
-                                        <Typography>No se registraron mantenimientos por mes para mostrar.</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%', marginTop: '80px' }}>
+                                <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                    <CardHeader title={reportType === "anual" ? "Componentes Más Usados por Mes" : "Gráfico de Componentes Más Usados"} />
+                                    <CardContent>
+                                        {componentBarData ? (
+                                            <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                                <Bar data={componentBarData} options={chartOptions} />
+                                            </Box>
+                                        ) : (
+                                            <Typography>No hay datos disponibles para mostrar.</Typography>
+                                        )}
+                                    </CardContent>
+                                </Card>
 
-                            <Box mt={4} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={generatePDF}
-                                    disabled={isGeneratingPDF}
-                                >
-                                    {isGeneratingPDF ? 'Generando PDF...' : 'Generar PDF'}
-                                </Button>
+                                <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                    <CardHeader title="Distribución Componentes" />
+                                    <CardContent>
+                                        {componentPieData ? (
+                                            <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                                <Pie data={componentPieData} options={chartOptions} />
+                                            </Box>
+                                        ) : (
+                                            <Typography>No hay datos disponibles para mostrar.</Typography>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </Box>
+
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '160px', width: '100%', marginTop: '80px' }}>
+                                <Card sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                                    <CardHeader title="Mantenimientos por Mes" />
+                                    <CardContent>
+                                        {barDataMantenimientoPorMes && barDataMantenimientoPorMes.labels ? (
+                                            <Box sx={{ width: '100%', height: '300px', overflow: 'hidden', padding: '40px' }}>
+                                                <Bar data={barDataMantenimientoPorMes} options={chartOptions} />
+                                            </Box>
+                                        ) : (
+                                            <Typography>No se registraron mantenimientos por mes para mostrar.</Typography>
+                                        )}
+                                    </CardContent>
+                                </Card>
+
+
                             </Box>
                         </Box>
-
+                        <Box mt={4} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={generatePDF}
+                                disabled={isGeneratingPDF}
+                            >
+                                {isGeneratingPDF ? 'Generando PDF...' : 'Generar PDF'}
+                            </Button>
+                        </Box>
                     </>
                 )}
             </Box>
